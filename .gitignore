@@ -27,7 +27,7 @@ DerivedData/
 !default.perspectivev3
 
 ## Configuration
-Config.xcconfig
+*.xcconfig
 
 ## Obj-C/Swift specific
 *.hmap
