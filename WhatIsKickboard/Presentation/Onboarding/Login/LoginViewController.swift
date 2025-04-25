@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  LoginViewController.swift
 //  WhatIsKickboard
 //
 //  Created by 백래훈 on 4/25/25.
@@ -7,8 +7,8 @@
 
 import UIKit
 
-class ViewController: UIViewController {
-
+final class LoginViewController: UIViewController {
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
