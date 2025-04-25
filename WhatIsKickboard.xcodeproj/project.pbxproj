@@ -13,6 +13,7 @@
 		1469B0602DBB55030081F9B4 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1469B05F2DBB55030081F9B4 /* RxSwift */; };
 		1469B0632DBB550F0081F9B4 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 1469B0622DBB550F0081F9B4 /* Then */; };
 		1469B0662DBB55190081F9B4 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1469B0652DBB55190081F9B4 /* SnapKit */; };
+		1469B0692DBB5D760081F9B4 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 1469B0682DBB5D760081F9B4 /* NMapsMap */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +77,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1469B0602DBB55030081F9B4 /* RxSwift in Frameworks */,
+				1469B0692DBB5D760081F9B4 /* NMapsMap in Frameworks */,
 				1469B05E2DBB55030081F9B4 /* RxRelay in Frameworks */,
 				1469B05C2DBB55030081F9B4 /* RxCocoa in Frameworks */,
 				1469B0632DBB550F0081F9B4 /* Then in Frameworks */,
@@ -146,6 +148,7 @@
 				1469B05F2DBB55030081F9B4 /* RxSwift */,
 				1469B0622DBB550F0081F9B4 /* Then */,
 				1469B0652DBB55190081F9B4 /* SnapKit */,
+				1469B0682DBB5D760081F9B4 /* NMapsMap */,
 			);
 			productName = WhatIsKickboard;
 			productReference = 1469B00C2DBB50E60081F9B4 /* WhatIsKickboard.app */;
@@ -233,6 +236,7 @@
 				1469B05A2DBB55030081F9B4 /* XCRemoteSwiftPackageReference "RxSwift" */,
 				1469B0612DBB550F0081F9B4 /* XCRemoteSwiftPackageReference "Then" */,
 				1469B0642DBB55190081F9B4 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				1469B0672DBB5D760081F9B4 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1469B00D2DBB50E60081F9B4 /* Products */;
@@ -624,6 +628,14 @@
 				minimumVersion = 5.7.1;
 			};
 		};
+		1469B0672DBB5D760081F9B4 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.21.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -651,6 +663,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1469B0642DBB55190081F9B4 /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
+		};
+		1469B0682DBB5D760081F9B4 /* NMapsMap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1469B0672DBB5D760081F9B4 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
+			productName = NMapsMap;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
