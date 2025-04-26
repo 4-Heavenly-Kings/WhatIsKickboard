@@ -10,7 +10,7 @@ import CoreData
 
 // MARK: - UserPersistenceManager
 /// 유저정보 CRUD Manager
-final class UserPersistenceManager {
+final class UserPersistenceManager: BaseCoreDataManager {
     
     static let context = CoreDataStack.shared.context
     
@@ -20,8 +20,14 @@ final class UserPersistenceManager {
     }
     
     /// 회원가입
-    static func register(_ email: String, _ password: String) -> User {
-        return User(context: context)
+    static func register(_ email: String, _ password: String) async throws -> User {
+        let user = User(context: context)
+        user.id = UUID()
+        user.email = email
+        user.password = password
+        user.role = "GUEST"
+        try await saveContext(context, "회원가입")
+        return user
     }
     
     /// 유저정보 변경
