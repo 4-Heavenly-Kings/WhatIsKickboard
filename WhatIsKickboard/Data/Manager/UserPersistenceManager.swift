@@ -20,7 +20,7 @@ final class UserPersistenceManager: BaseCoreDataManager {
     }
     
     /// 회원가입
-    static func register(_ email: String, _ password: String) async throws -> User {
+    static func createUser(_ email: String, _ password: String) async throws -> User {
         let user = User(context: context)
         user.id = UUID()
         user.email = email
@@ -28,6 +28,12 @@ final class UserPersistenceManager: BaseCoreDataManager {
         user.role = "GUEST"
         try await saveContext(context, "회원가입")
         return user
+    }
+    
+    
+    /// 유저정보 조희
+    static func getUser() -> User {
+        return User(context: context)
     }
     
     /// 유저정보 변경
@@ -41,7 +47,7 @@ final class UserPersistenceManager: BaseCoreDataManager {
     }
     
     /// 회원탈퇴
-    static func delete() -> Bool{
+    static func deleteUser() -> Bool{
         return Bool()
     }
 }
