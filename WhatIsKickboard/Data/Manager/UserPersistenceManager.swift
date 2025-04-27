@@ -59,8 +59,9 @@ final class UserPersistenceManager: BaseCoreDataManager {
     }
     
     /// 로그아웃
-    static func logout() -> Bool {
-        return Bool()
+    static func logout() {
+        print("로그아웃")
+        UserDefaults.standard.removeObject(forKey: "token")
     }
     
     /// 회원탈퇴
