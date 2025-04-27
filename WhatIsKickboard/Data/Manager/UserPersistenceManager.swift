@@ -15,8 +15,12 @@ final class UserPersistenceManager: BaseCoreDataManager {
     static let context = CoreDataStack.shared.context
     
     /// 로그인
-    static func login(_ email: String, _ password: String) -> User {
-        return User(context: context)
+    static func login(_ email: String, _ password: String) throws -> User {
+        let user = try getUserData(email: email, context: context)
+        
+        print("로그인 성공")
+        UserDefaults.standard.set(user.id!, forKey: "token")
+        return user
     }
     
     /// 회원가입
