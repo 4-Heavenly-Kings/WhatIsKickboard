@@ -65,7 +65,11 @@ final class UserPersistenceManager: BaseCoreDataManager {
     }
     
     /// 회원탈퇴
-    static func deleteUser() -> Bool{
-        return Bool()
+    static func deleteUser(id: UUID) async throws {
+        let user = try getUserData(id: id, context: context)
+        context.delete(user)
+        
+        try await saveContext(context, "회원탈퇴")
+        UserDefaults.standard.removeObject(forKey: "token")
     }
 }
