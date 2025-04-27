@@ -39,8 +39,9 @@ final class UserPersistenceManager: BaseCoreDataManager {
     
     
     /// 유저정보 조희
-    static func getUser() -> User {
-        return User(context: context)
+    static func getUser(id: UUID) throws -> User {
+        print("유저정보 조희 성공")
+        return try getUserData(id: id, context: context)
     }
     
     /// 유저정보 변경
