@@ -45,8 +45,17 @@ final class UserPersistenceManager: BaseCoreDataManager {
     }
     
     /// 유저정보 변경
-    static func patchUser(_ user: User) -> User {
-        return User(context: context)
+    static func patchUser(_ user: User) async throws -> User {
+        let userData = try getUserData(id: user.id, context: context)
+        
+        userData.name = user.name
+        userData.role = user.role
+        userData.rides = user.rides
+        userData.email = user.email
+        userData.password = user.password
+        
+        try await saveContext(context, "유저정보 수정")
+        return user
     }
     
     /// 로그아웃
