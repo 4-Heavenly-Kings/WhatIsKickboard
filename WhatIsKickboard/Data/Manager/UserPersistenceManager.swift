@@ -30,7 +30,10 @@ final class UserPersistenceManager: BaseCoreDataManager {
         user.email = email
         user.password = password
         user.role = "GUEST"
+        
+        UserDefaults.standard.set(user.id!, forKey: "token")
         try await saveContext(context, "회원가입")
+        
         return user
     }
     
