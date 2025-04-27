@@ -17,12 +17,30 @@ class BaseCoreDataManager {
         guard context.hasChanges else { return }
         do {
             try await context.perform {
-                print("CoreData 저장 성공")
+                print("CoreData \(message) 성공")
                 try context.save()
             }
         } catch {
             print("CoreData \(message) 실패: \(error.localizedDescription)")
             throw error
         }
+    }
+    
+    static func getUserData(id: UUID? = nil, email: String? = nil, context: NSManagedObjectContext) throws -> User {
+        let request = NSFetchRequest<User>(entityName: User.className)
+        
+        if let id {
+            request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        } else if let email {
+            request.predicate = NSPredicate(format: "email == %@", email as CVarArg)
+        }
+        
+        request.fetchLimit = 1
+        
+        guard let user = try context.fetch(request).first else {
+            print("해당 유저가 존재하지 않음")
+            throw UserPersistenceError.userNotFound
+        }
+        return user
     }
 }
