@@ -133,5 +133,33 @@ extension KickboardPersistenceManager {
         return kickboard
     }
     
+    
+}
+
+// MARK: - Extension + KickboardPersistenceManager
+/// DB저장 전 수행해야 하는 로직 추가
+extension KickboardPersistenceManager {
+    
+    /// 시간 계산 추가요금 부과
+    static private func calculateCharge(from start: Date, to end: Date) -> Int16 {
+        let minutes = Calendar.current.dateComponents([.minute], from: start, to: end).minute ?? 0
+        return Int16((minutes * 100) + 500)
+    }
+    
+    /// 상태 태그 반환
+    static private func setStatus(battery: Int) -> String {
+        switch battery {
+        case 0...10: return "LOW_BATTERY"
+        default: return "ABLE"
+        }
+    }
+    
+    /// UserDefaults를 조회하는 메소드
+    static func getCurrentUserId() throws -> UUID {
+        guard let idString = UserDefaults.standard.string(forKey: "token"),
+              let id = UUID(uuidString: idString) else {
+            throw KickboardPersistenceError.tokenNotValid
+        }
+        return id
     }
 }
