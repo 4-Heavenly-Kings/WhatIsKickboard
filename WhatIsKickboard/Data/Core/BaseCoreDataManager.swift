@@ -27,40 +27,4 @@ class BaseCoreDataManager {
             throw error
         }
     }
-    
-    /// CoreData Persistence 저장소에서 유저 Entity 추출
-    @discardableResult
-    static func getUserData(id: UUID? = nil, email: String? = nil) throws -> UserEntity {
-        let request = NSFetchRequest<UserEntity>(entityName: UserEntity.className)
-        
-        if let id {
-            request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
-        } else if let email {
-            request.predicate = NSPredicate(format: "email == %@", email as String)
-        }
-        
-        request.fetchLimit = 1
-        guard let user = try context.fetch(request).first else {
-            print("해당 유저가 존재하지 않음")
-            throw UserPersistenceError.userNotFound
-        }
-        return user
-    }
-    
-    /// CoreData Persistence 저장소에서 킥보드 Entity 추출
-    @discardableResult
-    static func getKickboardData(id: UUID? = nil) throws -> KickboardEntity {
-        let request = NSFetchRequest<KickboardEntity>(entityName: KickboardEntity.className)
-        
-        if let id {
-            request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
-        }
-        
-        request.fetchLimit = 1
-        guard let kickboard = try context.fetch(request).first else {
-            print("해당 유저가 존재하지 않음")
-            throw UserPersistenceError.userNotFound
-        }
-        return kickboard
-    }
 }
