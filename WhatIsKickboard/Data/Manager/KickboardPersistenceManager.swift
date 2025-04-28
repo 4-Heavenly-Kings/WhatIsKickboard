@@ -92,8 +92,15 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     }
     
     /// 킥보드 신고
-    static func declaredKickboard() {
+    static func declaredKickboard(id: UUID) async throws {
+        let userId = try getCurrentUserId()
+
+        /// 유저정보, 킥보드 정보 호출
+        let user = try getUserData(id: userId)
+        let kickboard = try getKickboardData(id: id)
         
+        kickboard.status = "DECLARED"
+        try await saveContext("킥보드 신고")
     }
     
     /// 킥보드 삭제
