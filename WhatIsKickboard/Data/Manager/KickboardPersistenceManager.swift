@@ -41,12 +41,11 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     /// 킥보드 대여
     static func rentKickboard(id: UUID, latitude: Double, longitude: Double) async throws {
         let userId = try getCurrentUserId()
-        
-        /// 유저정보. 킥보드 정보 호출 후 탑승정보 입력
+
         let user = try getUserData(id: userId)
         let kickboard = try getKickboardData(id: id)
-        let ride = KickboardRideEntity(context: context)
         
+        let ride = KickboardRideEntity(context: context)
         ride.id = UUID()
         ride.user_id = userId
         ride.kickboard_id = id
@@ -55,17 +54,23 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
         ride.start_longitude = longitude
         ride.battery = kickboard.battery
         
-        /// 킥보드 탑승 불가 태그 및 각 관계에 추가
-        kickboard.status = "IMPOSSIBILITY"
+        // ride와 kickboard/user를 연결
+        ride.kickboard = kickboard
+        ride.user = user
+        
+        // kickboard/user의 rides에 ride 추가
         kickboard.addToRides(ride)
         user.addToRides(ride)
         
+        kickboard.status = "IMPOSSIBILITY"
         try await saveContext("킥보드 대여")
     }
     
     /// 킥보드 반납
     static func returnKickboard(id: UUID, latitude: Double, longitude: Double, battery: Int, imagePath: String) async throws {
         let userId = try getCurrentUserId()
+        
+        let user = try getUserData(id: userId)
         let kickboard = try getKickboardData(id: id)
         
         /// 탑승 정보 CoreData에서 호출
@@ -88,6 +93,9 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
         latestRide.price = calculateCharge(from: latestRide.start_time ?? now, to: now)
         latestRide.image_path = imagePath
         latestRide.battery = kickboard.battery
+        
+        latestRide.kickboard = kickboard
+        latestRide.user = user
 
         try await saveContext("킥보드 반납")
     }
@@ -133,6 +141,7 @@ extension KickboardPersistenceManager {
         do {
             return try context.fetch(request)
         } catch {
+            print("킥보드 리스트가 존재하지 않음")
             throw KickboardPersistenceError.fetchKickboardFaild
         }
     }
@@ -161,6 +170,7 @@ extension KickboardPersistenceManager {
             let rides = try context.fetch(request)
             return rides.sorted { ($0.start_time ?? .distantPast) < ($1.start_time ?? .distantPast) }
         } catch {
+            print("탑승정보 리스트가 존재하지 않음")
             throw KickboardPersistenceError.fetchRideFaild
         }
     }

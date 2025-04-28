@@ -10,6 +10,14 @@ import Foundation
 // MARK: Kickboard + Mapper
 extension KickboardEntity {
     func toModel() -> Kickboard {
-        return Kickboard(id: self.id!, latitude: self.latitude, longitude: self.longitude, battery: Int(self.battery), status: self.status ?? "")
+        let rides = (self.rides as? Set<KickboardRideEntity>)?.map { $0.toModel() } ?? []
+        return Kickboard(
+            id: self.id ?? UUID(),
+            latitude: self.latitude,
+            longitude: self.longitude,
+            battery: Int(self.battery),
+            status: self.status ?? "",
+            rides: rides
+        )
     }
 }
