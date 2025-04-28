@@ -104,8 +104,10 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     }
     
     /// 킥보드 삭제
-    static func deleteKickboard() {
-        
+    static func deleteKickboard(id: UUID) async throws {
+        let kickboard = try getKickboardData(id: id)
+        context.delete(kickboard)
+        try await saveContext("킥보드 삭제")
     }
 }
 
