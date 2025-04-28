@@ -60,8 +60,35 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     }
     
     /// 킥보드 반납
-    static func returnKickboard() {
+    static func returnKickboard(id: UUID, latitude: Double, longitude: Double, battery: Int, imagePath: String) async throws {
+        let userId = try getCurrentUserId()
+
+        /// 유저정보, 킥보드 정보 호출
+        let user = try getUserData(id: userId)
+        let kickboard = try getKickboardData(id: id)
         
+        /// 탑승 정보 CoreData에서 호출
+        guard let latestRide = try getRideListData(userId: userId).last else {
+            throw KickboardPersistenceError.rideNotFound
+        }
+        
+        let now = Date()
+        
+        // 해당 킥보드 정보 수정
+        kickboard.latitude = latitude
+        kickboard.longitude = longitude
+        kickboard.battery = Int16(battery)
+        kickboard.status = setStatus(battery: battery)
+        
+        // 해당 킥보드의 가장 최신 탑승 정보 수정
+        latestRide.end_latitude = latitude
+        latestRide.end_longitude = longitude
+        latestRide.end_time = now
+        latestRide.price = calculateCharge(from: latestRide.start_time ?? now, to: now)
+        latestRide.image_path = imagePath
+        latestRide.battery = kickboard.battery
+
+        try await saveContext("킥보드 반납")
     }
     
     /// 킥보드 신고
