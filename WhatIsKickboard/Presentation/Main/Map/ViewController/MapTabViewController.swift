@@ -23,6 +23,7 @@ final class MapTabViewController: BaseViewController {
     
     // MARK: - UI Components
     
+    /// 지도 탭 View
     private let mapTabView = MapTabView()
     
     // MARK: - Lifecycle
@@ -34,29 +35,17 @@ final class MapTabViewController: BaseViewController {
     // MARK: - Bind Helper
     
     override func bindViewModel() {
+        // 현재 위치 버튼 탭
         mapTabView.getLocationButton().rx.tap
-            .withLatestFrom(viewModel.state.userLocation)
-            .subscribe(with: self) { owner, coordinate in
-                guard let coordinate else { return }
-                owner.updateMapCamera(to: coordinate)
-                let naverMapView = owner.mapTabView.getNaverMapView()
-                switch naverMapView.mapView.positionMode {
-                case .direction:
-                    naverMapView.mapView.positionMode = .compass
-                case .compass:
-                    naverMapView.mapView.positionMode = .direction
-                default:
-                    naverMapView.mapView.positionMode = .direction
-                    owner.updateMapCamera(to: coordinate)
-                }
+            .bind(with: self) { owner, _ in
+                owner.viewModel.action.onNext(.didlocationButtonTap)
             }.disposed(by: disposeBag)
         
         // ViewModel ➡️ State
         // 사용자 위치로 카메라 이동
         viewModel.state.userLocation
-            .observe(on: MainScheduler.instance)
+            .compactMap { $0 }
             .bind(with: self) { owner, coordinate in
-                guard let coordinate else { return }
                 owner.updateMapCamera(to: coordinate)
             }.disposed(by: disposeBag)
     }
@@ -83,16 +72,17 @@ final class MapTabViewController: BaseViewController {
 private extension MapTabViewController {
     /// coordinate 위치로 카메라 전환
     func updateMapCamera(to coordinate: CLLocationCoordinate2D) {
+        let mapView = mapTabView.getNaverMapView().mapView
+        if mapView.positionMode == .disabled {
+            mapView.positionMode = .normal
+        }
+        
         let nmgCoordinate = NMGLatLng(from: coordinate)
         let cameraUpdate = NMFCameraUpdate(scrollTo: nmgCoordinate)
         cameraUpdate.animation = .easeIn
         
-        let naverMapView = mapTabView.getNaverMapView()
-        if naverMapView.mapView.positionMode == .disabled ||
-            naverMapView.mapView.positionMode == .normal {
-            naverMapView.mapView.positionMode = .direction
+        DispatchQueue.main.async {
+            mapView.moveCamera(cameraUpdate)
         }
-        
-        naverMapView.mapView.moveCamera(cameraUpdate)
     }
 }

@@ -19,6 +19,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     
     var disposeBag = DisposeBag()
     
+    /// Core Location
     private let locationManager = CLLocationManager().then {
         $0.desiredAccuracy = kCLLocationAccuracyBest
         $0.requestWhenInUseAuthorization()
@@ -85,15 +86,11 @@ private extension MapTabViewModel {
         case .authorizedWhenInUse:
             os_log(.debug, log: log, "위치 서비스 권한: 허용됨")
             locationManager.startUpdatingLocation()
-            updateLastLocation()
-            break
         case .restricted, .denied:
             os_log(.debug, log: log, "위치 서비스 권한: 차단됨")
-            break
         case .notDetermined:
             os_log(.debug, log: log, "위치 서비스 권한: 설정 필요")
             locationManager.requestWhenInUseAuthorization()
-            break
         default:
             break
         }

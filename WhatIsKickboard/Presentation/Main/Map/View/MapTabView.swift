@@ -15,8 +15,10 @@ final class MapTabView: BaseView {
     
     // MARK: - UI Components
     
+    /// 네이버 지도 View
     private let naverMapView = NMFNaverMapView(frame: .zero)
     
+    /// 현재 위치 버튼
     private let locationButton = UIButton()
     
     // MARK: - Style Helper
@@ -31,8 +33,8 @@ final class MapTabView: BaseView {
             $0.mapView.zoomLevel = 16
             $0.mapView.minZoomLevel = 5.0
             $0.mapView.maxZoomLevel = 18.0
-            $0.mapView.isTiltGestureEnabled = false
             $0.mapView.logoAlign = .leftTop
+            $0.mapView.isTiltGestureEnabled = false
         }
         
         locationButton.do {
@@ -66,10 +68,12 @@ final class MapTabView: BaseView {
     
     // MARK: - Methods
     
+    /// 네이버 지도 View 반환
     func getNaverMapView() -> NMFNaverMapView {
         return naverMapView
     }
     
+    /// 현재 위치 버튼 반환
     func getLocationButton() -> UIButton {
         return locationButton
     }
