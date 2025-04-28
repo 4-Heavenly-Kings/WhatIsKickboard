@@ -15,37 +15,53 @@ final class UserPersistenceManager: BaseCoreDataManager {
     static let context = CoreDataStack.shared.context
     
     /// 로그인
+    @discardableResult
     static func login(_ email: String, _ password: String) throws -> User {
         let user = try getUserData(email: email, context: context)
         
         print("로그인 성공")
-        UserDefaults.standard.set(user.id, forKey: "token")
+        UserDefaults.standard.set(user.id?.uuidString, forKey: "token")
         return user.toModel()
     }
     
     /// 회원가입
+    @discardableResult
     static func createUser(_ email: String, _ password: String) async throws -> User {
-        let user = UserEntity(context: context)
-        user.id = UUID()
-        user.email = email
-        user.password = password
-        user.role = "GUEST"
-        
-        UserDefaults.standard.set(user.id, forKey: "token")
-        try await saveContext(context, "회원가입")
-        
-        return user.toModel()
+        do {
+            try getUserData(email: email, context: context)
+            throw UserPersistenceError.alreayUser
+        } catch let error as UserPersistenceError {
+            if error == .userNotFound {
+                
+                let user = UserEntity(context: context)
+                user.id = UUID()
+                user.email = email
+                user.password = password
+                user.role = "GUEST"
+                
+                UserDefaults.standard.set(user.id?.uuidString, forKey: "token")
+                try await saveContext(context, "회원가입")
+                return user.toModel()
+            } else {
+                throw error
+            }
+        }
     }
     
     
     /// 유저정보 조희
-    static func getUser(id: UUID) throws -> User {
+    @discardableResult
+    static func getUser() throws -> User {
+        guard let id = UserDefaults.standard.object(forKey: "token") as? String else {
+            throw UserPersistenceError.tokenNotValid
+        }
         print("유저정보 조희 성공")
-        let user = try getUserData(id: id, context: context)
+        let user = try getUserData(id: UUID(uuidString: id), context: context)
         return user.toModel()
     }
     
     /// 유저정보 변경
+    @discardableResult
     static func patchUser(_ user: User) async throws -> User {
         let userData = try getUserData(id: user.id, context: context)
         
@@ -65,8 +81,14 @@ final class UserPersistenceManager: BaseCoreDataManager {
     }
     
     /// 회원탈퇴
-    static func deleteUser(id: UUID) async throws {
-        let user = try getUserData(id: id, context: context)
+    static func deleteUser(password: String) async throws {
+        guard let id = UserDefaults.standard.object(forKey: "token") as? String else {
+            throw UserPersistenceError.tokenNotValid
+        }
+        let user = try getUserData(id: UUID(uuidString: id), context: context)
+        guard password == user.password else {
+            throw UserPersistenceError.passwordIsWorng
+        }
         context.delete(user)
         
         try await saveContext(context, "회원탈퇴")

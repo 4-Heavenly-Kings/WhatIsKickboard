@@ -26,17 +26,18 @@ class BaseCoreDataManager {
         }
     }
     
+    /// CoreData Persistence 저장소에서 유저 Entity 추출
+    @discardableResult
     static func getUserData(id: UUID? = nil, email: String? = nil, context: NSManagedObjectContext) throws -> UserEntity {
         let request = NSFetchRequest<UserEntity>(entityName: UserEntity.className)
         
         if let id {
             request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         } else if let email {
-            request.predicate = NSPredicate(format: "email == %@", email as CVarArg)
+            request.predicate = NSPredicate(format: "email == %@", email as String)
         }
         
         request.fetchLimit = 1
-        
         guard let user = try context.fetch(request).first else {
             print("해당 유저가 존재하지 않음")
             throw UserPersistenceError.userNotFound
