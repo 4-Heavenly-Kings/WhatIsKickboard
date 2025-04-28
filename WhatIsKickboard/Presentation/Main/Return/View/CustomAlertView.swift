@@ -10,10 +10,10 @@ import UIKit
 import Then
 import SnapKit
 
-class CustomAlertView: BaseView {
+final class CustomAlertView: BaseView {
     
     // MARK: - UI Components
-    
+
     private let containerView = UIView()
     private let imageView = UIImageView()
     private let titleLabel = UILabel()
@@ -24,12 +24,18 @@ class CustomAlertView: BaseView {
     private let submitButton = UIButton()
     private let cancelButton = UIButton()
     
+    // MARK: - Properties
+    
     private let alertType: CustomAlertViewType
+    
+    // MARK: - Initializer
     
     init(frame: CGRect, alertType: CustomAlertViewType) {
         self.alertType = alertType
         super.init(frame: frame)
     }
+    
+    // MARK: - Set UIComponents
     
     override func setStyles() {
         backgroundColor = UIColor(hex: "#000000").withAlphaComponent(0.5)
