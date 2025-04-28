@@ -19,29 +19,30 @@ final class UserPersistenceManager: BaseCoreDataManager {
         let user = try getUserData(email: email, context: context)
         
         print("로그인 성공")
-        UserDefaults.standard.set(user.id!, forKey: "token")
-        return user
+        UserDefaults.standard.set(user.id, forKey: "token")
+        return user.toModel()
     }
     
     /// 회원가입
     static func createUser(_ email: String, _ password: String) async throws -> User {
-        let user = User(context: context)
+        let user = UserEntity(context: context)
         user.id = UUID()
         user.email = email
         user.password = password
         user.role = "GUEST"
         
-        UserDefaults.standard.set(user.id!, forKey: "token")
+        UserDefaults.standard.set(user.id, forKey: "token")
         try await saveContext(context, "회원가입")
         
-        return user
+        return user.toModel()
     }
     
     
     /// 유저정보 조희
     static func getUser(id: UUID) throws -> User {
         print("유저정보 조희 성공")
-        return try getUserData(id: id, context: context)
+        let user = try getUserData(id: id, context: context)
+        return user.toModel()
     }
     
     /// 유저정보 변경
@@ -50,12 +51,11 @@ final class UserPersistenceManager: BaseCoreDataManager {
         
         userData.name = user.name
         userData.role = user.role
-        userData.rides = user.rides
         userData.email = user.email
         userData.password = user.password
         
         try await saveContext(context, "유저정보 수정")
-        return user
+        return userData.toModel()
     }
     
     /// 로그아웃

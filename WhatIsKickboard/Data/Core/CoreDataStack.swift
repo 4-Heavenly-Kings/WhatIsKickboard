@@ -18,7 +18,7 @@ final class CoreDataStack {
 
     // Core Data의 전체 스택을 관리하는 컨테이너
     private lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "Model")
+        let container = NSPersistentContainer(name: "Entity")
         container.loadPersistentStores { _, error in
             if let error { fatalError("컨테이너 로딩 실패: \(error)") }
         }

@@ -26,8 +26,8 @@ class BaseCoreDataManager {
         }
     }
     
-    static func getUserData(id: UUID? = nil, email: String? = nil, context: NSManagedObjectContext) throws -> User {
-        let request = NSFetchRequest<User>(entityName: User.className)
+    static func getUserData(id: UUID? = nil, email: String? = nil, context: NSManagedObjectContext) throws -> UserEntity {
+        let request = NSFetchRequest<UserEntity>(entityName: UserEntity.className)
         
         if let id {
             request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
