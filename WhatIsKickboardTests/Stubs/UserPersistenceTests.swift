@@ -9,7 +9,8 @@ import Testing
 import Foundation
 @testable import WhatIsKickboard
 
-struct WhatIsKickboardTests {
+// MARK: - UserPersistenceTests
+struct UserPersistenceTests {
 
     /// 회원가입 테스트
     @Test func testCreateUser() async throws {
