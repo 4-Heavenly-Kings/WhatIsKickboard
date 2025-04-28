@@ -100,7 +100,7 @@ extension UserPersistenceManager {
     
     /// CoreData Persistence 저장소에서 유저 Entity 추출
     @discardableResult
-    static private func getUserData(id: UUID? = nil, email: String? = nil) throws -> UserEntity {
+    private static func getUserData(id: UUID? = nil, email: String? = nil) throws -> UserEntity {
         let request = NSFetchRequest<UserEntity>(entityName: UserEntity.className)
         
         if let id {
