@@ -7,7 +7,7 @@
 
 import Foundation
 
-// MARK: - UserEntity
+// MARK: - User
 struct User {
     let id: UUID
     var email: String
