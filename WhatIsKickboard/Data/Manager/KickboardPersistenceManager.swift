@@ -18,8 +18,8 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     }
     
     /// 킥보드 조희
-    static func getKickboard() -> Kickboard {
-        return KickboardEntity(context: context).toModel()
+    static func getKickboard(id: UUID) throws -> Kickboard {
+        return try getKickboardData(id: id).toModel()
     }
     
     /// 킥보드 등록
