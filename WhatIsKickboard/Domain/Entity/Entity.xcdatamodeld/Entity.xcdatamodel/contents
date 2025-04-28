@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="23G93" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
-    <entity name="Kickboard" representedClassName="Kickboard" syncable="YES" codeGenerationType="class">
+    <entity name="KickboardEntity" representedClassName="KickboardEntity" syncable="YES" codeGenerationType="class">
         <attribute name="battery" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -21,7 +21,7 @@
         <attribute name="start_longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="start_time" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="user_id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="kickboard" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Kickboard" inverseName="rides" inverseEntity="Kickboard"/>
+        <relationship name="kickboard" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="KickboardEntity" inverseName="rides" inverseEntity="KickboardEntity"/>
         <relationship name="user" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UserEntity" inverseName="rides" inverseEntity="UserEntity"/>
     </entity>
     <entity name="UserEntity" representedClassName="UserEntity" syncable="YES" codeGenerationType="class">

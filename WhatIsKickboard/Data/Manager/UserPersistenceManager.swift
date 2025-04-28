@@ -12,12 +12,10 @@ import CoreData
 /// 유저정보 CRUD Manager
 final class UserPersistenceManager: BaseCoreDataManager {
     
-    static let context = CoreDataStack.shared.context
-    
     /// 로그인
     @discardableResult
     static func login(_ email: String, _ password: String) throws -> User {
-        let user = try getUserData(email: email, context: context)
+        let user = try getUserData(email: email)
         
         print("로그인 성공")
         UserDefaults.standard.set(user.id?.uuidString, forKey: "token")
@@ -28,7 +26,7 @@ final class UserPersistenceManager: BaseCoreDataManager {
     @discardableResult
     static func createUser(_ email: String, _ password: String) async throws -> User {
         do {
-            try getUserData(email: email, context: context)
+            try getUserData(email: email)
             throw UserPersistenceError.alreayUser
         } catch let error as UserPersistenceError {
             if error == .userNotFound {
@@ -56,14 +54,14 @@ final class UserPersistenceManager: BaseCoreDataManager {
             throw UserPersistenceError.tokenNotValid
         }
         print("유저정보 조희 성공")
-        let user = try getUserData(id: UUID(uuidString: id), context: context)
+        let user = try getUserData(id: UUID(uuidString: id))
         return user.toModel()
     }
     
     /// 유저정보 변경
     @discardableResult
     static func patchUser(_ user: User) async throws -> User {
-        let userData = try getUserData(id: user.id, context: context)
+        let userData = try getUserData(id: user.id)
         
         userData.name = user.name
         userData.role = user.role
@@ -85,7 +83,7 @@ final class UserPersistenceManager: BaseCoreDataManager {
         guard let id = UserDefaults.standard.object(forKey: "token") as? String else {
             throw UserPersistenceError.tokenNotValid
         }
-        let user = try getUserData(id: UUID(uuidString: id), context: context)
+        let user = try getUserData(id: UUID(uuidString: id))
         guard password == user.password else {
             throw UserPersistenceError.passwordIsWorng
         }
