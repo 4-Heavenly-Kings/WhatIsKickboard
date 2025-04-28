@@ -30,7 +30,7 @@ final class MapTabView: BaseView {
             $0.showZoomControls = false
             $0.showIndoorLevelPicker = false
             $0.mapView.extent = NMGLatLngBounds(southWestLat: 31.43, southWestLng: 122.37, northEastLat: 44.35, northEastLng: 132)
-            $0.mapView.zoomLevel = 16
+            $0.mapView.zoomLevel = 15
             $0.mapView.minZoomLevel = 5.0
             $0.mapView.maxZoomLevel = 18.0
             $0.mapView.logoAlign = .leftTop

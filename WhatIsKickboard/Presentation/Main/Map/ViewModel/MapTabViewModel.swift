@@ -39,6 +39,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     struct State {
         fileprivate(set) var actionSubject = PublishSubject<Action>()
         
+        /// Core Location 사용자 위치 좌표
         fileprivate(set) var userLocation = BehaviorSubject<CLLocationCoordinate2D?>(value: nil)
     }
     var state = State()
