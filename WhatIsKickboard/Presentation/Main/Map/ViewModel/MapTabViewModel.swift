@@ -1,5 +1,5 @@
 //
-//  MapViewModel.swift
+//  MapTabViewModel.swift
 //  WhatIsKickboard
 //
 //  Created by 서동환 on 4/28/25.
@@ -11,16 +11,23 @@ import OSLog
 
 import RxSwift
 
-final class MapViewModel: NSObject, ViewModelProtocol {
+final class MapTabViewModel: NSObject, ViewModelProtocol {
 
     // MARK: - Properties
     
     private let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MapViewModel")
     
+    var disposeBag = DisposeBag()
+    
+    private let locationManager = CLLocationManager().then {
+        $0.desiredAccuracy = kCLLocationAccuracyBest
+        $0.requestWhenInUseAuthorization()
+    }
+    
     // MARK: - Action ➡️ Input
     
     enum Action {
-        case mapLoaded
+        case didlocationButtonTap
     }
     var action: AnyObserver<Action> {
         return state.actionSubject.asObserver()
@@ -30,27 +37,23 @@ final class MapViewModel: NSObject, ViewModelProtocol {
     
     struct State {
         fileprivate(set) var actionSubject = PublishSubject<Action>()
+        
+        fileprivate(set) var userLocation = BehaviorSubject<CLLocationCoordinate2D?>(value: nil)
     }
     var state = State()
-    
-    var disposeBag = DisposeBag()
-    
-    private lazy var locationManager = CLLocationManager().then {
-        $0.delegate = self
-        $0.desiredAccuracy = kCLLocationAccuracyBest
-        $0.requestWhenInUseAuthorization()
-    }
     
     // MARK: - Initializer
     
     override init() {
         super.init()
         
+        locationManager.delegate = self
+        
         state.actionSubject
             .subscribe(with: self) { owner, action in
                 switch action {
-                case .mapLoaded:
-                    owner.checkDeviceLocationService()
+                case .didlocationButtonTap:
+                    owner.updateLastLocation()
                 }
             }.disposed(by: disposeBag)
     }
@@ -58,7 +61,7 @@ final class MapViewModel: NSObject, ViewModelProtocol {
 
 // MARK: - Location Methods
 
-private extension MapViewModel {
+private extension MapTabViewModel {
     /// 디바이스 위치 서비스가 활성화 상태인지 확인
     func checkDeviceLocationService() {
         DispatchQueue.global().async { [weak self] in
@@ -76,14 +79,13 @@ private extension MapViewModel {
         }
     }
     
+    /// 앱 위치 서비스 권한 확인
     func checkUserCurrentLocationAuthorization(status: CLAuthorizationStatus) {
         switch status {
         case .authorizedWhenInUse:
             os_log(.debug, log: log, "위치 서비스 권한: 허용됨")
             locationManager.startUpdatingLocation()
-            guard let coordinate = locationManager.location?.coordinate else { return }
-            let logMsg = "현재 위치: (latitude: \(coordinate.latitude), longitude: \(coordinate.longitude)"
-            os_log(.debug, log: log, "현재 위치: %@", logMsg)
+            updateLastLocation()
             break
         case .restricted, .denied:
             os_log(.debug, log: log, "위치 서비스 권한: 차단됨")
@@ -96,19 +98,24 @@ private extension MapViewModel {
             break
         }
     }
+    
+    func updateLastLocation() {
+        guard let coordinate = locationManager.location?.coordinate else { return }
+        let logMsg = "현재 위치: (latitude: \(coordinate.latitude), longitude: \(coordinate.longitude))"
+        os_log(.debug, log: log, "%@", logMsg)
+        state.userLocation.onNext(locationManager.location?.coordinate)
+    }
 }
 
 // MARK: - CLLocationManagerDelegate
 
-extension MapViewModel: CLLocationManagerDelegate {
+extension MapTabViewModel: CLLocationManagerDelegate {
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         checkDeviceLocationService()
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let coordinate = locationManager.location?.coordinate else { return }
-        let logMsg = "현재 위치: (latitude: \(coordinate.latitude), longitude: \(coordinate.longitude)"
-        os_log(.debug, log: log, "현재 위치: %@", logMsg)
+        updateLastLocation()
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
