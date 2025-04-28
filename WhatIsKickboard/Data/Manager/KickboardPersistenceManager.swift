@@ -35,8 +35,28 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     }
     
     /// 킥보드 대여
-    static func rentKickboard() {
+    static func rentKickboard(id: UUID, latitude: Double, longitude: Double) async throws {
+        let userId = try getCurrentUserId()
         
+        /// 유저정보. 킥보드 정보 호출 후 탑승정보 입력
+        let user = try getUserData(id: userId)
+        let kickboard = try getKickboardData(id: id)
+        let ride = RideEntity(context: context)
+        
+        ride.id = UUID()
+        ride.user_id = userId
+        ride.kickboard_id = id
+        ride.start_time = Date()
+        ride.start_latitude = latitude
+        ride.start_longitude = longitude
+        ride.battery = kickboard.battery
+        
+        /// 킥보드 탑승 불가 태그 및 각 관계에 추가
+        kickboard.status = "IMPOSSIBILITY"
+        kickboard.addToRides(ride)
+        user.addToRides(ride)
+        
+        try await saveContext("킥보드 대여")
     }
     
     /// 킥보드 반납
