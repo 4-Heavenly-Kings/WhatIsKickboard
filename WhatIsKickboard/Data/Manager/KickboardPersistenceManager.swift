@@ -23,15 +23,19 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     }
     
     /// 킥보드 등록
-    static func createKickboard(latitude: Double, longitude: Double, battery: Int) async throws {
+    @discardableResult
+    static func createKickboard(latitude: Double, longitude: Double, battery: Int) async throws -> UUID {
         let kickboard = KickboardEntity(context: context)
-        kickboard.id = UUID()
+        let id = UUID()
+        
+        kickboard.id = id
         kickboard.latitude = latitude
         kickboard.longitude = longitude
         kickboard.battery = Int16(battery)
         kickboard.status = setStatus(battery: battery)
         
         try await saveContext("킥보드 등록")
+        return id
     }
     
     /// 킥보드 대여
@@ -41,7 +45,7 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
         /// 유저정보. 킥보드 정보 호출 후 탑승정보 입력
         let user = try getUserData(id: userId)
         let kickboard = try getKickboardData(id: id)
-        let ride = RideEntity(context: context)
+        let ride = KickboardRideEntity(context: context)
         
         ride.id = UUID()
         ride.user_id = userId
@@ -62,9 +66,6 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     /// 킥보드 반납
     static func returnKickboard(id: UUID, latitude: Double, longitude: Double, battery: Int, imagePath: String) async throws {
         let userId = try getCurrentUserId()
-
-        /// 유저정보, 킥보드 정보 호출
-        let user = try getUserData(id: userId)
         let kickboard = try getKickboardData(id: id)
         
         /// 탑승 정보 CoreData에서 호출
@@ -93,10 +94,6 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     
     /// 킥보드 신고
     static func declaredKickboard(id: UUID) async throws {
-        let userId = try getCurrentUserId()
-
-        /// 유저정보, 킥보드 정보 호출
-        let user = try getUserData(id: userId)
         let kickboard = try getKickboardData(id: id)
         
         kickboard.status = "DECLARED"
@@ -142,8 +139,8 @@ extension KickboardPersistenceManager {
     
     /// CoreData Persistence 저장소에서 탑승 정보 Entity 추출
     @discardableResult
-    private static func getRideData(id: UUID) throws -> RideEntity {
-        let request = NSFetchRequest<RideEntity>(entityName: RideEntity.className)
+    private static func getRideData(id: UUID) throws -> KickboardRideEntity {
+        let request = NSFetchRequest<KickboardRideEntity>(entityName: KickboardRideEntity.className)
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         request.fetchLimit = 1
         
@@ -156,8 +153,8 @@ extension KickboardPersistenceManager {
     
     /// CoreData Persistence 저장소에서 탑승 정보 리스트 Entity 추출
     @discardableResult
-    private static func getRideListData(userId: UUID) throws -> [RideEntity] {
-        let request = NSFetchRequest<RideEntity>(entityName: RideEntity.className)
+    private static func getRideListData(userId: UUID) throws -> [KickboardRideEntity] {
+        let request = NSFetchRequest<KickboardRideEntity>(entityName: KickboardRideEntity.className)
         request.predicate = NSPredicate(format: "user_id == %@", userId as CVarArg)
         
         do {
@@ -181,8 +178,6 @@ extension KickboardPersistenceManager {
         }
         return kickboard
     }
-    
-    
 }
 
 // MARK: - Extension + KickboardPersistenceManager
