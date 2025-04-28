@@ -11,7 +11,8 @@ import Foundation
 
 struct WhatIsKickboardTests {
 
-    @Test func createUser() async throws {
+    /// 회원가입 테스트
+    @Test func testCreateUser() async throws {
         let email = "test@example.com"
         let password = "password123"
         
@@ -26,7 +27,8 @@ struct WhatIsKickboardTests {
         }
     }
     
-    @Test func login() async throws {
+    /// 로그인 테스트
+    @Test func testLogin() async throws {
         let email = "test@example.com"
         let password = "password123"
         
@@ -41,8 +43,8 @@ struct WhatIsKickboardTests {
         }
     }
     
-
-    @Test func getUser() async throws {
+    /// 유저정보 조회 테스트
+    @Test func testGetUser() async throws {
         do {
             let fetchedUser = try UserPersistenceManager.getUser()
             #expect(fetchedUser.email == fetchedUser.getMock().email)
@@ -52,7 +54,8 @@ struct WhatIsKickboardTests {
         }
     }
 
-    @Test func patchUser() async throws {
+    /// 유저정보 수정 테스트
+    @Test func testPatchUser() async throws {
         do {
             var fetchedUser = try UserPersistenceManager.getUser()
             fetchedUser.name = "포비"
@@ -65,8 +68,9 @@ struct WhatIsKickboardTests {
             #expect(Bool(false))
         }
     }
-
-    @Test func deleteUser() async throws {
+    
+    /// 유저정보 삭제 테스트
+    @Test func testDeleteUser() async throws {
         do {
             try await UserPersistenceManager.deleteUser(password: "password123")
         } catch let error as UserPersistenceError {
@@ -81,6 +85,7 @@ struct WhatIsKickboardTests {
         }
     }
     
+    // 로그아웃 테스트
     @Test func testLogOut() async throws {
         UserPersistenceManager.logout()
         let token = UserDefaults.standard.string(forKey: "token")
