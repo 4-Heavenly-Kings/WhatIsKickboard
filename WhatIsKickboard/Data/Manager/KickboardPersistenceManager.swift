@@ -24,19 +24,12 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     
     /// 킥보드 등록
     static func createKickboard(latitude: Double, longitude: Double, battery: Int) async throws {
-        let status:String
-        
-        switch battery {
-        case 0...10: status = "LOW_BATTERY"
-        default: status = "ABLE"
-        }
-        
         let kickboard = KickboardEntity(context: context)
         kickboard.id = UUID()
         kickboard.latitude = latitude
         kickboard.longitude = longitude
         kickboard.battery = Int16(battery)
-        kickboard.status = status
+        kickboard.status = setStatus(battery: battery)
         
         try await saveContext("킥보드 등록")
     }
