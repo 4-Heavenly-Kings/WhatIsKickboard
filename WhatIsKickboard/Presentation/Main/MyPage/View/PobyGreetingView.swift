@@ -56,6 +56,7 @@ final class PobyGreetingView: BaseView {
         subGreetingLabel.snp.makeConstraints {
             $0.top.equalTo(greetingLabel.snp.bottom).offset(10)
             $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.bottom.equalToSuperview().offset(-16)
         }
     }
 }
