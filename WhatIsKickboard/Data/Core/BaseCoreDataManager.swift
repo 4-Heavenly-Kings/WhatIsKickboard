@@ -15,7 +15,7 @@ class BaseCoreDataManager {
     static let context = CoreDataStack.shared.context
     
     /// context를 받아 저장하는 비동기 함수
-    static func saveContext(_ context: NSManagedObjectContext, _ message: String) async throws {
+    static func saveContext(_ message: String) async throws {
         guard context.hasChanges else { return }
         do {
             try await context.perform {

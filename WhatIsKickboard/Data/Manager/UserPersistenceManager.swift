@@ -38,7 +38,7 @@ final class UserPersistenceManager: BaseCoreDataManager {
                 user.role = "GUEST"
                 
                 UserDefaults.standard.set(user.id?.uuidString, forKey: "token")
-                try await saveContext(context, "회원가입")
+                try await saveContext("회원가입")
                 return user.toModel()
             } else {
                 throw error
@@ -68,7 +68,7 @@ final class UserPersistenceManager: BaseCoreDataManager {
         userData.email = user.email
         userData.password = user.password
         
-        try await saveContext(context, "유저정보 수정")
+        try await saveContext("유저정보 수정")
         return userData.toModel()
     }
     
@@ -89,7 +89,7 @@ final class UserPersistenceManager: BaseCoreDataManager {
         }
         context.delete(user)
         
-        try await saveContext(context, "회원탈퇴")
+        try await saveContext("회원탈퇴")
         UserDefaults.standard.removeObject(forKey: "token")
     }
 }
