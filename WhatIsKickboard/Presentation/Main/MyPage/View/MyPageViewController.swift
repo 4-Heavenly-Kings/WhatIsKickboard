@@ -12,10 +12,13 @@ import RxCocoa
 import SnapKit
 import Then
 
+//MARK: - MyPageViewController
 final class MyPageViewController: BaseViewController {
     
+    // MARK: - Components
     let myPageView = MyPageView()
     
+    // MARK: - View Life Cycle
     override func loadView() {
         super.loadView()
         
@@ -27,16 +30,19 @@ final class MyPageViewController: BaseViewController {
         
     }
     
+    // MARK: - bindViewModel
     override func bindViewModel() {
         super.bindViewModel()
         
     }
     
+    // MARK: - Styles
     override func setStyles() {
         super.setStyles()
         
     }
     
+    // MARK: - Layouts
     override func setLayout() {
         super.setLayout()
         

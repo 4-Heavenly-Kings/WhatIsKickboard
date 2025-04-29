@@ -10,14 +10,18 @@ import UIKit
 import SnapKit
 import Then
 
+//MARK: - PobyGreetingView
 final class PobyGreetingView: BaseView {
     
+    //MARK: - Components
+    /// 포비 인사 Image
     let pobyGreetingImage = UIImageView()
-    let userNameLabel = UILabel()
-    let greetingLabel = UILabel()
-    let greetingStackView = UIStackView()
+    /// 사용자 이름 + 인사말 Label
+    let userNameGreetingLabel = UILabel()
+    /// 서브 인사말 Label
     let subGreetingLabel = UILabel()
     
+    // MARK: - Styles
     override func setStyles() {
         super.setStyles()
         
@@ -26,23 +30,15 @@ final class PobyGreetingView: BaseView {
             $0.contentMode = .scaleAspectFit
         }
         
-        userNameLabel.do {
-            $0.text = "회원"
-            $0.textColor = UIColor(hex: "#69C6D3")
+        userNameGreetingLabel.do {
+            let text = "회원님, 안녕하세요!"
+            let attributedString = NSMutableAttributedString(string: text)
+            attributedString.addAttribute(.foregroundColor, value: UIColor(hex: "#69C6D3"), range: (text as NSString).range(of: "회원"))
+            attributedString.addAttribute(.foregroundColor, value: UIColor.black, range: (text as NSString).range(of: "님, 안녕하세요!"))
+
+            $0.attributedText = attributedString
             $0.font = UIFont(name: "Jalnan2", size: 28)
             $0.textAlignment = .center
-        }
-        
-        greetingLabel.do {
-            $0.text = "님, 안녕하세요!"
-            $0.font = UIFont(name: "Jalnan2", size: 28)
-            $0.textAlignment = .center
-        }
-        
-        greetingStackView.do {
-            $0.axis = .horizontal
-            $0.spacing = 0
-            $0.alignment = .center
         }
         
         subGreetingLabel.do {
@@ -50,13 +46,13 @@ final class PobyGreetingView: BaseView {
             $0.font = UIFont(name: "Jalnan2", size: 18)
             $0.textAlignment = .center
         }
-        
-        self.addSubviews(pobyGreetingImage, greetingStackView, subGreetingLabel)
-        greetingStackView.addArrangedSubviews(userNameLabel, greetingLabel)
     }
     
+    // MARK: - Layouts
     override func setLayout() {
         super.setLayout()
+        
+        self.addSubviews(pobyGreetingImage, userNameGreetingLabel, subGreetingLabel)
         
         pobyGreetingImage.snp.makeConstraints {
             $0.top.equalToSuperview().offset(16)
@@ -64,18 +60,18 @@ final class PobyGreetingView: BaseView {
             $0.size.equalTo(120)
         }
         
-        userNameLabel.snp.makeConstraints {
+        userNameGreetingLabel.snp.makeConstraints {
             $0.top.equalTo(pobyGreetingImage.snp.bottom).offset(16)
             $0.leading.equalToSuperview().offset(16)
         }
         
-        greetingStackView.snp.makeConstraints {
+        userNameGreetingLabel.snp.makeConstraints {
             $0.top.equalTo(pobyGreetingImage.snp.bottom).offset(16)
             $0.centerX.equalToSuperview()
         }
         
         subGreetingLabel.snp.makeConstraints {
-            $0.top.equalTo(greetingLabel.snp.bottom).offset(10)
+            $0.top.equalTo(userNameGreetingLabel.snp.bottom).offset(10)
             $0.centerX.equalToSuperview()
             $0.bottom.equalToSuperview().offset(-16)
         }

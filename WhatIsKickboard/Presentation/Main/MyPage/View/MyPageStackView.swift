@@ -10,12 +10,17 @@ import UIKit
 import SnapKit
 import Then
 
+//MARK: - MyPageStackView
 final class MyPageStackView: UIStackView {
     
-    let backgroundView = UIView()
+    // MARK: - Components
+    /// 이름 수정 Button
     let modifyNameLabel = MyPageStackButton(title: "이름 수정")
+    /// 비밀번호 수정 Button
     let modifyPasswordLabel = MyPageStackButton(title: "비밀번호 수정")
+    /// 이용 내역 Button
     let useDetailLabel = MyPageStackButton(title: "이용 내역")
+    /// 로그아웃 Button
     let logoutLabel = MyPageStackButton(title: "로그아웃", titleColor: .systemRed)
     
     override init(frame: CGRect) {
@@ -28,17 +33,17 @@ final class MyPageStackView: UIStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    /// View 의 Style 을 set 합니다.
-    func setStyles() {
+    // MARK: - Styles
+    private func setStyles() {
         self.axis = .vertical
         self.alignment = .fill
         self.spacing = 1
         self.distribution = .fillEqually
         self.backgroundColor = .systemGray5
-        
-        self.addArrangedSubviews(modifyNameLabel, modifyPasswordLabel, useDetailLabel, logoutLabel)
     }
     
-    /// View 의 Layout 을 set 합니다.
-    func setLayout() {}
+    // MARK: - Layouts
+    private func setLayout() {
+        self.addArrangedSubviews(modifyNameLabel, modifyPasswordLabel, useDetailLabel, logoutLabel)
+    }
 }
