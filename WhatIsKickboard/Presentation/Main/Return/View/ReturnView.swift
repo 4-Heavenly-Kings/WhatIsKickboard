@@ -20,12 +20,11 @@ final class ReturnView: BaseView {
     private(set) var imageView = UIImageView()
     private(set) var feeLabelView = FeeLabelView()
     private(set) var returnStackView = ReturnStackView()
+    private(set) var customSubmitButton = CustomSubmitButton()
     
     // MARK: - Set UIComponents
 
-    override func setStyles() {
-        navigationBarView.configure(title: "반납하기", showsRightButton: false, rightButtonTitle: nil)
-        
+    override func setStyles() {        
         imageView.do {
             $0.layer.cornerRadius = 20
             $0.backgroundColor = UIColor(hex: "#868686")
@@ -35,7 +34,7 @@ final class ReturnView: BaseView {
     // MARK: - Layout Helper
     
     override func setLayout() {
-        addSubviews(navigationBarView, imageView, feeLabelView, returnStackView)
+        addSubviews(navigationBarView, imageView, feeLabelView, returnStackView, customSubmitButton)
         
         navigationBarView.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide.snp.top)
@@ -59,6 +58,13 @@ final class ReturnView: BaseView {
         returnStackView.snp.makeConstraints {
             $0.top.equalTo(feeLabelView.snp.bottom).offset(80)
             $0.trailing.equalToSuperview().offset(-20)
+        }
+        
+        customSubmitButton.snp.makeConstraints {
+            $0.top.equalTo(returnStackView.snp.bottom).offset(29)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(UIScreen.main.bounds.width * 394 / 440)
+            $0.height.equalTo(UIScreen.main.bounds.height * 50 / 956)
         }
     }
 }
