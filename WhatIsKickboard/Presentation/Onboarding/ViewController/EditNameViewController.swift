@@ -6,3 +6,14 @@
 //
 
 import Foundation
+
+// MARK: - EditNameViewController
+final class EditNameViewController: BaseViewController {
+    
+    // MARK: - Components
+    private let editNameView = EditNameView()
+    
+    override func loadView() {
+        view = editNameView
+    }
+}
