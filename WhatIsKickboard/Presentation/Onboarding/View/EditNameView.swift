@@ -35,7 +35,7 @@ final class EditNameView: BaseView {
         
         // 타이틀 라벨
         titleLabel.do {
-            $0.text = "지금 바로 빌려봐 ~"
+            $0.text = "이름을 불러봐 ~"
             $0.font = .jalnan2(32)
         }
         
