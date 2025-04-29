@@ -45,94 +45,149 @@ final class CustomAlertView: BaseView {
             $0.layer.cornerRadius = 20
         }
         
-        imageView.do {
-            $0.image = UIImage(named: "PobyHi")
+        switch alertType {
+        case .returnRequest, .logout, .deleteID:
+            imageView.do {
+                $0.image = UIImage(named: "PobyHi")
+            }
+            
+            titleLabel.do {
+                $0.font = .systemFont(ofSize: 20, weight: .regular)
+            }
+            
+            subtitleLabel.do {
+                $0.textColor = UIColor(hex: "#000000")
+                $0.numberOfLines = 2
+                $0.textAlignment = .center
+                $0.font = .systemFont(ofSize: 20, weight: .bold)
+            }
+            
+            buttonStackView.do {
+                $0.axis = .horizontal
+                $0.distribution = .fillEqually
+            }
+            
+            horizontalSeparator.do {
+                $0.backgroundColor = UIColor(hex: "#000000")
+            }
+            
+            verticalSeparator.do {
+                $0.backgroundColor = UIColor(hex: "#000000")
+            }
+            
+            submitButton.do {
+                $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+            }
+            
+            cancelButton.do {
+                $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+                $0.tintColor = UIColor(hex: "#69C6D3")
+            }
+        case .confirmReturn:
+            imageView.do {
+                $0.image = UIImage(named: "PobyRiding")
+            }
+            
+            titleLabel.do {
+                $0.font = .systemFont(ofSize: 20, weight: .regular)
+            }
+            
+            horizontalSeparator.do {
+                $0.backgroundColor = UIColor(hex: "#000000")
+            }
+            
+            submitButton.do {
+                $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+            }
         }
-        
-        titleLabel.do {
-            $0.text = "천성우님은 지금까지 포비와 22분 달렸어요"
-            $0.font = .systemFont(ofSize: 20, weight: .regular)
-        }
-        
-        subtitleLabel.do {
-            $0.text = "이제 포비와 그만 달릴까요?"
-            $0.textColor = UIColor(hex: "#000000")
-            $0.numberOfLines = 2
-            $0.textAlignment = .center
-            $0.font = .systemFont(ofSize: 20, weight: .bold)
-        }
-        
-        buttonStackView.do {
-            $0.axis = .horizontal
-            $0.distribution = .fillEqually
-        }
-        
-        horizontalSeparator.do {
-            $0.backgroundColor = UIColor(hex: "#000000")
-        }
-        
-        verticalSeparator.do {
-            $0.backgroundColor = UIColor(hex: "#000000")
-        }
-        
-        submitButton.do {
-            $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
-        }
-        
-        cancelButton.do {
-            $0.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
-            $0.tintColor = UIColor(hex: "#69C6D3")
-        }
-        
     }
     
     // MARK: - Layout Helper
     
     override func setLayout() {
-        addSubviews(containerView)
-        containerView.addSubviews(imageView, titleLabel, subtitleLabel, buttonStackView, verticalSeparator, horizontalSeparator)
-        buttonStackView.addArrangedSubviews(submitButton, cancelButton)
         
-        containerView.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.width.equalTo(UIScreen.main.bounds.width * 400 / 440)
-            $0.height.equalTo(UIScreen.main.bounds.height * 400 / 956)
-        }
-        
-        imageView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(45)
-            $0.centerX.equalToSuperview()
-            $0.width.equalTo(UIScreen.main.bounds.width * 84 / 440)
-            $0.height.equalTo(UIScreen.main.bounds.height * 100 / 956)
-        }
-        
-        titleLabel.snp.makeConstraints {
-            $0.top.equalTo(imageView.snp.bottom).offset(17)
-            $0.centerX.equalToSuperview()
-        }
-        
-        subtitleLabel.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(38)
-            $0.centerX.equalToSuperview()
-        }
-        
-        horizontalSeparator.snp.makeConstraints {
-            $0.top.equalTo(buttonStackView.snp.top)
-            $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(1)
-        }
-        
-        buttonStackView.snp.makeConstraints {
-            $0.bottom.equalToSuperview()
-            $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(UIScreen.main.bounds.height * 85 / 956)
-        }
-        
-        verticalSeparator.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.top.equalTo(buttonStackView.snp.top)
-            $0.bottom.equalTo(buttonStackView.snp.bottom)
-            $0.width.equalTo(1)
+        switch alertType {
+        case .returnRequest, .logout, .deleteID:
+            addSubviews(containerView)
+            containerView.addSubviews(imageView, titleLabel, subtitleLabel, buttonStackView, verticalSeparator, horizontalSeparator)
+            buttonStackView.addArrangedSubviews(submitButton, cancelButton)
+            
+            containerView.snp.makeConstraints {
+                $0.center.equalToSuperview()
+                $0.width.equalTo(UIScreen.main.bounds.width * 400 / 440)
+                $0.height.equalTo(UIScreen.main.bounds.height * 400 / 956)
+            }
+            
+            imageView.snp.makeConstraints {
+                $0.top.equalToSuperview().offset(45)
+                $0.centerX.equalToSuperview()
+                $0.width.equalTo(UIScreen.main.bounds.width * 84 / 440)
+                $0.height.equalTo(UIScreen.main.bounds.height * 100 / 956)
+            }
+            
+            titleLabel.snp.makeConstraints {
+                $0.top.equalTo(imageView.snp.bottom).offset(17)
+                $0.centerX.equalToSuperview()
+            }
+            
+            subtitleLabel.snp.makeConstraints {
+                $0.top.equalTo(titleLabel.snp.bottom).offset(38)
+                $0.centerX.equalToSuperview()
+            }
+            
+            horizontalSeparator.snp.makeConstraints {
+                $0.top.equalTo(buttonStackView.snp.top)
+                $0.leading.trailing.equalToSuperview()
+                $0.height.equalTo(1)
+            }
+            
+            buttonStackView.snp.makeConstraints {
+                $0.bottom.equalToSuperview()
+                $0.leading.trailing.equalToSuperview()
+                $0.height.equalTo(UIScreen.main.bounds.height * 85 / 956)
+            }
+            
+            verticalSeparator.snp.makeConstraints {
+                $0.centerX.equalToSuperview()
+                $0.top.equalTo(buttonStackView.snp.top)
+                $0.bottom.equalTo(buttonStackView.snp.bottom)
+                $0.width.equalTo(1)
+            }
+        case .confirmReturn:
+            addSubviews(containerView)
+            containerView.addSubviews(imageView, titleLabel, horizontalSeparator, buttonStackView)
+            buttonStackView.addArrangedSubviews(submitButton)
+            
+            containerView.snp.makeConstraints {
+                $0.center.equalToSuperview()
+                $0.width.equalTo(UIScreen.main.bounds.width * 400 / 440)
+                $0.height.equalTo(UIScreen.main.bounds.height * 400 / 956)
+            }
+            
+            imageView.snp.makeConstraints {
+                $0.top.equalToSuperview().offset(45)
+                $0.centerX.equalToSuperview()
+                $0.width.equalTo(UIScreen.main.bounds.width * 73 / 440)
+                $0.height.equalTo(UIScreen.main.bounds.height * 109 / 956)
+            }
+            
+            titleLabel.snp.makeConstraints {
+                $0.top.equalTo(imageView.snp.bottom).offset(56)
+                $0.centerX.equalToSuperview()
+            }
+            
+            horizontalSeparator.snp.makeConstraints {
+                $0.top.equalTo(buttonStackView.snp.top)
+                $0.leading.trailing.equalToSuperview()
+                $0.height.equalTo(1)
+            }
+            
+            buttonStackView.snp.makeConstraints {
+                $0.bottom.equalToSuperview()
+                $0.leading.trailing.equalToSuperview()
+                $0.height.equalTo(UIScreen.main.bounds.height * 85 / 956)
+            }
+            
         }
     }
     

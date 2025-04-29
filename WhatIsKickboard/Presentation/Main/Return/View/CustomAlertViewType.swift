@@ -9,6 +9,7 @@ import UIKit
 
 enum CustomAlertViewType {
     case returnRequest
+    case confirmReturn
     case logout
     case deleteID
     
@@ -22,11 +23,13 @@ enum CustomAlertViewType {
             } else {
                 fullText = "\(name)님은 포비와 함께했어요"
             }
+        case .confirmReturn:
+            fullText = "킥보드는 안전하게 포비에게 다시 돌아갔습니다."
         case .logout, .deleteID:
             if let count = count {
                 fullText = "\(name)님은 지금까지 포비와 \(count)번 달렸어요"
             } else {
-                fullText = "\(name)님은 포비와 함께했어요"
+                fullText = "\(name)님은 아직 포비와 달린적이 없어요"
             }
         }
         
@@ -62,6 +65,8 @@ enum CustomAlertViewType {
             } else {
                 return "이제 포비와 그만 달릴까요?"
             }
+        case .confirmReturn:
+            return ""
         case .logout:
             return "이제 그만 로그아웃 할까요?"
         case .deleteID:
@@ -72,6 +77,7 @@ enum CustomAlertViewType {
     var submitTitle: String {
         switch self {
         case .returnRequest: return "포비와 그만 놀기"
+        case .confirmReturn: return "확인"
         case .logout: return "로그아웃"
         case .deleteID: return "포비에게 도망가기"
         }
@@ -79,7 +85,7 @@ enum CustomAlertViewType {
     
     var submitTitleColor: UIColor {
         switch self {
-        case .returnRequest, .deleteID: return UIColor(hex: "#6B6E82")
+        case .returnRequest, .confirmReturn, .deleteID: return UIColor(hex: "#6B6E82")
         case .logout: return UIColor(hex: "#FF4F17")
         }
     }
@@ -87,6 +93,7 @@ enum CustomAlertViewType {
     var cancelTitle: String {
         switch self {
         case .returnRequest: return "더 달리기"
+        case .confirmReturn: return ""
         case .logout: return "취소"
         case .deleteID: return "포비와 더 달리기"
         }
