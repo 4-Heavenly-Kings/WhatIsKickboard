@@ -46,7 +46,7 @@ final class MyPageView: BaseView {
             $0.contentHorizontalAlignment = .center
         }
         
-        self.addSubviews(usingKickboardView, pobyGreetingView, dividingLine, myPageStackView, withDrawalButton)
+        self.addSubviews(pobyGreetingView, usingKickboardView, dividingLine, myPageStackView, withDrawalButton)
         
     }
     
@@ -58,13 +58,13 @@ final class MyPageView: BaseView {
             $0.horizontalEdges.equalTo(safeAreaLayoutGuide)
         }
         
-        usingKickboardView.snp.makeConstraints {
-            $0.top.equalTo(pobyGreetingView.snp.bottom)
-            $0.horizontalEdges.equalTo(safeAreaLayoutGuide)
-        }
+//        usingKickboardView.snp.makeConstraints {
+//            $0.top.equalTo(safeAreaLayoutGuide)
+//            $0.horizontalEdges.equalTo(safeAreaLayoutGuide)
+//        }
         
         dividingLine.snp.makeConstraints {
-            $0.top.equalTo(usingKickboardView.snp.bottom).offset(16)
+            $0.top.equalTo(pobyGreetingView.snp.bottom).offset(16)
             $0.horizontalEdges.equalTo(safeAreaLayoutGuide).inset(20)
             $0.height.equalTo(1)
         }
@@ -75,7 +75,8 @@ final class MyPageView: BaseView {
         }
         
         withDrawalButton.snp.makeConstraints {
-            $0.trailing.bottom.equalTo(safeAreaLayoutGuide).offset(-16)
+            $0.trailing.equalTo(safeAreaLayoutGuide).offset(-16)
+            $0.bottom.equalToSuperview().offset(-105 - 16)
         }
         
     }

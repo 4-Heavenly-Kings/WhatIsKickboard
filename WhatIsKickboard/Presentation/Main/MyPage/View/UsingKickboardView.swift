@@ -42,7 +42,7 @@ final class UsingKickboardView: BaseView {
         }
         
         userNameLabel.do {
-            $0.text = "홍길동"
+            $0.text = "회원"
             $0.font = .systemFont(ofSize: 30, weight: .bold)
             $0.textColor = UIColor(hex: "#69C6D3")
         }
