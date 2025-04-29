@@ -25,7 +25,7 @@ final class LoginView: BaseView {
     private let inputStackView = UIStackView()
     private let navigationStackView = UIStackView()
     
-    // MARK: - Custon Components
+    // MARK: - Custom Components
     private var customAlertView: CustomAlertView?
     private var disposeBag = DisposeBag()
     

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RxSwift
 
 // MARK: - BaseView
 final class EditNameView: BaseView {
@@ -20,6 +21,9 @@ final class EditNameView: BaseView {
     // MARK: - StackView Components
     private let inputStackView = UIStackView()
     
+    // MARK: - Custonm Components
+    private var customAlertView: CustomAlertView?
+    private var disposeBag = DisposeBag()
     
     // MARK: - Style
     override func setStyles() {
@@ -109,5 +113,35 @@ final class EditNameView: BaseView {
             $0.horizontalEdges.equalToSuperview().inset(45)
             $0.centerX.equalToSuperview()
         }
+    }
+    
+    /// Alert 표시
+    func showAlert(text: String) {
+        customAlertView = CustomAlertView(frame: .zero, alertType: .emailFailed)
+        
+        guard let customAlertView else { return }
+        addSubview(customAlertView)
+        
+        customAlertView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        customAlertView.configure(name: text)
+        
+        customAlertView.getSubmitButton().rx.tap
+            .bind(with: self){ owner, _  in
+                customAlertView.removeFromSuperview()
+                owner.customAlertView = nil
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    // MARK: 컴포넌트 접근시
+    var getNameTextField: UITextField {
+        nameTextField
+    }
+    
+    var getConfirmButton: UIButton {
+        confirmButton
     }
 }

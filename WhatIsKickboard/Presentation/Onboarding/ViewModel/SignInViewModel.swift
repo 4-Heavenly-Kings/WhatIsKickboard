@@ -74,7 +74,7 @@ extension SignInViewModel {
             state.signInError.accept(UserPersistenceError.passwordTextFieldIsEmpty)
             return false
         } else if passwordConfirm.isEmpty {
-            state.signInError.accept(UserPersistenceError.passwordConfirmTextFieldIsEmpty)
+            state.signInError.accept(UserPersistenceError.fieldIsEmpty)
             return false
         }
         return true

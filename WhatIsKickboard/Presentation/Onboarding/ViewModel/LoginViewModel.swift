@@ -21,7 +21,7 @@ final class LoginViewModel: ViewModelProtocol {
     struct State {
         fileprivate(set) var actionSubject = PublishSubject<Action>()
         
-        fileprivate(set) var loginSuccess = PublishRelay<String>()
+        fileprivate(set) var loginSuccess = PublishRelay<User>()
         fileprivate(set) var loginError = PublishRelay<Error>()
     }
     
@@ -54,11 +54,7 @@ final class LoginViewModel: ViewModelProtocol {
         
         UserPersistenceManager.login(email, password)
             .subscribe(with: self, onSuccess: { owner, user in
-                if user.role == "USER" {
-                    owner.state.loginSuccess.accept("USER")
-                } else {
-                    owner.state.loginSuccess.accept("GUEST")
-                }
+                owner.state.loginSuccess.accept(user)
             }, onFailure: { owner, error in
                 owner.state.loginError.accept(error)
             })

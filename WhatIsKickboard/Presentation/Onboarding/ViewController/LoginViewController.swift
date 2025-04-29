@@ -14,7 +14,6 @@ final class LoginViewController: BaseViewController {
     private let loginView = LoginView()
     private let viewModel = LoginViewModel()
     
-    
     override func loadView() {
         view = loginView
     }
@@ -36,14 +35,15 @@ final class LoginViewController: BaseViewController {
         
         /// 로그인 성공 이벤트 구독
         viewModel.state.loginSuccess
-            .subscribe(with: self, onNext: { owner, role in
+            .subscribe(with: self, onNext: { owner, user in
                 owner.dismiss(animated: true) {
-                    if role == "GUEST" {
+                    if user.role == "GUEST" {
                         if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                            let window = scene.windows.first,
                            let rootVC = window.rootViewController {
                             
                             let vc = EditNameViewController()
+                            vc.user = user
                             vc.modalPresentationStyle = .fullScreen
                             rootVC.present(vc, animated: true)
                         }
