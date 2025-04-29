@@ -8,7 +8,7 @@
 import UIKit
 
 // MARK: - LoginViewController
-final class LoginViewController: UIViewController {
+final class LoginViewController: BaseViewController {
     
     // MARK: - Components
     private let loginView = LoginView()

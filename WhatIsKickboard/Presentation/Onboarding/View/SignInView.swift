@@ -1,5 +1,5 @@
 //
-//  LoginView.swift
+//  RegisterView.swift
 //  WhatIsKickboard
 //
 //  Created by 유영웅 on 4/29/25.
@@ -7,8 +7,8 @@
 
 import UIKit
 
-// MARK: - LoginView
-final class LoginView: BaseView {
+// MARK: - SignIntView
+final class SignInView: BaseView {
     
     // MARK: - Components
     private let titleLabel = UILabel()
@@ -16,9 +16,10 @@ final class LoginView: BaseView {
     private let titleLogoTitleView = UIImageView()
     private let emailTextField = UITextField()
     private let passwordTextField = UITextField()
-    private let loginButton = UIButton()
+    private let passwordConfirmTextField = UITextField()
+    private let registerButton = UIButton()
     private let announcementLabel = UILabel()
-    private let navigationSignInButton = UIButton()
+    private let navigationLogInButton = UIButton()
     
     // MARK: - StackView Components
     private let inputStackView = UIStackView()
@@ -40,6 +41,7 @@ final class LoginView: BaseView {
         // 타이틀 라벨
         titleLabel.do {
             $0.text = "지금 바로 빌려봐 ~"
+            $0.textColor = .black
             $0.font = .jalnan2(32)
         }
         
@@ -77,22 +79,33 @@ final class LoginView: BaseView {
             $0.leftViewMode = .always
         }
         
+        // 비밀번호 확인
+        passwordConfirmTextField.do {
+            $0.placeholder = "비밀번호 확인"
+            $0.isSecureTextEntry = true
+            $0.backgroundColor = .white
+            $0.layer.cornerRadius = 25
+            $0.layer.masksToBounds = true
+            $0.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
+            $0.leftViewMode = .always
+        }
+        
         // 로그인 버튼
-        loginButton.do {
-            $0.setTitle("로그인", for: .normal)
+        registerButton.do {
+            $0.setTitle("회원가입", for: .normal)
             $0.setTitleColor(.black, for: .normal)
         }
         
         // 안내 라벨
         announcementLabel.do {
-            $0.text = "아직 회원이 아니라면?"
+            $0.text = "이미 계정이 있다면?"
             $0.textColor = .systemGray
         }
         
         // 회원가입 버튼
-        navigationSignInButton.do {
+        navigationLogInButton.do {
             $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
-            $0.setTitle("회원가입하기", for: .normal)
+            $0.setTitle("로그인하기", for: .normal)
             $0.setTitleColor(.systemGray, for: .normal)
         }
         
@@ -100,7 +113,7 @@ final class LoginView: BaseView {
         navigationStackView.do {
             $0.axis = .horizontal
             $0.spacing = 10
-            $0.addArrangedSubviews(announcementLabel, navigationSignInButton)
+            $0.addArrangedSubviews(announcementLabel, navigationLogInButton)
         }
         
         // 이메일 + 비밀번호 + 로그인 + (안내 + 회원가입)
@@ -108,7 +121,7 @@ final class LoginView: BaseView {
             $0.axis = .vertical
             $0.spacing = 20
             $0.alignment = .center
-            $0.addArrangedSubviews(emailTextField, passwordTextField, loginButton, navigationStackView)
+            $0.addArrangedSubviews(emailTextField, passwordTextField, passwordConfirmTextField, registerButton, navigationStackView)
         }
         
     }
@@ -141,6 +154,11 @@ final class LoginView: BaseView {
         }
         
         passwordTextField.snp.makeConstraints {
+            $0.height.equalTo(50)
+            $0.width.equalToSuperview()
+        }
+        
+        passwordConfirmTextField.snp.makeConstraints {
             $0.height.equalTo(50)
             $0.width.equalToSuperview()
         }
