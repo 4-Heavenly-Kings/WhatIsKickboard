@@ -24,6 +24,15 @@ final class MapTabViewController: BaseViewController {
     /// 킥보드 마커 리스트
     private var kickboardMarkerList = [NMFMarker]()
     
+    /// 킥보드 마커 숨김 상태
+    private var isAllMarkerHidden: Bool = false {
+        didSet {
+            let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .semibold)
+            let buttonImage = UIImage(systemName: isAllMarkerHidden ? "eye" : "eye.slash", withConfiguration: config)
+            mapTabView.getHideKickboardButton().setImage(buttonImage, for: .normal)
+        }
+    }
+    
     // MARK: - UI Components
     
     /// 지도 탭 View
@@ -89,6 +98,11 @@ final class MapTabViewController: BaseViewController {
         
         // 바인딩 완료 알림
         viewModel.action.onNext(.didBinding)
+        
+        mapTabView.getHideKickboardButton().rx.tap
+            .bind(with: self) { owner, _ in
+                owner.toggleMarkerHideState()
+            }.disposed(by: disposeBag)
     }
     
     // MARK: - Style Helper
@@ -165,6 +179,11 @@ private extension MapTabViewController {
         }
         
         return markerList
+    }
+    
+    func toggleMarkerHideState() {
+        isAllMarkerHidden.toggle()
+        kickboardMarkerList.forEach { $0.hidden = isAllMarkerHidden }
     }
 }
 

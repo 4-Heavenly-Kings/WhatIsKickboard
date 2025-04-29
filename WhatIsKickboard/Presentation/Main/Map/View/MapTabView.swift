@@ -20,6 +20,11 @@ final class MapTabView: BaseView {
     /// 현재 위치 버튼
     private let locationButton = UIButton()
     
+    /// 킥보드 숨기기 버튼
+    private let hideKickboardButton = UIButton()
+    
+    private let vertialStackView = UIStackView()
+    
     // MARK: - Style Helper
     
     override func setStyles() {
@@ -41,20 +46,43 @@ final class MapTabView: BaseView {
             $0.setImage(UIImage(named: "LocationButton.svg"), for: .normal)
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
         }
+        
+        hideKickboardButton.do {
+            let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .semibold)
+            $0.setImage(UIImage(systemName: "eye.slash", withConfiguration: config), for: .normal)
+            $0.tintColor = UIColor.core
+            $0.backgroundColor = UIColor(hex: "#FFFFFF")
+        }
+        
+        vertialStackView.do {
+            $0.axis = .vertical
+            $0.spacing = 15
+        }
     }
     
     // MARK: - Layout Helper
     
     override func setLayout() {
-        self.addSubviews(naverMapView, locationButton)
+        self.addSubviews(naverMapView, vertialStackView)
+        vertialStackView.addArrangedSubviews(hideKickboardButton, locationButton)
         
         naverMapView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
+        vertialStackView.snp.makeConstraints {
+            $0.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
+            $0.bottom.equalTo(self.safeAreaLayoutGuide).inset(30)
+            $0.width.equalTo(50)
+        }
+        
         locationButton.snp.makeConstraints {
-            $0.trailing.equalTo(self.safeAreaInsets).inset(15)
-            $0.bottom.equalTo(self.safeAreaInsets).inset(150)
+//            $0.trailing.equalTo(self.safeAreaInsets).inset(15)
+//            $0.bottom.equalTo(self.safeAreaInsets).inset(150)
+            $0.width.height.equalTo(50)
+        }
+        
+        hideKickboardButton.snp.makeConstraints {
             $0.width.height.equalTo(50)
         }
     }
@@ -63,7 +91,10 @@ final class MapTabView: BaseView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        locationButton.layer.cornerRadius = locationButton.frame.width / 2
+        vertialStackView.layoutIfNeeded()
+        vertialStackView.subviews.forEach {
+            $0.layer.cornerRadius = $0.frame.width / 2
+        }
     }
     
     // MARK: - Methods
@@ -76,5 +107,10 @@ final class MapTabView: BaseView {
     /// 현재 위치 버튼 반환
     func getLocationButton() -> UIButton {
         return locationButton
+    }
+    
+    /// 킥보드 숨기기 버튼 반환
+    func getHideKickboardButton() -> UIButton {
+        return hideKickboardButton
     }
 }
