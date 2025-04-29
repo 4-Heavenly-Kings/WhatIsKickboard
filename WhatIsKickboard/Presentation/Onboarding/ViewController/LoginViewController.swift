@@ -7,16 +7,13 @@
 
 import UIKit
 
+// MARK: - LoginViewController
 final class LoginViewController: UIViewController {
     
+    // MARK: - Components
     private let loginView = LoginView()
     
     override func loadView() {
         view = loginView
-    }
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        view.backgroundColor = .systemBackground
     }
 }
