@@ -11,6 +11,7 @@ import RxCocoa
 import RxSwift
 import SnapKit
 import Then
+import UniformTypeIdentifiers
 
 final class testViewController: BaseViewController {
     
@@ -67,8 +68,7 @@ final class testViewController: BaseViewController {
                 alert?.removeFromSuperview()
                 self?.customAlertView = nil
                 print("포비와 그만 놀기 버튼 눌림")
-                let vc = ReturnViewController()
-                self?.navigationController?.pushViewController(vc, animated: true)
+                self?.openCamera()
             }
             .disposed(by: disposeBag)
         
@@ -83,4 +83,52 @@ final class testViewController: BaseViewController {
         self.customAlertView = alert
     }
     
+}
+
+extension testViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    private func openCamera() {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            print("카메라 사용 불가")
+            return
+        }
+        
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = self
+        picker.allowsEditing = false
+        picker.mediaTypes = [UTType.image.identifier]
+        picker.modalPresentationStyle = .fullScreen
+        present(picker, animated: true)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true) {
+            if let image = info[.originalImage] as? UIImage {
+                if let imagePath = self.saveImageToDocuments(image: image) {
+                    let returnVC = ReturnViewController(imagePath: imagePath)
+                    self.navigationController?.pushViewController(returnVC, animated: true)
+                }
+            }
+        }
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+    private func saveImageToDocuments(image: UIImage) -> String? {
+        guard let data = image.jpegData(compressionQuality: 0.8) else { return nil }
+        
+        let filename = UUID().uuidString + ".jpg"
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileURL = documentsPath.appendingPathComponent(filename)
+        
+        do {
+            try data.write(to: fileURL)
+            return fileURL.path
+        } catch {
+            print("이미지 저장 실패: \(error)")
+            return nil
+        }
+    }
 }

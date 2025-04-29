@@ -16,12 +16,24 @@ final class ReturnViewController: BaseViewController {
     
     private let contentView = ReturnView()
     private var customAlertView: CustomAlertView?
+    
+    private let imagePath: String
 
     
     // MARK: - View Life Cycle
+    
+    init(imagePath: String) {
+        self.imagePath = imagePath
+        super.init(nibName: nil, bundle: nil)
+    }
 
     override func loadView() {
         view = contentView
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setImage()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -85,11 +97,25 @@ final class ReturnViewController: BaseViewController {
                 alert?.removeFromSuperview()
                 self?.customAlertView = nil
                 self?.navigationController?.popViewController(animated: true)
+                /// 이게 이미지 경로라 이거를 CoreData로 주면 될 것 같아요~
+                if let imagePath = self?.imagePath {
+                    print("🖼️ 이미지 경로:", imagePath)
+                }
             }
             .disposed(by: disposeBag)
 
         self.customAlertView = alert
     }
     
+    private func setImage() {
+        if let image = UIImage(contentsOfFile: imagePath) {
+            contentView.imageView.image = image
+        } else {
+            print("❌ 이미지 로딩 실패")
+        }
+    }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
