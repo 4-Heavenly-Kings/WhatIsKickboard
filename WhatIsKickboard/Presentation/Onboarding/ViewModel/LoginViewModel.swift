@@ -21,7 +21,7 @@ final class LoginViewModel: ViewModelProtocol {
     struct State {
         fileprivate(set) var actionSubject = PublishSubject<Action>()
         
-        fileprivate(set) var loginSuccess = PublishRelay<Void>()
+        fileprivate(set) var loginSuccess = PublishRelay<String>()
         fileprivate(set) var loginError = PublishRelay<Error>()
     }
     
@@ -53,8 +53,12 @@ final class LoginViewModel: ViewModelProtocol {
         guard textFieldValidation(email: email, password: password) else { return }
         
         UserPersistenceManager.login(email, password)
-            .subscribe(with: self, onSuccess: { owner, _ in
-                owner.state.loginSuccess.accept(())
+            .subscribe(with: self, onSuccess: { owner, user in
+                if user.role == "USER" {
+                    owner.state.loginSuccess.accept("USER")
+                } else {
+                    owner.state.loginSuccess.accept("GUEST")
+                }
             }, onFailure: { owner, error in
                 owner.state.loginError.accept(error)
             })

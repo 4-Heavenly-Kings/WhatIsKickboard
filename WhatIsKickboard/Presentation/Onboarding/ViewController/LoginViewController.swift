@@ -22,23 +22,33 @@ final class LoginViewController: BaseViewController {
     override func bindViewModel() {
         /// 로그인 버튼 이벤트 방출
         loginView.getloginButton.rx.tap
-             .withUnretained(self)
-             .map { owner, _ in
-                 let email = owner.loginView.getEmailTextField.text ?? ""
-                 let password = owner.loginView.getPasswordTextField.text ?? ""
-                 return (owner, (email, password))
-             }
-             .bind { owner, data in
-                 let (email, password) = data
-                 owner.viewModel.action.onNext(.didTapLoginButton(email: email, password: password))
-             }
-             .disposed(by: disposeBag)
+            .withUnretained(self)
+            .map { owner, _ in
+                let email = owner.loginView.getEmailTextField.text ?? ""
+                let password = owner.loginView.getPasswordTextField.text ?? ""
+                return (owner, (email, password))
+            }
+            .bind { owner, data in
+                let (email, password) = data
+                owner.viewModel.action.onNext(.didTapLoginButton(email: email, password: password))
+            }
+            .disposed(by: disposeBag)
         
         /// 로그인 성공 이벤트 구독
         viewModel.state.loginSuccess
-            .subscribe(with: self, onNext: { owner, event in
-                let editNameVC = EditNameViewController()
-                owner.navigationController?.pushViewController(editNameVC, animated: true)
+            .subscribe(with: self, onNext: { owner, role in
+                owner.dismiss(animated: true) {
+                    if role == "GUEST" {
+                        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let window = scene.windows.first,
+                           let rootVC = window.rootViewController {
+                            
+                            let vc = EditNameViewController()
+                            vc.modalPresentationStyle = .fullScreen
+                            rootVC.present(vc, animated: true)
+                        }
+                    }
+                }
             })
             .disposed(by: disposeBag)
         
@@ -49,5 +59,5 @@ final class LoginViewController: BaseViewController {
                 owner.loginView.showAlert(text: error.rawValue)
             })
             .disposed(by: disposeBag)
-     }
+    }
 }
