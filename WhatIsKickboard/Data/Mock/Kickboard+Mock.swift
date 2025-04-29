@@ -6,7 +6,6 @@
 //
 
 import Foundation
-@testable import WhatIsKickboard
 
 // MARK: - Kickboard Mock
 extension Kickboard {
