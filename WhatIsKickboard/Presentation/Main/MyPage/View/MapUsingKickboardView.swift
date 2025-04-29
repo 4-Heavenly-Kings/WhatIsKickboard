@@ -53,7 +53,7 @@ final class MapUsingKickboardView: BaseView {
         /// makeAttributedString 메서드 사용법은 본 메서드에 작성되어 있습니다.
         usingTimeLabel.do {
             let text = "15분 이용 중"
-            let attributedText = makeAttributedString(
+            let attributedText = NSMutableAttributedString.makeAttributedString(
                 text: text,
                 highlightedParts: [
                     ("15분", .black, UIFont.systemFont(ofSize: 30, weight: .bold)),

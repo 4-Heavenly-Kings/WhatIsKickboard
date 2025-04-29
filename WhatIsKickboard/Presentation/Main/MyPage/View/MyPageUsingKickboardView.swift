@@ -49,7 +49,7 @@ final class MyPageUsingKickboardView: BaseView {
         
         userNameLabel.do {
             let text = "회원님!"
-            let attributedText = makeAttributedString(
+            let attributedText = NSMutableAttributedString.makeAttributedString(
                 text: text,
                 highlightedParts: [
                     ("회원", UIColor(hex: "#69C6D3"), UIFont.systemFont(ofSize: 30, weight: .bold)),
@@ -62,7 +62,7 @@ final class MyPageUsingKickboardView: BaseView {
         
         usingTimeLabel.do {
             let text = "15분 이용 중"
-            let attributedText = makeAttributedString(
+            let attributedText = NSMutableAttributedString.makeAttributedString(
                 text: text,
                 highlightedParts: [
                     ("15분", .black, UIFont.systemFont(ofSize: 30, weight: .bold)),

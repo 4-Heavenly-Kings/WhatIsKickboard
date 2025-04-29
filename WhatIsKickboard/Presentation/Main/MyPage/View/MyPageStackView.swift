@@ -15,13 +15,13 @@ final class MyPageStackView: UIStackView {
     
     // MARK: - Components
     /// 이름 수정 Button
-    let modifyNameLabel = MyPageStackButton(title: "이름 수정")
+    let modifyNameButton = MyPageStackButton(title: "이름 수정")
     /// 비밀번호 수정 Button
-    let modifyPasswordLabel = MyPageStackButton(title: "비밀번호 수정")
+    let modifyPasswordButton = MyPageStackButton(title: "비밀번호 수정")
     /// 이용 내역 Button
-    let useDetailLabel = MyPageStackButton(title: "이용 내역")
+    let useDetailButton = MyPageStackButton(title: "이용 내역")
     /// 로그아웃 Button
-    let logoutLabel = MyPageStackButton(title: "로그아웃", titleColor: .systemRed)
+    let logoutButton = MyPageStackButton(title: "로그아웃", titleColor: .systemRed)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -44,6 +44,6 @@ final class MyPageStackView: UIStackView {
     
     // MARK: - Layouts
     private func setLayout() {
-        self.addArrangedSubviews(modifyNameLabel, modifyPasswordLabel, useDetailLabel, logoutLabel)
+        self.addArrangedSubviews(modifyNameButton, modifyPasswordButton, useDetailButton, logoutButton)
     }
 }
