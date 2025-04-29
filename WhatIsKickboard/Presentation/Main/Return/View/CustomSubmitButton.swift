@@ -27,7 +27,7 @@ final class CustomSubmitButton: UIButton {
     }
     
     // MARK: - Methods
-    
+    /// 버튼의 title을 지정하는 configure입니다.
     func configure(buttonTitle: String) {
         setTitle(buttonTitle, for: .normal)
     }

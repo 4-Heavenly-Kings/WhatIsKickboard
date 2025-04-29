@@ -66,7 +66,7 @@ final class CustomNavigationBarView: BaseView {
     }
     
     // MARK: - Methods
-
+    /// configure를 할 때 어떤 title을 넣을지, 오른쪽 버튼의 isHidden 여부와 버튼의 title을 지정할 수 있습니다.
     func configure(title: String, showsRightButton: Bool, rightButtonTitle: String?) {
         titleLabel.text = title
         rightButton.isHidden = !showsRightButton
