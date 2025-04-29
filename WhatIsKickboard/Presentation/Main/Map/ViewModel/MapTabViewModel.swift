@@ -16,6 +16,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     // MARK: - Properties
     
     private let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MapViewModel")
+    private let mockKickboard = Kickboard(id: UUID(), latitude: 37.2064, longitude: 127.0681, battery: 80, status: "ABLE")
     
     var disposeBag = DisposeBag()
     
@@ -54,17 +55,11 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         
         locationManager.delegate = self
         
-        let mockKickboard = Kickboard(id: UUID(),
-                                  latitude: 37.20641977176015,
-                                  longitude: 127.06812295386771,
-                                  battery: 80,
-                                  status: "ABLE")
-        
         state.actionSubject
             .subscribe(with: self) { owner, action in
                 switch action {
                 case .didBinding:
-                    owner.state.kickboardList.onNext(mockKickboard.getMockList())
+                    owner.updateKickboardList()
                 case .didlocationButtonTap:
                     owner.updateLastLocation()
                 }
@@ -108,6 +103,11 @@ private extension MapTabViewModel {
         }
     }
     
+    func updateKickboardList() {
+        state.kickboardList.onNext(mockKickboard.getMockList())
+    }
+    
+    /// 최근 업데이트된 좌표 ViewController로 전달
     func updateLastLocation() {
         let latitude = locationManager.location?.coordinate.latitude
         let longitude = locationManager.location?.coordinate.longitude
