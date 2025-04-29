@@ -7,24 +7,13 @@
 
 import UIKit
 
+// MARK: - SplashViewController
 final class SplashViewController: BaseViewController {
     
-    
+    // MARK: - Components
+    private let splashView = SplashView()
     
     override func loadView() {
-        // 뷰 초기화
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-    }
-    
-    override func bindViewModel() {
-        <#code#>
-    }
-
-    override func setStyles() {
-        <#code#>
+        view = splashView
     }
 }
