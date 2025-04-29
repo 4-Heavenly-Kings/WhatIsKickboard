@@ -21,7 +21,7 @@ final class CustomNavigationBarView: BaseView {
     // MARK: - Set UIComponents
 
     override func setStyles() {
-        backgroundColor = .clear
+        backgroundColor = UIColor(hex: "#FFFFFF")
 
         backButton.do {
             $0.setImage(UIImage(systemName: "chevron.left"), for: .normal)
