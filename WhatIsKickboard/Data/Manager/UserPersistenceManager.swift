@@ -7,69 +7,99 @@
 
 import Foundation
 import CoreData
+import RxSwift
 
 // MARK: - UserPersistenceManager
 /// 유저정보 CRUD Manager
 final class UserPersistenceManager: BaseCoreDataManager {
     
     /// 로그인
-    @discardableResult
-    static func login(_ email: String, _ password: String) throws -> User {
-        let user = try getUserData(email: email)
-        
-        print("로그인 성공")
-        UserDefaults.standard.set(user.id?.uuidString, forKey: "token")
-        return user.toModel()
+    static func login(_ email: String, _ password: String) -> Single<User> {
+        return Single.create { single in
+            do {
+                let user = try getUserData(email: email)
+                
+                guard user.password == password else {
+                    throw UserPersistenceError.passwordIsWorng
+                }
+                
+                print("로그인 성공")
+                UserDefaults.standard.set(user.id?.uuidString, forKey: "token")
+                single(.success(user.toModel()))
+            } catch {
+                single(.failure(error))
+            }
+            
+            return Disposables.create()
+        }
     }
     
     /// 회원가입
-    @discardableResult
-    static func createUser(_ email: String, _ password: String) async throws -> User {
-        do {
-            try getUserData(email: email)
-            throw UserPersistenceError.alreayUser
-        } catch let error as UserPersistenceError {
-            if error == .userNotFound {
-                
-                let user = UserEntity(context: context)
-                user.id = UUID()
-                user.email = email
-                user.password = password
-                user.role = "GUEST"
-                
-                UserDefaults.standard.set(user.id?.uuidString, forKey: "token")
-                try await saveContext("회원가입")
-                return user.toModel()
-            } else {
-                throw error
+    static func createUser(_ email: String, _ password: String) -> Single<User> {
+        return Single.create { single in
+            do {
+                do {
+                    try getUserData(email: email)
+                    throw UserPersistenceError.alreayUser
+                } catch let error as UserPersistenceError {
+                    if error == .userNotFound {
+                        let user = UserEntity(context: context)
+                        user.id = UUID()
+                        user.email = email
+                        user.password = password
+                        user.role = "GUEST"
+
+                        UserDefaults.standard.set(user.id?.uuidString, forKey: "token")
+                        try context.save()
+                        single(.success(user.toModel()))
+                    } else {
+                        throw error
+                    }
+                }
+            } catch {
+                single(.failure(error))
             }
+
+            return Disposables.create()
         }
     }
     
     
-    /// 유저정보 조희
-    @discardableResult
-    static func getUser() throws -> User {
-        guard let id = UserDefaults.standard.object(forKey: "token") as? String else {
-            throw UserPersistenceError.tokenNotValid
+    /// 유저정보 조회
+    static func getUser() -> Single<User> {
+        return Single.create { single in
+            do {
+                guard let id = UserDefaults.standard.object(forKey: "token") as? String else {
+                    throw UserPersistenceError.tokenNotValid
+                }
+                print("유저정보 조회 성공")
+                let user = try getUserData(id: UUID(uuidString: id))
+                single(.success(user.toModel()))
+            } catch {
+                single(.failure(error))
+            }
+            return Disposables.create()
         }
-        print("유저정보 조희 성공")
-        let user = try getUserData(id: UUID(uuidString: id))
-        return user.toModel()
     }
     
     /// 유저정보 변경
-    @discardableResult
-    static func patchUser(_ user: User) async throws -> User {
-        let userData = try getUserData(id: user.id)
-        
-        userData.name = user.name
-        userData.role = user.role
-        userData.email = user.email
-        userData.password = user.password
-        
-        try await saveContext("유저정보 수정")
-        return userData.toModel()
+    static func patchUser(_ user: User) -> Single<User> {
+        return Single.create { single in
+            do {
+                let userData = try getUserData(id: user.id)
+                
+                userData.name = user.name
+                userData.role = user.role
+                userData.email = user.email
+                userData.password = user.password
+                
+                try context.save()
+                single(.success(userData.toModel()))
+            } catch {
+                single(.failure(error))
+            }
+            return Disposables.create()
+        }
     }
     
     /// 로그아웃
