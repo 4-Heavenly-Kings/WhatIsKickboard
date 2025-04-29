@@ -17,7 +17,6 @@ final class MapTabView: BaseView {
     
     /// 네이버 지도 View
     private let naverMapView = NMFNaverMapView(frame: .zero)
-    
     /// 현재 위치 버튼
     private let locationButton = UIButton()
     
@@ -25,20 +24,21 @@ final class MapTabView: BaseView {
     
     override func setStyles() {
         naverMapView.do {
-            $0.showLocationButton = false
             $0.showScaleBar = false
             $0.showZoomControls = false
             $0.showIndoorLevelPicker = false
+            $0.showLocationButton = false
             $0.mapView.extent = NMGLatLngBounds(southWestLat: 31.43, southWestLng: 122.37, northEastLat: 44.35, northEastLng: 132)
             $0.mapView.zoomLevel = 15
             $0.mapView.minZoomLevel = 5.0
             $0.mapView.maxZoomLevel = 18.0
-            $0.mapView.logoAlign = .leftTop
+            $0.mapView.logoAlign = .rightTop
+            $0.mapView.logoMargin = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
             $0.mapView.isTiltGestureEnabled = false
         }
         
         locationButton.do {
-            $0.setImage(UIImage(named: "UserLocation.svg"), for: .normal)
+            $0.setImage(UIImage(named: "LocationButton.svg"), for: .normal)
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
         }
     }

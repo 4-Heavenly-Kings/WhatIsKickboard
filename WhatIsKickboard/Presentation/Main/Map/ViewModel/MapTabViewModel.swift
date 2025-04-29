@@ -28,6 +28,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     // MARK: - Action ➡️ Input
     
     enum Action {
+        case didBinding
         case didlocationButtonTap
     }
     var action: AnyObserver<Action> {
@@ -41,6 +42,8 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         
         /// Core Location 사용자 위치 좌표
         fileprivate(set) var userLocation = BehaviorSubject<CLLocationCoordinate2D?>(value: nil)
+        /// 킥보드 리스트
+        fileprivate(set) var kickboardList = BehaviorSubject<[Kickboard]>(value: [])
     }
     var state = State()
     
@@ -51,9 +54,17 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         
         locationManager.delegate = self
         
+        let mockKickboard = Kickboard(id: UUID(),
+                                  latitude: 37.20641977176015,
+                                  longitude: 127.06812295386771,
+                                  battery: 80,
+                                  status: "ABLE")
+        
         state.actionSubject
             .subscribe(with: self) { owner, action in
                 switch action {
+                case .didBinding:
+                    owner.state.kickboardList.onNext(mockKickboard.getMockList())
                 case .didlocationButtonTap:
                     owner.updateLastLocation()
                 }
@@ -98,8 +109,9 @@ private extension MapTabViewModel {
     }
     
     func updateLastLocation() {
-        guard let coordinate = locationManager.location?.coordinate else { return }
-        let logMsg = "현재 위치: (latitude: \(coordinate.latitude), longitude: \(coordinate.longitude))"
+        let latitude = locationManager.location?.coordinate.latitude
+        let longitude = locationManager.location?.coordinate.longitude
+        let logMsg = "현재 위치: (latitude: \(latitude ?? 0.0)), longitude: \(longitude ?? 0.0))"
         os_log(.debug, log: log, "%@", logMsg)
         state.userLocation.onNext(locationManager.location?.coordinate)
     }
