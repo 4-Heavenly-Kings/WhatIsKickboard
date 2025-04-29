@@ -14,8 +14,6 @@ import Then
 
 final class ReturnViewController: BaseViewController {
     
-    private var disposeBag = DisposeBag()
-    
     private let contentView = ReturnView()
     private var customAlertView: CustomAlertView?
 
@@ -30,6 +28,13 @@ final class ReturnViewController: BaseViewController {
         super.viewWillAppear(animated)
         
         self.navigationController?.setNavigationBarHidden(true, animated: animated)
+        self.tabBarController?.tabBar.isHidden = true
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        self.tabBarController?.tabBar.isHidden = false
     }
     
     override func bindViewModel() {

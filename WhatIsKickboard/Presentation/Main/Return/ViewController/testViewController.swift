@@ -14,8 +14,6 @@ import Then
 
 final class testViewController: BaseViewController {
     
-    private var disposeBag = DisposeBag()
-    
     private let showAlertButton = UIButton()
     private var customAlertView: CustomAlertView?
 

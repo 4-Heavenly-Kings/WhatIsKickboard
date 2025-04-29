@@ -13,9 +13,7 @@ import SnapKit
 import Then
 
 final class RegisterViewController: BaseViewController {
-    
-    private var disposeBag = DisposeBag()
-    
+        
     private let contentView = RegisterView()
 
     
