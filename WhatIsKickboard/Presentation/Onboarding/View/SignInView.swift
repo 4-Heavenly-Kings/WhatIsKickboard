@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RxSwift
 
 // MARK: - SignIntView
 final class SignInView: BaseView {
@@ -25,6 +26,9 @@ final class SignInView: BaseView {
     private let inputStackView = UIStackView()
     private let navigationStackView = UIStackView()
     
+    // MARK: - Custon Components
+    private var customAlertView: CustomAlertView?
+    private var disposeBag = DisposeBag()
     
     // MARK: - Style
     override func setStyles() {
@@ -168,5 +172,43 @@ final class SignInView: BaseView {
             $0.horizontalEdges.equalToSuperview().inset(45)
             $0.centerX.equalToSuperview()
         }
+    }
+    
+    /// Alert 표시
+    func showAlert(text: String) {
+        customAlertView = CustomAlertView(frame: .zero, alertType: .emailFailed)
+        
+        guard let customAlertView else { return }
+        addSubview(customAlertView)
+        
+        customAlertView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        customAlertView.configure(name: text)
+        
+        customAlertView.getSubmitButton().rx.tap
+            .bind(with: self){ owner, _  in
+                customAlertView.removeFromSuperview()
+                owner.customAlertView = nil
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    // MARK: 컴포넌트 접근시
+    var getEmailTextField: UITextField {
+        emailTextField
+    }
+    
+    var getPasswordTextField: UITextField {
+        passwordTextField
+    }
+    
+    var getPasswordConfirmTextField: UITextField {
+        passwordConfirmTextField
+    }
+    
+    var getloginButton: UIButton {
+        registerButton
     }
 }

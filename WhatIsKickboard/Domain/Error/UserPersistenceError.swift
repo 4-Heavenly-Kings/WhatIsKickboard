@@ -14,4 +14,5 @@ enum UserPersistenceError: String, Error {
     case passwordIsWorng = "비밀번호가 일치하지 않습니다."
     case emailTextFieldIsEmpty = "이메일을 입력하지 않았습니다."
     case passwordTextFieldIsEmpty = "비밀번호를 입력하지 않았습니다."
+    case passwordConfirmTextFieldIsEmpty = "입력하지 않은 필드가 있습니다."
 }

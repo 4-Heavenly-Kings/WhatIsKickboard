@@ -7,18 +7,22 @@
 
 import Foundation
 import RxSwift
+import RxRelay
 
 // MARK: - SinInViewModel
-final class SinInViewModel: ViewModelProtocol {
+final class SignInViewModel: ViewModelProtocol {
     
     // MARK: - VC에서 방출하는 이벤트 액션 정의
     enum Action {
-        case didTapSignInButton
+        case didTapSignInButton(email: String, password: String, passwordConfirm: String)
     }
     
     // MARK: - 상태관리 프로퍼티
     struct State {
         fileprivate(set) var actionSubject = PublishSubject<Action>()
+        
+        fileprivate(set) var signInSuccess = PublishRelay<Void>()
+        fileprivate(set) var signInError = PublishRelay<Error>()
     }
     
     // MARK: - Action -> Observer 생성
@@ -34,13 +38,45 @@ final class SinInViewModel: ViewModelProtocol {
         state.actionSubject
             .subscribe(with: self){ owner, action in
                 switch action {
-                case .didTapSignInButton: owner.signIn()
+                case let .didTapSignInButton(email, password, passwordConfirm):
+                    owner.signIn(email: email, password: password, passwordConfirm: passwordConfirm)
                 }
             }
             .disposed(by: disposeBag)
     }
     
-    private func signIn() {
+    // MARK: - Action에 따른 이벤트
+    
+    /// 회원가입
+    private func signIn(email: String, password: String, passwordConfirm: String) {
+        // 유효성 검사 통과 후 실행
+        guard textFieldValidation(email: email, password: password, passwordConfirm: passwordConfirm) else { return }
         
+        UserPersistenceManager.createUser(email, password)
+            .subscribe(with: self, onSuccess: { owner, _ in
+                owner.state.signInSuccess.accept(())
+            }, onFailure: { owner, error in
+                owner.state.signInError.accept(error)
+            })
+            .disposed(by: disposeBag)
+    }
+}
+
+// MARK: - 내부에서만 동작되는 메서드 분리
+extension SignInViewModel {
+    
+    /// 텍스트 필드 유효성 검사
+    private func textFieldValidation(email: String, password: String, passwordConfirm: String) -> Bool {
+        if email.isEmpty {
+            state.signInError.accept(UserPersistenceError.emailTextFieldIsEmpty)
+            return false
+        } else if password.isEmpty {
+            state.signInError.accept(UserPersistenceError.passwordTextFieldIsEmpty)
+            return false
+        } else if passwordConfirm.isEmpty {
+            state.signInError.accept(UserPersistenceError.passwordConfirmTextFieldIsEmpty)
+            return false
+        }
+        return true
     }
 }
