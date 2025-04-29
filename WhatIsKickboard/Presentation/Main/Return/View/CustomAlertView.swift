@@ -53,6 +53,7 @@ final class CustomAlertView: BaseView {
             
             titleLabel.do {
                 $0.font = .systemFont(ofSize: 20, weight: .regular)
+                $0.textColor = UIColor(hex: "#000000")
             }
             
             subtitleLabel.do {
@@ -89,7 +90,8 @@ final class CustomAlertView: BaseView {
             }
             
             titleLabel.do {
-                $0.font = .systemFont(ofSize: 20, weight: .regular)
+                $0.font = .systemFont(ofSize: 18, weight: .regular)
+                $0.textColor = UIColor(hex: "#000000")
             }
             
             horizontalSeparator.do {
