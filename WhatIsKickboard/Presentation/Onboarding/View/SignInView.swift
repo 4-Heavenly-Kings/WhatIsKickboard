@@ -40,7 +40,7 @@ final class SignInView: BaseView {
         
         // 타이틀 라벨
         titleLabel.do {
-            $0.text = "지금 바로 빌려봐 ~"
+            $0.text = "지금 바로 가입해봐 ~"
             $0.textColor = .black
             $0.font = .jalnan2(32)
         }
