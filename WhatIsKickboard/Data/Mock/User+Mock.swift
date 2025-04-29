@@ -6,7 +6,6 @@
 //
 
 import Foundation
-@testable import WhatIsKickboard
 
 // MARK: - User Mock
 extension User {

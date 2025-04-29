@@ -15,7 +15,7 @@ import Then
 class BaseViewController: UIViewController {
     
     private lazy var viewControllerName = self.className
-    private var disposeBag = DisposeBag()
+    var disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
