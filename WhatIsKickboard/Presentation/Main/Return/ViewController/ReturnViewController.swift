@@ -17,6 +17,8 @@ final class ReturnViewController: BaseViewController {
     private var disposeBag = DisposeBag()
     
     private let contentView = ReturnView()
+    private var customAlertView: CustomAlertView?
+
     
     // MARK: - View Life Cycle
 
@@ -36,6 +38,12 @@ final class ReturnViewController: BaseViewController {
                 self?.navigationController?.popViewController(animated: true)
             }
             .disposed(by: disposeBag)
+        
+        contentView.customSubmitButton.rx.tap
+            .bind { [weak self] in
+                self?.showCustomAlert()
+            }
+            .disposed(by: disposeBag)
     }
 
     override func setStyles() {
@@ -49,6 +57,33 @@ final class ReturnViewController: BaseViewController {
     
     override func setLayout() {
 
+    }
+    
+    private func showCustomAlert() {
+        let alert = CustomAlertView(frame: .zero, alertType: .confirmReturn)
+        
+        view.addSubview(alert)
+        
+        alert.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        alert.configure(
+            name: "천성우",
+            minutes: nil,
+            count: nil,
+            price: nil
+        )
+        
+        alert.getSubmitButton().rx.tap
+            .bind { [weak self, weak alert] in
+                alert?.removeFromSuperview()
+                self?.customAlertView = nil
+                self?.navigationController?.popViewController(animated: true)
+            }
+            .disposed(by: disposeBag)
+
+        self.customAlertView = alert
     }
     
     
