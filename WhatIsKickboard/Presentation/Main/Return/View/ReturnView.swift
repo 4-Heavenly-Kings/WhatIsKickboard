@@ -26,8 +26,9 @@ final class ReturnView: BaseView {
 
     override func setStyles() {        
         imageView.do {
+            $0.contentMode = .scaleAspectFill
+            $0.clipsToBounds = true
             $0.layer.cornerRadius = 20
-            $0.backgroundColor = UIColor(hex: "#868686")
         }
     }
     
@@ -61,7 +62,7 @@ final class ReturnView: BaseView {
         }
         
         customSubmitButton.snp.makeConstraints {
-            $0.top.equalTo(returnStackView.snp.bottom).offset(29)
+            $0.bottom.equalToSuperview().offset(-26)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(UIScreen.main.bounds.width * 394 / 440)
             $0.height.equalTo(UIScreen.main.bounds.height * 50 / 956)
