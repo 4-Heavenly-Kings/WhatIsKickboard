@@ -54,11 +54,11 @@ final class MapTabViewController: BaseViewController {
         // 킥보드 마커 생성
         viewModel.state.kickboardList
             .withUnretained(self)
+            .observe(on: ConcurrentDispatchQueueScheduler(qos: .default))
             .map { owner, kickboardList in
-                kickboardList.map { data in
-                    return owner.makeMarker(of: data)
-                }
+                owner.makeMarkerList(of: kickboardList)
             }
+            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, markerList in
                 // 마커 맵에서 삭제
                 owner.kickboardMarkerList.forEach {
@@ -129,38 +129,42 @@ private extension MapTabViewController {
         }
     }
     
-    func makeMarker(of data: Kickboard) -> NMFMarker {
-        let marker = NMFMarker()
-        marker.width = 45
-        marker.height = 45
-        marker.position = .init(lat: data.latitude, lng: data.longitude)
-        marker.anchor = CGPoint(x: 0.5, y: 0.45)
-        marker.minZoom = 12.0
-        marker.maxZoom = 18.0
-        marker.isMaxZoomInclusive = true
-        marker.userInfo = [
-            "id": data.id,
-            "latitude": data.latitude,
-            "longtitude": data.longitude,
-            "battery": data.battery,
-            "status": data.status
-        ]
-        
-        let iconImage: NMFOverlayImage
-        switch data.status {
-        case KickboardStatus.able.rawValue:
-            iconImage = .init(name: "KickboardMarker_Available.svg")
-        case KickboardStatus.declared.rawValue:
-            iconImage = .init(name: "KickboardMarker_Declared.svg")
-        case KickboardStatus.lowBattery.rawValue:
-            iconImage = .init(name: "KickboardMarker_Unavailable.svg")
-        default:  // IMPOSSIBILITY
-            iconImage = .init(name: "KickboardMarker_Unavailable.svg")
-            marker.hidden = true
+    func makeMarkerList(of data: [Kickboard]) -> [NMFMarker] {
+        let markerList = data.map {
+            let marker = NMFMarker()
+            marker.width = 45
+            marker.height = 45
+            marker.position = .init(lat: $0.latitude, lng: $0.longitude)
+            marker.anchor = CGPoint(x: 0.5, y: 0.45)
+            marker.minZoom = 12.0
+            marker.maxZoom = 18.0
+            marker.isMaxZoomInclusive = true
+            marker.userInfo = [
+                "id": $0.id,
+                "latitude": $0.latitude,
+                "longtitude": $0.longitude,
+                "battery": $0.battery,
+                "status": $0.status
+            ]
+            
+            let iconImage: NMFOverlayImage
+            switch $0.status {
+            case KickboardStatus.able.rawValue:
+                iconImage = .init(name: "KickboardMarker_Available.svg")
+            case KickboardStatus.declared.rawValue:
+                iconImage = .init(name: "KickboardMarker_Declared.svg")
+            case KickboardStatus.lowBattery.rawValue:
+                iconImage = .init(name: "KickboardMarker_Unavailable.svg")
+            default:  // IMPOSSIBILITY
+                iconImage = .init(name: "KickboardMarker_Unavailable.svg")
+                marker.hidden = true
+            }
+            marker.iconImage = iconImage
+            
+            return marker
         }
-        marker.iconImage = iconImage
         
-        return marker
+        return markerList
     }
 }
 
