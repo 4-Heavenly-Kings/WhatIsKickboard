@@ -45,6 +45,10 @@ final class MapTabView: BaseView {
         locationButton.do {
             $0.setImage(UIImage(named: "LocationButton.svg"), for: .normal)
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
+            $0.layer.shadowColor = UIColor.gray.cgColor
+            $0.layer.shadowOpacity = 1.0
+            $0.layer.shadowOffset = CGSize(width: 0, height: 3)
+            $0.layer.shadowRadius = 4
         }
         
         hideKickboardButton.do {
@@ -52,6 +56,10 @@ final class MapTabView: BaseView {
             $0.setImage(UIImage(systemName: "eye.slash", withConfiguration: config), for: .normal)
             $0.tintColor = UIColor.core
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
+            $0.layer.shadowColor = UIColor.gray.cgColor
+            $0.layer.shadowOpacity = 1.0
+            $0.layer.shadowOffset = CGSize(width: 0, height: 3)
+            $0.layer.shadowRadius = 4
         }
         
         vertialStackView.do {
