@@ -9,42 +9,43 @@ import Foundation
 import CoreLocation
 import OSLog
 
+import RxRelay
 import RxSwift
 
 final class MapTabViewModel: NSObject, ViewModelProtocol {
-
+    
     // MARK: - Properties
     
     private let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MapViewModel")
+    /// 킥보드 목업 데이터
     private let mockKickboard = Kickboard(id: UUID(), latitude: 37.2064, longitude: 127.0681, battery: 80, status: "ABLE")
+    /// Core Location Manager
+    private let locationManager = CLLocationManager()
     
     var disposeBag = DisposeBag()
     
-    /// Core Location
-    private let locationManager = CLLocationManager().then {
-        $0.desiredAccuracy = kCLLocationAccuracyBest
-        $0.requestWhenInUseAuthorization()
-    }
-    
-    // MARK: - Action ➡️ Input
+    // MARK: - Action (ViewController ➡️ ViewModel)
     
     enum Action {
+        /// 바인딩 완료
         case didBinding
+        /// 현재 위치 버튼 탭
         case didlocationButtonTap
     }
     var action: AnyObserver<Action> {
         return state.actionSubject.asObserver()
     }
     
-    // MARK: - Output ➡️ State
+    // MARK: - State (ViewModel ➡️ ViewController)
     
     struct State {
+        /// ViewController에서 받은 action
         fileprivate(set) var actionSubject = PublishSubject<Action>()
         
         /// Core Location 사용자 위치 좌표
-        fileprivate(set) var userLocation = BehaviorSubject<CLLocationCoordinate2D?>(value: nil)
+        fileprivate(set) var userLocation = BehaviorRelay<CLLocationCoordinate2D?>(value: nil)
         /// 킥보드 리스트
-        fileprivate(set) var kickboardList = BehaviorSubject<[Kickboard]>(value: [])
+        fileprivate(set) var kickboardList = BehaviorRelay<[Kickboard]>(value: [])
     }
     var state = State()
     
@@ -53,7 +54,11 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     override init() {
         super.init()
         
-        locationManager.delegate = self
+        locationManager.do {
+            $0.delegate = self
+            $0.desiredAccuracy = kCLLocationAccuracyBest
+            $0.requestWhenInUseAuthorization()
+        }
         
         state.actionSubject
             .subscribe(with: self) { owner, action in
@@ -103,17 +108,18 @@ private extension MapTabViewModel {
         }
     }
     
+    /// 킥보드 리스트 ViewController로 전달
     func updateKickboardList() {
-        state.kickboardList.onNext(mockKickboard.getMockList())
+        state.kickboardList.accept(mockKickboard.getMockList())
     }
     
     /// 최근 업데이트된 좌표 ViewController로 전달
     func updateLastLocation() {
         let latitude = locationManager.location?.coordinate.latitude
         let longitude = locationManager.location?.coordinate.longitude
-        let logMsg = "현재 위치: (latitude: \(latitude ?? 0.0)), longitude: \(longitude ?? 0.0))"
+        let logMsg = "현재 위치: (latitude: \(latitude ?? 0.0), longitude: \(longitude ?? 0.0))"
         os_log(.debug, log: log, "%@", logMsg)
-        state.userLocation.onNext(locationManager.location?.coordinate)
+        state.userLocation.accept(locationManager.location?.coordinate)
     }
 }
 
