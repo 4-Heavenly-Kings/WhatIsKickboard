@@ -7,19 +7,36 @@
 
 import Foundation
 import CoreData
+import RxSwift
 
 // MARK: - KickboardPersistenceManager
 /// 킥보드정보 CRUD Manager
 final class KickboardPersistenceManager: BaseCoreDataManager {
     
     /// 킥보드 리스트 조회
-    static func getKickboardList() throws -> [Kickboard] {
-        return try getKickboardListData().map { $0.toModel() }
+    static func getKickboardList() -> Single<[Kickboard]> {
+        return Single.create { single in
+            do {
+                let kickboards = try getKickboardListData().map { $0.toModel() }
+                single(.success(kickboards))
+            } catch {
+                single(.failure(error))
+            }
+            return Disposables.create()
+        }
     }
-    
-    /// 킥보드 조희
-    static func getKickboard(id: UUID) throws -> Kickboard {
-        return try getKickboardData(id: id).toModel()
+
+    /// 킥보드 조회
+    static func getKickboard(id: UUID) -> Single<Kickboard> {
+        return Single.create { single in
+            do {
+                let kickboard = try getKickboardData(id: id).toModel()
+                single(.success(kickboard))
+            } catch {
+                single(.failure(error))
+            }
+            return Disposables.create()
+        }
     }
     
     /// 킥보드 등록
