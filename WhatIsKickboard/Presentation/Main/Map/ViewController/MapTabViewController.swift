@@ -150,13 +150,13 @@ private extension MapTabViewController {
             let iconImage: NMFOverlayImage
             switch $0.status {
             case KickboardStatus.able.rawValue:
-                iconImage = .init(name: "KickboardMarker_Available.svg")
+                iconImage = .init(image: .kickboardMarkerAvailable)
             case KickboardStatus.declared.rawValue:
-                iconImage = .init(name: "KickboardMarker_Declared.svg")
+                iconImage = .init(image: .kickboardMarkerDeclared)
             case KickboardStatus.lowBattery.rawValue:
-                iconImage = .init(name: "KickboardMarker_Unavailable.svg")
+                iconImage = .init(image: .kickboardMarkerUnavailable)
             default:  // IMPOSSIBILITY
-                iconImage = .init(name: "KickboardMarker_Unavailable.svg")
+                iconImage = .init(image: .kickboardMarkerUnavailable)
                 marker.hidden = true
             }
             marker.iconImage = iconImage
