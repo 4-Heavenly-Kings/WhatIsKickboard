@@ -103,7 +103,7 @@ private extension TabBarController {
     /// 지도, 등록, 마이페이지 탭바 아이템 설정
     /// (여기서 '등록'은 dummy로 선언)
     func setTabBarItems() {
-        let mapVC = UINavigationController(rootViewController: MyPageViewController())
+        let mapVC = UINavigationController(rootViewController: testViewController())
         let myPageVC = UINavigationController(rootViewController: MyPageViewController())
         
         let dummyVC = UIViewController()
