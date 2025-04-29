@@ -69,8 +69,8 @@ final class ReturnStackView: UIStackView {
     
     // MARK: - Methods
     
-    func configure(time: String, battery: String, fee: String) {
-        totalTimeLabel.text = "이용시간: \(time)"
+    func configure(time: Int, battery: Int, fee: String) {
+        totalTimeLabel.text = "이용시간: \(time)분"
         batteryLabel.text = "배터리 \(battery)%"
         totalFeeLabel.text = "총금액: \(fee)원"
     }

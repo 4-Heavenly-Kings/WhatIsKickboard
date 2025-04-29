@@ -40,6 +40,11 @@ final class ReturnViewController: BaseViewController {
 
     override func setStyles() {
         view.backgroundColor = .white
+        
+        contentView.navigationBarView.configure(title: "반납하기", showsRightButton: false, rightButtonTitle: nil)
+        contentView.feeLabelView.configure(extraFee: "2,200")
+        contentView.returnStackView.configure(time: 22, battery: 55, fee: "2,700")
+        contentView.customSubmitButton.configure(buttonTitle: "반납하기")
     }
     
     override func setLayout() {
