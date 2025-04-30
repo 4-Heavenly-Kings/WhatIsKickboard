@@ -92,7 +92,10 @@ struct UserPersistenceTests {
         let token = UserDefaults.standard.string(forKey: "token")
         #expect(token == nil)
     }
-    
+}
+
+// MARK: - 테스트가 아닌 메서드
+extension UserPersistenceTests {
     // 킥보드 반환 핸들링
     private func getUser(expect: Bool = false, completion: @escaping (User) -> Void) {
         UserPersistenceManager.getUser()

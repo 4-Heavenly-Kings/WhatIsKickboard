@@ -15,7 +15,7 @@ struct KickboardPersistenceTests {
     var disposeBag = DisposeBag()
     
     /// 킥보드 조회 테스트
-    @Test func getKickboard() async throws {
+    @Test func testGetKickboard() async throws {
         guard let id = UserDefaults.standard.object(forKey: "kickboard_id") as? String, let uuid = UUID(uuidString: id) else {
             throw KickboardPersistenceError.kickboardNotFound
         }
@@ -28,6 +28,34 @@ struct KickboardPersistenceTests {
     /// 킥보드 리스트 조회 테스트
     @Test func testGetKickboardList() async throws {
         getKickboardList { kickboards in
+            print(kickboards)
+            #expect(!kickboards.isEmpty)
+        }
+    }
+    
+    /// 킥보드 탑승정보 조회 테스트
+    @Test func testGetKickboardRide() async throws {
+        guard let id = UserDefaults.standard.object(forKey: "kickboard_id") as? String,
+                let uuid = UUID(uuidString: id),
+                let userId = UserDefaults.standard.object(forKey: "token") as? String,
+                let userUuid = UUID(uuidString: userId)
+        else {
+            throw KickboardPersistenceError.kickboardNotFound
+        }
+        getKickboardRide(id: uuid) { ride in
+            print(ride)
+            #expect(ride.endLatitude == KickboardRide.getMock(kickboardId: uuid, userId: userUuid).endLatitude)
+        }
+    }
+    
+    /// 킥보드 탑승정보 리스트 조회 테스트
+    @Test func testGetKickboardRideList() async throws {
+        guard let userId = UserDefaults.standard.object(forKey: "token") as? String,
+              let userUuid = UUID(uuidString: userId)
+        else {
+            throw KickboardPersistenceError.kickboardNotFound
+        }
+        getKickboardRideList(userId: userUuid) { kickboards in
             print(kickboards)
             #expect(!kickboards.isEmpty)
         }
@@ -93,7 +121,10 @@ struct KickboardPersistenceTests {
             #expect(!kickboards.contains { $0.id == uuid })
         }
     }
-    
+}
+
+// MARK: - 테스트가 아닌 메서드
+extension KickboardPersistenceTests {
     // 킥보드 반환 핸들링
     private func getKickboard(id: UUID, completion: @escaping (Kickboard) -> Void) {
         KickboardPersistenceManager.getKickboard(id: id)
@@ -116,11 +147,22 @@ struct KickboardPersistenceTests {
             .disposed(by: disposeBag)
     }
     
-    // 킥보드 반환 핸들링
+    // 킥보드 탑승정보 반환 핸들링
     private func getKickboardRide(id: UUID, completion: @escaping (KickboardRide) -> Void) {
         KickboardPersistenceManager.getKickboardRide(id: id)
             .subscribe(onSuccess: { ride in
                 completion(ride)
+            }, onFailure: { _ in
+                #expect(Bool(false))
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    // 킥보드 탑승정보 리스트 반환 핸들링
+    private func getKickboardRideList(userId: UUID, completion: @escaping ([KickboardRide]) -> Void) {
+        KickboardPersistenceManager.getKickboardRideList(userId: userId)
+            .subscribe(onSuccess: { kickboards in
+                completion(kickboards)
             }, onFailure: { _ in
                 #expect(Bool(false))
             })
