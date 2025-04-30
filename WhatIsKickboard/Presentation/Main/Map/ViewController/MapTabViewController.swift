@@ -36,8 +36,17 @@ final class MapTabViewController: BaseViewController {
     var isRegister: Bool = false {
         didSet {
             self.tabBarController?.tabBar.isHidden = isRegister
-            mapTabView.getNavigationBarView().isHidden = !isRegister
             mapTabView.getStatusBarBackgroundView().isHidden = !isRegister
+            mapTabView.getNavigationBarView().isHidden = !isRegister
+            mapTabView.getSearchBar().snp.remakeConstraints {
+                if isRegister {
+                    $0.top.equalTo(mapTabView.getNavigationBarView().snp.bottom).offset(10)
+                    $0.leading.trailing.equalTo(mapTabView.safeAreaLayoutGuide).inset(30)
+                } else {
+                    $0.top.equalTo(mapTabView.safeAreaLayoutGuide).inset(10)
+                    $0.leading.trailing.equalTo(mapTabView.safeAreaLayoutGuide).inset(30)
+                }
+            }
         }
     }
     /// TabBarController 관련 Delegate

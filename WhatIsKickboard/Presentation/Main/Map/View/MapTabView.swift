@@ -17,7 +17,7 @@ final class MapTabView: BaseView {
     
     /// 네이버 지도 View
     private let naverMapView = NMFNaverMapView(frame: .zero)
-    /// 지도 관련 버튼 스택
+    /// 지도 관련 버튼을 담고있는 수직 StackView
     private let buttonStackView = UIStackView()
     /// 킥보드 숨기기 버튼
     private let hideKickboardButton = UIButton()
@@ -29,22 +29,27 @@ final class MapTabView: BaseView {
     private let navigationBarView = CustomNavigationBarView()
     /// 주소 검색창
     private let searchBar = UISearchBar()
+    /// 나침반 버튼
+    private let compassButton = NMFCompassView()
 
     // MARK: - Style Helper
     
     override func setStyles() {
         naverMapView.do {
+            $0.showCompass = false
             $0.showScaleBar = false
             $0.showZoomControls = false
             $0.showIndoorLevelPicker = false
             $0.showLocationButton = false
+            
             $0.mapView.extent = NMGLatLngBounds(southWestLat: 31.43, southWestLng: 122.37, northEastLat: 44.35, northEastLng: 132)
             $0.mapView.zoomLevel = 15
             $0.mapView.minZoomLevel = 5
             $0.mapView.maxZoomLevel = 18
-            $0.mapView.logoAlign = .rightTop
-            $0.mapView.logoMargin = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+            $0.mapView.logoAlign = .leftBottom
+            $0.mapView.logoMargin = UIEdgeInsets(top: 0, left: 15, bottom: 40, right: 0)
             $0.mapView.isTiltGestureEnabled = false
+            $0.mapView.showLegalNotice()
         }
         
         buttonStackView.do {
@@ -57,19 +62,21 @@ final class MapTabView: BaseView {
             $0.setImage(UIImage(systemName: "eye.slash", withConfiguration: config), for: .normal)
             $0.tintColor = UIColor.core
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
+            
             $0.layer.shadowColor = UIColor.gray.cgColor
             $0.layer.shadowOpacity = 1.0
             $0.layer.shadowOffset = CGSize(width: 0, height: 3)
-            $0.layer.shadowRadius = 4
+            $0.layer.shadowRadius = 2
         }
         
         locationButton.do {
             $0.setImage(UIImage(named: "LocationButton.svg"), for: .normal)
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
+            
             $0.layer.shadowColor = UIColor.gray.cgColor
             $0.layer.shadowOpacity = 1.0
             $0.layer.shadowOffset = CGSize(width: 0, height: 3)
-            $0.layer.shadowRadius = 4
+            $0.layer.shadowRadius = 2
         }
         
         statusBarBackgroundView.do {
@@ -81,12 +88,37 @@ final class MapTabView: BaseView {
             $0.configure(title: "킥보드 위치 등록", showsRightButton: true, rightButtonTitle: "등록")
             $0.isHidden = true
         }
+        
+        searchBar.do {
+            $0.searchBarStyle = .minimal
+            $0.setImage(UIImage(), for: UISearchBar.Icon.search, state: .normal)
+            $0.placeholder = "주소를 입력해주세요"
+            $0.searchTextField.font = .systemFont(ofSize: 16)
+            
+            let spacer = UIView()
+            spacer.frame.size.width = 8
+            $0.searchTextField.leftView = spacer
+            
+            $0.searchTextField.backgroundColor = UIColor(hex: "#FFFFFF")
+            $0.searchTextField.borderStyle = .none
+            $0.searchTextField.layer.borderWidth = 4
+            $0.searchTextField.layer.borderColor = UIColor.core.cgColor
+            
+            $0.searchTextField.layer.shadowColor = UIColor.gray.cgColor
+            $0.searchTextField.layer.shadowOpacity = 1.0
+            $0.searchTextField.layer.shadowOffset = CGSize(width: 0, height: 1.5)
+            $0.searchTextField.layer.shadowRadius = 2
+        }
+        
+        compassButton.do {
+            $0.mapView = naverMapView.mapView
+        }
     }
     
     // MARK: - Layout Helper
     
     override func setLayout() {
-        self.addSubviews(naverMapView, buttonStackView, statusBarBackgroundView, navigationBarView)
+        self.addSubviews(naverMapView, buttonStackView, statusBarBackgroundView, navigationBarView, searchBar, compassButton)
         buttonStackView.addArrangedSubviews(hideKickboardButton, locationButton)
         
         naverMapView.snp.makeConstraints {
@@ -117,6 +149,17 @@ final class MapTabView: BaseView {
             $0.leading.trailing.equalTo(self.safeAreaLayoutGuide)
             $0.height.equalTo(44)
         }
+        
+        searchBar.snp.makeConstraints {
+            $0.top.equalTo(self.safeAreaLayoutGuide).inset(10)
+            $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
+        }
+        
+        compassButton.snp.makeConstraints {
+            $0.top.equalTo(searchBar.snp.bottom).offset(15)
+            $0.leading.equalTo(self.safeAreaLayoutGuide).inset(15)
+            $0.width.height.equalTo(50)
+        }
     }
     
     // MARK: - Lifecycle
@@ -126,7 +169,16 @@ final class MapTabView: BaseView {
         buttonStackView.layoutIfNeeded()
         buttonStackView.subviews.forEach {
             $0.layer.cornerRadius = $0.frame.width / 2
+            let bezierCGPath = UIBezierPath(roundedRect: $0.bounds, cornerRadius: $0.layer.cornerRadius).cgPath
+            $0.layer.shadowPath = bezierCGPath
         }
+        
+        searchBar.layoutIfNeeded()
+        let searchTextField = searchBar.searchTextField
+        searchTextField.layer.cornerRadius = searchTextField.frame.height / 2
+        let bezierCGPath = UIBezierPath(roundedRect: searchTextField.bounds,
+                                        cornerRadius: searchTextField.layer.cornerRadius).cgPath
+        searchTextField.layer.shadowPath = bezierCGPath
     }
     
     // MARK: - Methods
@@ -154,5 +206,10 @@ final class MapTabView: BaseView {
     /// 네비게이션 바 반환
     func getNavigationBarView() -> CustomNavigationBarView {
         return navigationBarView
+    }
+    
+    /// 주소 검색창 반환
+    func getSearchBar() -> UISearchBar {
+        return searchBar
     }
 }
