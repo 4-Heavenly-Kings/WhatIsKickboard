@@ -52,9 +52,15 @@ final class SignInViewController: BaseViewController {
         // MARK: - 구독 이벤트
         /// 회원가입 성공 이벤트 구독
         viewModel.state.signInSuccess
-            .subscribe(with: self, onNext: { owner, event in
-                let editNameVC = EditNameViewController()
-                owner.navigationController?.pushViewController(editNameVC, animated: true)
+            .subscribe(with: self, onNext: { owner, user in
+                guard let presenter = owner.presentingViewController else { return }
+
+                owner.dismiss(animated: true) {
+                    let vc = EditNameViewController()
+                    vc.user = user
+                    vc.modalPresentationStyle = .fullScreen
+                    presenter.present(vc, animated: true)
+                }
             })
             .disposed(by: disposeBag)
         

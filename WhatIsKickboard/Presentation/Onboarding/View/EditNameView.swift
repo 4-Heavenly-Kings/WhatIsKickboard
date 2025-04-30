@@ -16,7 +16,7 @@ final class EditNameView: BaseView {
     private let titleImageView = UIImageView()
     private let titleLogoTitleView = UIImageView()
     private let nameTextField = UITextField()
-    private let confirmButton = UIButton()
+    private let confirmButton = CustomSubmitButton()
     
     // MARK: - StackView Components
     private let inputStackView = UIStackView()
@@ -68,7 +68,7 @@ final class EditNameView: BaseView {
         // 확인 버튼
         confirmButton.do {
             $0.setTitle("시작하기", for: .normal)
-            $0.setTitleColor(.black, for: .normal)
+            $0.setTitleColor(.white, for: .normal)
         }
         
         // 이메일 + 비밀번호 + 로그인 + (안내 + 회원가입)
@@ -101,6 +101,11 @@ final class EditNameView: BaseView {
             $0.width.equalTo(200)
             $0.height.equalTo(86)
             $0.centerX.equalToSuperview()
+        }
+        
+        confirmButton.snp.makeConstraints {
+            $0.height.equalTo(50)
+            $0.horizontalEdges.equalToSuperview()
         }
         
         nameTextField.snp.makeConstraints {

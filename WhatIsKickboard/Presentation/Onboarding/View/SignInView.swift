@@ -18,7 +18,7 @@ final class SignInView: BaseView {
     private let emailTextField = UITextField()
     private let passwordTextField = UITextField()
     private let passwordConfirmTextField = UITextField()
-    private let registerButton = UIButton()
+    private let registerButton = CustomSubmitButton()
     private let announcementLabel = UILabel()
     private let navigationLogInButton = UIButton()
     
@@ -97,7 +97,7 @@ final class SignInView: BaseView {
         // 로그인 버튼
         registerButton.do {
             $0.setTitle("회원가입", for: .normal)
-            $0.setTitleColor(.black, for: .normal)
+            $0.setTitleColor(.white, for: .normal)
         }
         
         // 안내 라벨
@@ -165,6 +165,11 @@ final class SignInView: BaseView {
         passwordConfirmTextField.snp.makeConstraints {
             $0.height.equalTo(50)
             $0.width.equalToSuperview()
+        }
+        
+        registerButton.snp.makeConstraints {
+            $0.height.equalTo(50)
+            $0.horizontalEdges.equalToSuperview()
         }
         
         inputStackView.snp.makeConstraints {

@@ -17,7 +17,7 @@ final class LoginView: BaseView {
     private let titleLogoTitleView = UIImageView()
     private let emailTextField = UITextField()
     private let passwordTextField = UITextField()
-    private let loginButton = UIButton()
+    private let loginButton = CustomSubmitButton()
     private let announcementLabel = UILabel()
     private let navigationSignInButton = UIButton()
     
@@ -84,7 +84,7 @@ final class LoginView: BaseView {
         // 로그인 버튼
         loginButton.do {
             $0.setTitle("로그인", for: .normal)
-            $0.setTitleColor(.black, for: .normal)
+            $0.setTitleColor(.white, for: .normal)
         }
         
         // 안내 라벨
@@ -147,6 +147,11 @@ final class LoginView: BaseView {
         passwordTextField.snp.makeConstraints {
             $0.height.equalTo(50)
             $0.width.equalToSuperview()
+        }
+        
+        loginButton.snp.makeConstraints {
+            $0.height.equalTo(50)
+            $0.horizontalEdges.equalToSuperview()
         }
         
         inputStackView.snp.makeConstraints {

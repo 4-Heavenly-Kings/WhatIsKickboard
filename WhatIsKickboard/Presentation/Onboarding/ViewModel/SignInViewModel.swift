@@ -21,7 +21,7 @@ final class SignInViewModel: ViewModelProtocol {
     struct State {
         fileprivate(set) var actionSubject = PublishSubject<Action>()
         
-        fileprivate(set) var signInSuccess = PublishRelay<Void>()
+        fileprivate(set) var signInSuccess = PublishRelay<User>()
         fileprivate(set) var signInError = PublishRelay<Error>()
     }
     
@@ -53,8 +53,8 @@ final class SignInViewModel: ViewModelProtocol {
         guard textFieldValidation(email: email, password: password, passwordConfirm: passwordConfirm) else { return }
         
         UserPersistenceManager.createUser(email, password)
-            .subscribe(with: self, onSuccess: { owner, _ in
-                owner.state.signInSuccess.accept(())
+            .subscribe(with: self, onSuccess: { owner, user in
+                owner.state.signInSuccess.accept(user)
             }, onFailure: { owner, error in
                 owner.state.signInError.accept(error)
             })
@@ -75,6 +75,9 @@ extension SignInViewModel {
             return false
         } else if passwordConfirm.isEmpty {
             state.signInError.accept(UserPersistenceError.fieldIsEmpty)
+            return false
+        } else if password != passwordConfirm {
+            state.signInError.accept(UserPersistenceError.passwordIsWorng)
             return false
         }
         return true
