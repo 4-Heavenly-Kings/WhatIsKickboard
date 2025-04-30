@@ -22,15 +22,19 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     /// Core Location Manager
     private let locationManager = CLLocationManager()
     
+    private let apiUseCase = FetchAPIGeocodingUseCase()
+    
     var disposeBag = DisposeBag()
     
     // MARK: - Action (ViewController ➡️ ViewModel)
     
     enum Action {
-        /// 바인딩 완료
-        case didBinding
         /// 현재 위치 버튼 탭
         case didlocationButtonTap
+        /// 주소 검색창 텍스트
+        case searchText(text: String)
+        /// 바인딩 완료
+        case didBinding
     }
     var action: AnyObserver<Action> {
         return state.actionSubject.asObserver()
@@ -46,6 +50,8 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         fileprivate(set) var userLocation = BehaviorRelay<CLLocationCoordinate2D?>(value: nil)
         /// 킥보드 리스트
         fileprivate(set) var kickboardList = BehaviorRelay<[Kickboard]>(value: [])
+        /// 검색 결과
+        fileprivate(set) var searchResult = PublishRelay<GeocodingModel>()
     }
     var state = State()
     
@@ -67,12 +73,14 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
                     owner.updateKickboardList()
                 case .didlocationButtonTap:
                     owner.updateLastLocation()
+                case let .searchText(text):
+                    owner.searchLocation(searchText: text)
                 }
             }.disposed(by: disposeBag)
     }
 }
 
-// MARK: - Location Methods
+// MARK: - Map Methods
 
 private extension MapTabViewModel {
     /// 디바이스 위치 서비스가 활성화 상태인지 확인
@@ -120,6 +128,20 @@ private extension MapTabViewModel {
         let logMsg = "현재 위치: (latitude: \(latitude ?? 0.0), longitude: \(longitude ?? 0.0))"
         os_log(.debug, log: log, "%@", logMsg)
         state.userLocation.accept(locationManager.location?.coordinate)
+    }
+}
+
+// MARK: - Location Methods
+
+private extension MapTabViewModel {
+    /// API를 통한 주소 검색
+    func searchLocation(searchText: String) {
+        apiUseCase.fetchSearchResults(for: searchText)
+            .subscribe(with: self, onSuccess: { owner, model in
+                owner.state.searchResult.accept(model)
+            }, onFailure: { owner, error in
+                os_log(.error, log: owner.log, "주소 검색 실패: %@", "\(error)")
+            }).disposed(by: disposeBag)
     }
 }
 

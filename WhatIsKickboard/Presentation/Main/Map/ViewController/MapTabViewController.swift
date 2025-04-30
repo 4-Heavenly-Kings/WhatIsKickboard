@@ -108,12 +108,27 @@ final class MapTabViewController: BaseViewController {
                 }
             }.disposed(by: disposeBag)
         
+        // TODO: 검색 결과 UI에 반영
+        viewModel.state.searchResult
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, model in
+                print(model.addresses)
+            }.disposed(by: disposeBag)
+        
         // Action ➡️ ViewModel
         // 현재 위치 버튼 탭
         mapTabView.getLocationButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.mapPositionMode = .direction
                 owner.viewModel.action.onNext(.didlocationButtonTap)
+            }.disposed(by: disposeBag)
+        
+        // 주소 검색창 텍스트 전달
+        mapTabView.getSearchBar().rx.text.orEmpty
+            .distinctUntilChanged()
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+            .bind(with: self) { owner, text in
+                owner.viewModel.action.onNext(.searchText(text: text))
             }.disposed(by: disposeBag)
         
         // 바인딩 완료 알림
@@ -194,13 +209,13 @@ private extension MapTabViewController {
             let iconImage: NMFOverlayImage
             switch $0.status {
             case KickboardStatus.able.rawValue:
-                iconImage = .init(image: .kickboardMarkerAvailable)
+                iconImage = .init(image: .kickboardMarkerAvailableShadow)
             case KickboardStatus.declared.rawValue:
-                iconImage = .init(image: .kickboardMarkerDeclared)
+                iconImage = .init(image: .kickboardMarkerDeclaredShadow)
             case KickboardStatus.lowBattery.rawValue:
-                iconImage = .init(image: .kickboardMarkerUnavailable)
+                iconImage = .init(image: .kickboardMarkerUnavailableShadow)
             default:  // IMPOSSIBILITY
-                iconImage = .init(image: .kickboardMarkerUnavailable)
+                iconImage = .init(image: .kickboardMarkerUnavailableShadow)
                 marker.hidden = true
             }
             marker.iconImage = iconImage
