@@ -51,11 +51,11 @@ extension Kickboard {
             Kickboard(id: UUID(), latitude: 37.5660, longitude: 126.9610, battery: 52, status: "DECLARED"),
             Kickboard(id: UUID(), latitude: 37.5760, longitude: 126.9680, battery: 30, status: "LOW_BATTERY"),
             Kickboard(id: UUID(), latitude: 37.5590, longitude: 126.9820, battery: 90, status: "ABLE"),
-            Kickboard(id: UUID(), latitude: 37.2064, longitude: 127.0681, battery: 80, status: "ABLE"),
-            Kickboard(id: UUID(), latitude: 37.2062, longitude: 127.0680, battery: 50, status: "DECLARED"),
-            Kickboard(id: UUID(), latitude: 37.2063, longitude: 127.0684, battery: 10, status: "LOW_BATTERY"),
-            Kickboard(id: UUID(), latitude: 37.2063, longitude: 127.0684, battery: 60, status: "IMPOSSIBILITY"),
-            Kickboard(id: UUID(), latitude: 37.2063, longitude: 127.0684, battery: 40, status: "ABLE")
+            Kickboard(id: UUID(), latitude: 37.2060, longitude: 127.0680, battery: 80, status: "ABLE"),
+            Kickboard(id: UUID(), latitude: 37.2061, longitude: 127.0681, battery: 50, status: "DECLARED"),
+            Kickboard(id: UUID(), latitude: 37.2062, longitude: 127.0682, battery: 10, status: "LOW_BATTERY"),
+            Kickboard(id: UUID(), latitude: 37.2063, longitude: 127.0683, battery: 60, status: "IMPOSSIBILITY"),
+            Kickboard(id: UUID(), latitude: 37.2064, longitude: 127.0684, battery: 40, status: "ABLE")
         ]
     }
 }

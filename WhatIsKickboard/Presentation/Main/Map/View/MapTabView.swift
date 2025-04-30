@@ -17,9 +17,19 @@ final class MapTabView: BaseView {
     
     /// 네이버 지도 View
     private let naverMapView = NMFNaverMapView(frame: .zero)
+    /// 지도 관련 버튼 스택
+    private let buttonStackView = UIStackView()
+    /// 킥보드 숨기기 버튼
+    private let hideKickboardButton = UIButton()
     /// 현재 위치 버튼
     private let locationButton = UIButton()
-    
+    /// 네비게이션 바 흰색
+    private let statusBarBackgroundView = UIView()
+    /// 네비게이션 바(킥보드 위치 등록 모드 전용)
+    private let navigationBarView = CustomNavigationBarView()
+    /// 주소 검색창
+    private let searchBar = UISearchBar()
+
     // MARK: - Style Helper
     
     override func setStyles() {
@@ -30,32 +40,82 @@ final class MapTabView: BaseView {
             $0.showLocationButton = false
             $0.mapView.extent = NMGLatLngBounds(southWestLat: 31.43, southWestLng: 122.37, northEastLat: 44.35, northEastLng: 132)
             $0.mapView.zoomLevel = 15
-            $0.mapView.minZoomLevel = 5.0
-            $0.mapView.maxZoomLevel = 18.0
+            $0.mapView.minZoomLevel = 5
+            $0.mapView.maxZoomLevel = 18
             $0.mapView.logoAlign = .rightTop
             $0.mapView.logoMargin = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
             $0.mapView.isTiltGestureEnabled = false
         }
         
+        buttonStackView.do {
+            $0.axis = .vertical
+            $0.spacing = 15
+        }
+        
+        hideKickboardButton.do {
+            let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .semibold)
+            $0.setImage(UIImage(systemName: "eye.slash", withConfiguration: config), for: .normal)
+            $0.tintColor = UIColor.core
+            $0.backgroundColor = UIColor(hex: "#FFFFFF")
+            $0.layer.shadowColor = UIColor.gray.cgColor
+            $0.layer.shadowOpacity = 1.0
+            $0.layer.shadowOffset = CGSize(width: 0, height: 3)
+            $0.layer.shadowRadius = 4
+        }
+        
         locationButton.do {
             $0.setImage(UIImage(named: "LocationButton.svg"), for: .normal)
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
+            $0.layer.shadowColor = UIColor.gray.cgColor
+            $0.layer.shadowOpacity = 1.0
+            $0.layer.shadowOffset = CGSize(width: 0, height: 3)
+            $0.layer.shadowRadius = 4
+        }
+        
+        statusBarBackgroundView.do {
+            $0.backgroundColor = UIColor(hex: "#FFFFFF")
+            $0.isHidden = true
+        }
+        
+        navigationBarView.do {
+            $0.configure(title: "킥보드 위치 등록", showsRightButton: true, rightButtonTitle: "등록")
+            $0.isHidden = true
         }
     }
     
     // MARK: - Layout Helper
     
     override func setLayout() {
-        self.addSubviews(naverMapView, locationButton)
+        self.addSubviews(naverMapView, buttonStackView, statusBarBackgroundView, navigationBarView)
+        buttonStackView.addArrangedSubviews(hideKickboardButton, locationButton)
         
         naverMapView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
-        locationButton.snp.makeConstraints {
-            $0.trailing.equalTo(self.safeAreaInsets).inset(15)
-            $0.bottom.equalTo(self.safeAreaInsets).inset(150)
+        buttonStackView.snp.makeConstraints {
+            $0.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
+            $0.bottom.equalTo(self.safeAreaLayoutGuide).inset(40)
+            $0.width.equalTo(50)
+        }
+        
+        hideKickboardButton.snp.makeConstraints {
             $0.width.height.equalTo(50)
+        }
+        
+        locationButton.snp.makeConstraints {
+            $0.width.height.equalTo(50)
+        }
+        
+        statusBarBackgroundView.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(self.safeAreaLayoutGuide.snp.top)
+        }
+        
+        navigationBarView.snp.makeConstraints {
+            $0.top.equalTo(self.safeAreaLayoutGuide)
+            $0.leading.trailing.equalTo(self.safeAreaLayoutGuide)
+            $0.height.equalTo(44)
         }
     }
     
@@ -63,18 +123,36 @@ final class MapTabView: BaseView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        locationButton.layer.cornerRadius = locationButton.frame.width / 2
+        buttonStackView.layoutIfNeeded()
+        buttonStackView.subviews.forEach {
+            $0.layer.cornerRadius = $0.frame.width / 2
+        }
     }
     
     // MARK: - Methods
-    
+
     /// 네이버 지도 View 반환
     func getNaverMapView() -> NMFNaverMapView {
         return naverMapView
     }
     
+    /// 킥보드 숨기기 버튼 반환
+    func getHideKickboardButton() -> UIButton {
+        return hideKickboardButton
+    }
+    
     /// 현재 위치 버튼 반환
     func getLocationButton() -> UIButton {
         return locationButton
+    }
+    
+    /// 네비게이션 바 배경 반환
+    func getStatusBarBackgroundView() -> UIView {
+        return statusBarBackgroundView
+    }
+    
+    /// 네비게이션 바 반환
+    func getNavigationBarView() -> CustomNavigationBarView {
+        return navigationBarView
     }
 }
