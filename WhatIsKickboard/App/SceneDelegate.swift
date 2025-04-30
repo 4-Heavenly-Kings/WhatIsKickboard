@@ -59,7 +59,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 .first?.windows
                 .first else { return }
 
-        window.rootViewController = UINavigationController(rootViewController: SplashViewController())
+        window.rootViewController = SplashViewController()
         window.makeKeyAndVisible()
     }
 }

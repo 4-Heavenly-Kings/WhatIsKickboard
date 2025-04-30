@@ -20,6 +20,7 @@ final class ModifyViewController: BaseViewController {
     
     // MARK: - Properties
     private var modityType: ModifyType
+    private let modifyViewModel = ModifyViewModel()
     
     init(modityType: ModifyType) {
         self.modityType = modityType
@@ -35,6 +36,12 @@ final class ModifyViewController: BaseViewController {
         view = modifyView
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        bindUIEvents()
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -42,7 +49,7 @@ final class ModifyViewController: BaseViewController {
         self.tabBarController?.tabBar.isHidden = true
     }
     
-    override func bindViewModel() {
+    private func bindUIEvents() {
         modifyView.navigationBarView.getBackButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.navigationController?.popViewController(animated: true)
@@ -53,13 +60,30 @@ final class ModifyViewController: BaseViewController {
         modifyView.navigationBarView.getRightButton().rx.tap
             .bind(with: self) { owner, _ in
                 print("저장버튼")
+                switch owner.modityType {
+                case .name:
+                    let nameText = owner.modifyView.modifyStackView.modifyTextFiled.text ?? ""
+                    owner.modifyViewModel.action.onNext(.name(nameText))
+                case .password:
+                    let passwordText = owner.modifyView.modifyStackView.modifyTextFiled.text ?? ""
+                    let passwordCheckText = owner.modifyView.modifyStackView.modifyCheckTextFiled.text ?? ""
+                    owner.modifyViewModel.action.onNext(.password(passwordText, passwordCheckText))
+                case .withdrawal:
+                    let passwordText = owner.modifyView.modifyStackView.modifyTextFiled.text ?? ""
+                    let passwordCheckText = owner.modifyView.modifyStackView.modifyCheckTextFiled.text ?? ""
+                    owner.modifyViewModel.action.onNext(.password(passwordText, passwordCheckText))
+                    owner.modifyViewModel.action.onNext(.withdrawal(passwordText, passwordCheckText))
+                }
             }
             .disposed(by: disposeBag)
+    }
+    
+    override func bindViewModel() {
         
     }
 
     override func setStyles() {
-        modifyView.navigationBarView.configure(title: modityType.navigationTitle, showsRightButton: true, rightButtonTitle: "저장")
+        modifyView.navigationBarView.configure(title: modityType.navigationTitle, showsRightButton: true, rightButtonTitle: modityType.rightBarButtonTitle)
         modifyView.modifyStackView.configure(modityType)
     }
     
@@ -67,4 +91,3 @@ final class ModifyViewController: BaseViewController {
 
     }
 }
-

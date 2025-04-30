@@ -65,12 +65,13 @@ private extension MyPageViewModel {
             .disposed(by: disposeBag)
     }
     
+    /// 로그아웃 처리하기
     func logoutProgress() {
         state.accessLogout.accept(())
     }
     
+    /// 회원탈퇴 처리하기
     func withDrawalProgress() {
-        // 회원탈퇴 비즈니스 로직 처리 필요
         state.accessWithDrawal.accept(())
     }
 }

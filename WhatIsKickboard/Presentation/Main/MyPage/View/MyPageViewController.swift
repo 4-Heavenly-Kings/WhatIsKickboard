@@ -94,6 +94,7 @@ final class MyPageViewController: BaseViewController {
                 owner.tabBarController?.tabBar.isHidden = true
             }
             .disposed(by: disposeBag)
+        
     }
     
     // MARK: - bindViewModel
@@ -120,6 +121,14 @@ final class MyPageViewController: BaseViewController {
             .disposed(by: disposeBag)
         
         /// 최종적으로 AlertView에서 로그아웃 버튼이 눌린 경우
+        myPageViewModel.state.accessLogout
+            .bind(with: self) { owner, _ in
+                UserPersistenceManager.logout()
+                SceneDelegate.switchToSplash()
+            }
+            .disposed(by: disposeBag)
+        
+        /// 최종적으로 AlertView에서  버튼이 눌린 경우
         myPageViewModel.state.accessLogout
             .bind(with: self) { owner, _ in
                 UserPersistenceManager.logout()
@@ -160,7 +169,7 @@ final class MyPageViewController: BaseViewController {
         alert.getSubmitButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.dismissAlertView(alert)
-                owner.myPageViewModel.action.onNext(.logoutAction)
+                 owner.myPageViewModel.action.onNext(.logoutAction)
             }
             .disposed(by: disposeBag)
         
@@ -188,6 +197,7 @@ final class MyPageViewController: BaseViewController {
         alert.getSubmitButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.dismissAlertView(alert)
+                owner.pushNavigationController(ModifyViewController(modityType: .withdrawal))
             }
             .disposed(by: disposeBag)
         
