@@ -99,7 +99,7 @@ final class MapTabView: BaseView {
         searchBar.do {
             $0.searchBarStyle = .minimal
             $0.setImage(UIImage(), for: UISearchBar.Icon.search, state: .normal)
-            $0.placeholder = "위치를 입력해주세요"
+            $0.placeholder = "장소를 입력해주세요"
             $0.searchTextField.font = .systemFont(ofSize: 16)
             
             let spacer = UIView()
@@ -259,8 +259,8 @@ final class MapTabView: BaseView {
         return resultTableView
     }
     
-    /// resultTableView 높이 및 그림자 효과 업데이트
-    func updateTableViewContainer(heightTo height: ConstraintRelatableTarget) {
+    /// resultTableView(tableViewContainer) 높이 및 그림자 효과 업데이트
+    func updateTableViewAppearance(heightTo height: ConstraintRelatableTarget) {
         tableViewContainer.snp.updateConstraints {
             $0.height.equalTo(height)
         }
@@ -274,5 +274,11 @@ final class MapTabView: BaseView {
         let bezierCGPath = UIBezierPath(roundedRect: tableViewContainer.bounds,
                                         cornerRadius: tableViewContainer.layer.cornerRadius).cgPath
         tableViewContainer.layer.shadowPath = bezierCGPath
+    }
+    
+    /// resultTableView(tableViewContainer).isHidden 상태 설정
+    func updateTableViewHideState(to state: Bool) {
+        tableViewContainer.isHidden = state
+        resultTableView.isHidden = state
     }
 }

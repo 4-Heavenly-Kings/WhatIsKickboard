@@ -119,7 +119,7 @@ final class MapTabViewController: BaseViewController {
                 guard let self else { return }
                 
                 let totalHeight = locationList.count * 40
-                self.mapTabView.updateTableViewContainer(heightTo: totalHeight)
+                self.mapTabView.updateTableViewAppearance(heightTo: totalHeight)
             })
             .drive(mapTabView.getSearchResultTableView().rx.items(
                 cellIdentifier: SearchResultCell.identifier,
@@ -175,6 +175,18 @@ final class MapTabViewController: BaseViewController {
             .bind(with: self) { owner, _ in
                 owner.toggleMarkerHideState()
             }.disposed(by: disposeBag)
+        
+        // 검색창 활성화, 검색 결과 표시
+        mapTabView.getSearchBar().rx.textDidBeginEditing
+            .bind(with: self) { owner, _ in
+                owner.mapTabView.updateTableViewHideState(to: false)
+            }.disposed(by: disposeBag)
+        
+        // 검색창 비활성화, 검색 결과 숨김
+        mapTabView.getSearchBar().rx.textDidEndEditing
+            .bind(with: self) { owner, _ in
+                owner.mapTabView.updateTableViewHideState(to: true)
+            }.disposed(by: disposeBag)
     }
     
     // MARK: - Style Helper
@@ -192,6 +204,8 @@ final class MapTabViewController: BaseViewController {
             $0.edges.equalToSuperview()
         }
     }
+    
+    // MARK: - Delegate Helper
     
     override func setDelegates() {
         mapTabView.getNaverMapView().mapView.addCameraDelegate(delegate: self)
