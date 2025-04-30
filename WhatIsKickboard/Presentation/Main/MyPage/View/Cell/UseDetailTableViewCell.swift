@@ -14,12 +14,14 @@ import Then
 final class UseDetailTableViewCell: BaseTableViewCell {
     
     //MARK: - Components
-    /// 포비 킥보드 Image
-    let pobyImageView = UIImageView()
     /// 반납 Image
     let returnImage = UIImageView()
     /// 이용내역 코멘트 Label
     let usingComment = UILabel()
+    /// 대여장소 Label
+    let rentLocationLabel = UILabel()
+    /// 코멘트 + 대여장소 StackView
+    let stackView = UIStackView()
     
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -29,11 +31,6 @@ final class UseDetailTableViewCell: BaseTableViewCell {
     //MARK: - Styles
     override func setStyles() {
         super.setStyles()
-        
-        pobyImageView.do {
-            $0.image = UIImage(named: "PobyRiding")
-            $0.contentMode = .scaleAspectFit
-        }
         
         returnImage.do {
             $0.image = UIImage()
@@ -55,29 +52,35 @@ final class UseDetailTableViewCell: BaseTableViewCell {
             $0.textAlignment = .center
         }
         
+        rentLocationLabel.do {
+            $0.text = "대여장소: 서울특별시 강남구 강남대로 1234"
+            $0.textColor = .gray
+            $0.font = .systemFont(ofSize: 13, weight: .regular)
+        }
+        
+        stackView.do {
+            $0.axis = .vertical
+            $0.spacing = 5
+            $0.alignment = .trailing
+        }
+        
     }
     
     //MARK: - Layouts
     override func setLayout() {
         super.setLayout()
         
-        self.addSubviews(pobyImageView, returnImage, usingComment)
-        
-        pobyImageView.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(16)
-            $0.verticalEdges.equalToSuperview().inset(16)
-            $0.width.equalTo(40)
-            $0.height.equalTo(pobyImageView.snp.width).multipliedBy(1.5)
-        }
+        self.addSubviews(returnImage, stackView)
+        stackView.addArrangedSubviews(usingComment, rentLocationLabel)
         
         returnImage.snp.makeConstraints {
-            $0.verticalEdges.equalTo(pobyImageView)
-            $0.leading.equalTo(pobyImageView.snp.trailing).offset(8)
-            $0.height.equalTo(pobyImageView)
-            $0.width.equalTo(returnImage.snp.height)
+            $0.leading.equalToSuperview().offset(16)
+            $0.verticalEdges.equalToSuperview().inset(16)
+            $0.width.equalTo(50)
+            $0.height.equalTo(returnImage.snp.width)
         }
         
-        usingComment.snp.makeConstraints {
+        stackView.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().offset(-16)
         }
