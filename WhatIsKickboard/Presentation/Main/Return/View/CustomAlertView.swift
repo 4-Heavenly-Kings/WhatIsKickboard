@@ -60,7 +60,7 @@ final class CustomAlertView: BaseView {
                 $0.textColor = UIColor(hex: "#000000")
                 $0.numberOfLines = 2
                 $0.textAlignment = .center
-                $0.font = .systemFont(ofSize: 20, weight: .bold)
+                $0.font = UIFont.jalnan2(20)
             }
             
             buttonStackView.do {
