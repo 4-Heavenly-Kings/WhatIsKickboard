@@ -39,6 +39,32 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
         }
     }
     
+    /// 킥보드 탑승 정보 조회
+    static func getKickboardRide(id: UUID) -> Single<KickboardRide> {
+        return Single.create { single in
+            do {
+                let ride = try getRideData(id: id).toModel()
+                single(.success(ride))
+            } catch {
+                single(.failure(error))
+            }
+            return Disposables.create()
+        }
+    }
+    
+    /// 킥보드 탑승 정보 리스트List 조회
+    static func getKickboardRideList(userId: UUID) -> Single<[KickboardRide]> {
+        return Single.create { single in
+            do {
+                let ride = try getRideListData(userId: userId).map { $0.toModel() }
+                single(.success(ride))
+            } catch {
+                single(.failure(error))
+            }
+            return Disposables.create()
+        }
+    }
+    
     /// 킥보드 등록
     @discardableResult
     static func createKickboard(latitude: Double, longitude: Double, battery: Int) async throws -> UUID {
@@ -56,7 +82,7 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     }
     
     /// 킥보드 대여
-    static func rentKickboard(id: UUID, latitude: Double, longitude: Double) async throws {
+    static func rentKickboard(id: UUID, latitude: Double, longitude: Double, address: String) async throws {
         let userId = try getCurrentUserId()
 
         let user = try getUserData(id: userId)
@@ -70,6 +96,7 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
         ride.start_latitude = latitude
         ride.start_longitude = longitude
         ride.battery = kickboard.battery
+        ride.address = address
         
         // ride와 kickboard/user를 연결
         ride.kickboard = kickboard
