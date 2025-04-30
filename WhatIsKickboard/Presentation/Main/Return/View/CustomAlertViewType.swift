@@ -12,8 +12,10 @@ enum CustomAlertViewType {
     case confirmReturn
     case logout
     case deleteID
+    case emailFailed
+    case signIntFailed
     
-    func makeTitle(name: String, minutes: Int?, count: Int?) -> NSAttributedString {
+    func makeTitle(name: String, minutes: Int? = nil, count: Int? = nil) -> NSAttributedString {
         let fullText: String
         
         switch self {
@@ -31,6 +33,8 @@ enum CustomAlertViewType {
             } else {
                 fullText = "\(name)님은 아직 포비와 달린적이 없어요"
             }
+        case .emailFailed, .signIntFailed:
+            fullText = name
         }
         
         let attributedString = NSMutableAttributedString(string: fullText)
@@ -57,7 +61,7 @@ enum CustomAlertViewType {
         return attributedString
     }
     
-    func makeSubtitle(price: String?) -> String {
+    func makeSubtitle(price: String? = nil) -> String {
         switch self {
         case .returnRequest:
             if let price {
@@ -71,13 +75,15 @@ enum CustomAlertViewType {
             return "이제 그만 로그아웃 할까요?"
         case .deleteID:
             return "어디가~? 킥보드 말고 뭐 타려고~?"
+        case .emailFailed, .signIntFailed:
+            return ""
         }
     }
     
     var submitTitle: String {
         switch self {
         case .returnRequest: return "포비와 그만 놀기"
-        case .confirmReturn: return "확인"
+        case .confirmReturn, .emailFailed, .signIntFailed: return "확인"
         case .logout: return "로그아웃"
         case .deleteID: return "포비에게 도망가기"
         }
@@ -85,7 +91,7 @@ enum CustomAlertViewType {
     
     var submitTitleColor: UIColor {
         switch self {
-        case .returnRequest, .confirmReturn, .deleteID: return UIColor(hex: "#6B6E82")
+        case .returnRequest, .confirmReturn, .deleteID, .emailFailed, .signIntFailed: return UIColor(hex: "#6B6E82")
         case .logout: return UIColor(hex: "#FF4F17")
         }
     }
@@ -93,7 +99,7 @@ enum CustomAlertViewType {
     var cancelTitle: String {
         switch self {
         case .returnRequest: return "더 달리기"
-        case .confirmReturn: return ""
+        case .confirmReturn, .emailFailed, .signIntFailed: return ""
         case .logout: return "취소"
         case .deleteID: return "포비와 더 달리기"
         }

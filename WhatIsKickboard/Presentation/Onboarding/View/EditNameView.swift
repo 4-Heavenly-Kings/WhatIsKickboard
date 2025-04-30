@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RxSwift
 
 // MARK: - BaseView
 final class EditNameView: BaseView {
@@ -15,11 +16,14 @@ final class EditNameView: BaseView {
     private let titleImageView = UIImageView()
     private let titleLogoTitleView = UIImageView()
     private let nameTextField = UITextField()
-    private let confirmButton = UIButton()
+    private let confirmButton = CustomSubmitButton()
     
     // MARK: - StackView Components
     private let inputStackView = UIStackView()
     
+    // MARK: - Custonm Components
+    private var customAlertView: CustomAlertView?
+    private var disposeBag = DisposeBag()
     
     // MARK: - Style
     override func setStyles() {
@@ -64,7 +68,7 @@ final class EditNameView: BaseView {
         // 확인 버튼
         confirmButton.do {
             $0.setTitle("시작하기", for: .normal)
-            $0.setTitleColor(.black, for: .normal)
+            $0.setTitleColor(.white, for: .normal)
         }
         
         // 이메일 + 비밀번호 + 로그인 + (안내 + 회원가입)
@@ -99,6 +103,11 @@ final class EditNameView: BaseView {
             $0.centerX.equalToSuperview()
         }
         
+        confirmButton.snp.makeConstraints {
+            $0.height.equalTo(50)
+            $0.horizontalEdges.equalToSuperview()
+        }
+        
         nameTextField.snp.makeConstraints {
             $0.height.equalTo(50)
             $0.width.equalToSuperview()
@@ -109,5 +118,35 @@ final class EditNameView: BaseView {
             $0.horizontalEdges.equalToSuperview().inset(45)
             $0.centerX.equalToSuperview()
         }
+    }
+    
+    /// Alert 표시
+    func showAlert(text: String) {
+        customAlertView = CustomAlertView(frame: .zero, alertType: .emailFailed)
+        
+        guard let customAlertView else { return }
+        addSubview(customAlertView)
+        
+        customAlertView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        customAlertView.configure(name: text)
+        
+        customAlertView.getSubmitButton().rx.tap
+            .bind(with: self){ owner, _  in
+                customAlertView.removeFromSuperview()
+                owner.customAlertView = nil
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    // MARK: 컴포넌트 접근시
+    var getNameTextField: UITextField {
+        nameTextField
+    }
+    
+    var getConfirmButton: UIButton {
+        confirmButton
     }
 }

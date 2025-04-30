@@ -16,6 +16,7 @@ extension KickboardEntity {
             latitude: self.latitude,
             longitude: self.longitude,
             battery: Int(self.battery),
+            address: self.address ?? "",
             status: self.status ?? "",
             rides: rides
         )

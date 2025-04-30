@@ -46,7 +46,7 @@ final class CustomAlertView: BaseView {
         }
         
         switch alertType {
-        case .returnRequest, .logout, .deleteID:
+        case .returnRequest, .logout, .deleteID, .emailFailed, .signIntFailed:
             imageView.do {
                 $0.image = UIImage(named: "PobyHi")
             }
@@ -60,7 +60,7 @@ final class CustomAlertView: BaseView {
                 $0.textColor = UIColor(hex: "#000000")
                 $0.numberOfLines = 2
                 $0.textAlignment = .center
-                $0.font = .systemFont(ofSize: 20, weight: .bold)
+                $0.font = UIFont.jalnan2(20)
             }
             
             buttonStackView.do {
@@ -155,7 +155,7 @@ final class CustomAlertView: BaseView {
                 $0.bottom.equalTo(buttonStackView.snp.bottom)
                 $0.width.equalTo(1)
             }
-        case .confirmReturn:
+        case .confirmReturn, .emailFailed ,.signIntFailed:
             addSubviews(containerView)
             containerView.addSubviews(imageView, titleLabel, horizontalSeparator, buttonStackView)
             buttonStackView.addArrangedSubviews(submitButton)
@@ -198,7 +198,7 @@ final class CustomAlertView: BaseView {
     /// 반납 Alert의 경우: 사용자의 이름과 킥보드 사용시간 가격을 configure에 작성
     /// 로그아웃+회원탈퇴의 경우: 사용자의 이름과 킥보드 탑승 횟수
     /// 만약 사용자가 킥보드를 아예 사용한 적이 없을 경우 'name님은 포비와 함께 했어요' 라는 예외 처리.
-    func configure(name: String, minutes: Int?, count: Int?, price: String?) {
+    func configure(name: String, minutes: Int? = nil, count: Int? = nil, price: String? = nil) {
         titleLabel.attributedText = alertType.makeTitle(name: name, minutes: minutes, count: count)
         subtitleLabel.text = alertType.makeSubtitle(price: price)
         

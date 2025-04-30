@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RxSwift
 
 // MARK: - SignIntView
 final class SignInView: BaseView {
@@ -17,7 +18,7 @@ final class SignInView: BaseView {
     private let emailTextField = UITextField()
     private let passwordTextField = UITextField()
     private let passwordConfirmTextField = UITextField()
-    private let registerButton = UIButton()
+    private let registerButton = CustomSubmitButton()
     private let announcementLabel = UILabel()
     private let navigationLogInButton = UIButton()
     
@@ -25,6 +26,9 @@ final class SignInView: BaseView {
     private let inputStackView = UIStackView()
     private let navigationStackView = UIStackView()
     
+    // MARK: - Custom Components
+    private var customAlertView: CustomAlertView?
+    private var disposeBag = DisposeBag()
     
     // MARK: - Style
     override func setStyles() {
@@ -93,7 +97,7 @@ final class SignInView: BaseView {
         // 로그인 버튼
         registerButton.do {
             $0.setTitle("회원가입", for: .normal)
-            $0.setTitleColor(.black, for: .normal)
+            $0.setTitleColor(.white, for: .normal)
         }
         
         // 안내 라벨
@@ -163,10 +167,57 @@ final class SignInView: BaseView {
             $0.width.equalToSuperview()
         }
         
+        registerButton.snp.makeConstraints {
+            $0.height.equalTo(50)
+            $0.horizontalEdges.equalToSuperview()
+        }
+        
         inputStackView.snp.makeConstraints {
             $0.top.equalTo(titleLogoTitleView.snp.bottom).offset(72)
             $0.horizontalEdges.equalToSuperview().inset(45)
             $0.centerX.equalToSuperview()
         }
+    }
+    
+    /// Alert 표시
+    func showAlert(text: String) {
+        customAlertView = CustomAlertView(frame: .zero, alertType: .emailFailed)
+        
+        guard let customAlertView else { return }
+        addSubview(customAlertView)
+        
+        customAlertView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        customAlertView.configure(name: text)
+        
+        customAlertView.getSubmitButton().rx.tap
+            .bind(with: self){ owner, _  in
+                customAlertView.removeFromSuperview()
+                owner.customAlertView = nil
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    // MARK: 컴포넌트 접근시
+    var getEmailTextField: UITextField {
+        emailTextField
+    }
+    
+    var getPasswordTextField: UITextField {
+        passwordTextField
+    }
+    
+    var getPasswordConfirmTextField: UITextField {
+        passwordConfirmTextField
+    }
+    
+    var getloginButton: UIButton {
+        registerButton
+    }
+    
+    var getNavigationLogInButton: UIButton {
+        navigationLogInButton
     }
 }

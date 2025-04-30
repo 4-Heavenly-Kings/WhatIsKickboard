@@ -18,7 +18,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     
     private let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MapViewModel")
     /// 킥보드 목업 데이터
-    private let mockKickboard = Kickboard(id: UUID(), latitude: 37.2064, longitude: 127.0681, battery: 80, status: "ABLE")
+    private let mockKickboard = Kickboard(id: UUID(), latitude: 37.2064, longitude: 127.0681, battery: 80, address: "서울특별시 종로구 세종대로 175", status: "ABLE")
     /// Core Location Manager
     private let locationManager = CLLocationManager()
     
