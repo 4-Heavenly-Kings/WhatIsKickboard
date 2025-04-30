@@ -67,7 +67,7 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
     
     /// 킥보드 등록
     @discardableResult
-    static func createKickboard(latitude: Double, longitude: Double, battery: Int) async throws -> UUID {
+    static func createKickboard(latitude: Double, longitude: Double, battery: Int, address: String) async throws -> UUID {
         let kickboard = KickboardEntity(context: context)
         let id = UUID()
         
@@ -76,6 +76,7 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
         kickboard.longitude = longitude
         kickboard.battery = Int16(battery)
         kickboard.status = setStatus(battery: battery)
+        kickboard.address = address
         
         try await saveContext("킥보드 등록")
         return id
