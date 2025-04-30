@@ -22,7 +22,8 @@ extension KickboardRide {
             endLongitude: 127.1236,
             battery: 50,
             price: 500,
-            imagePath: "test/path"
+            imagePath: "test/path",
+            address: "서울특별시 강남구 강남대로 1234"
         )
     }
 }

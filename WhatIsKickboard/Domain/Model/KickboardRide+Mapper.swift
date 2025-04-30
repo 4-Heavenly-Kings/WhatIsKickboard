@@ -22,7 +22,8 @@ extension KickboardRideEntity {
             endLongitude: self.end_longitude,
             battery: Int(self.battery),
             price: Int(self.price),
-            imagePath: self.image_path
+            imagePath: self.image_path,
+            address: self.address ?? ""
         )
     }
 }
