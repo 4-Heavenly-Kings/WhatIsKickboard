@@ -39,6 +39,19 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
         }
     }
     
+    /// 킥보드 탑승 정보 조회
+    static func getKickboardRide(id: UUID) -> Single<KickboardRide> {
+        return Single.create { single in
+            do {
+                let ride = try getRideData(id: id).toModel()
+                single(.success(ride))
+            } catch {
+                single(.failure(error))
+            }
+            return Disposables.create()
+        }
+    }
+    
     /// 킥보드 등록
     @discardableResult
     static func createKickboard(latitude: Double, longitude: Double, battery: Int) async throws -> UUID {

@@ -115,4 +115,15 @@ struct KickboardPersistenceTests {
             })
             .disposed(by: disposeBag)
     }
+    
+    // 킥보드 반환 핸들링
+    private func getKickboardRide(id: UUID, completion: @escaping (KickboardRide) -> Void) {
+        KickboardPersistenceManager.getKickboardRide(id: id)
+            .subscribe(onSuccess: { ride in
+                completion(ride)
+            }, onFailure: { _ in
+                #expect(Bool(false))
+            })
+            .disposed(by: disposeBag)
+    }
 }
