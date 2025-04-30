@@ -6,26 +6,29 @@
 //
 
 import Testing
+import RxSwift
 import Foundation
 @testable import WhatIsKickboard
 
 // MARK: - UserPersistenceTests
 struct UserPersistenceTests {
 
+    var disposeBag = DisposeBag()
     /// 회원가입 테스트
     @Test func testCreateUser() async throws {
         let email = "test@example.com"
         let password = "password123"
         
-        do {
-            try await UserPersistenceManager.createUser(email, password)
-            
-            let fetchedUser = try UserPersistenceManager.getUser()
-            #expect(fetchedUser.email == email)
-        } catch let error as UserPersistenceError {
-            print(error.rawValue)
-            #expect(Bool(false))
-        }
+        UserPersistenceManager.createUser(email, password)
+            .subscribe(onSuccess: { user in
+                getUser { user in
+                    #expect(user.email == email)
+                }
+            }, onFailure: { error in
+                print(error.localizedDescription)
+                #expect(Bool(false))
+            })
+            .disposed(by: disposeBag)
     }
     
     /// 로그인 테스트
@@ -33,40 +36,40 @@ struct UserPersistenceTests {
         let email = "test@example.com"
         let password = "password123"
         
-        do {
-            try UserPersistenceManager.login(email, password)
-            
-            let fetchedUser = try UserPersistenceManager.getUser()
-            #expect(fetchedUser.email == email)
-        } catch let error as UserPersistenceError {
-            print(error.rawValue)
-            #expect(Bool(false))
-        }
+        UserPersistenceManager.login(email, password)
+            .subscribe(onSuccess: { user in
+                getUser { user in
+                    #expect(user.email == email)
+                }
+            }, onFailure: { error in
+                print(error.localizedDescription)
+                #expect(Bool(false))
+            })
+            .disposed(by: disposeBag)
     }
     
     /// 유저정보 조회 테스트
     @Test func testGetUser() async throws {
-        do {
-            let fetchedUser = try UserPersistenceManager.getUser()
-            #expect(fetchedUser.email == fetchedUser.getMock().email)
-        } catch let error as UserPersistenceError {
-            print(error.rawValue)
-            #expect(Bool(false))
+        getUser { user in
+            #expect(user.email == user.getMock().email)
         }
     }
 
     /// 유저정보 수정 테스트
     @Test func testPatchUser() async throws {
-        do {
-            var fetchedUser = try UserPersistenceManager.getUser()
-            fetchedUser.name = "포비"
-            try await UserPersistenceManager.patchUser(fetchedUser)
-            
-            let updatedUser = try UserPersistenceManager.getUser()
-            #expect(updatedUser.name == "포비")
-        } catch let error as UserPersistenceError {
-            print(error.rawValue)
-            #expect(Bool(false))
+        getUser { user in
+            var user = user
+            user.name = "포비"
+            UserPersistenceManager.patchUser(user)
+                .subscribe(onSuccess: { user in
+                    getUser { user in
+                        #expect(user.name == "포비")
+                    }
+                }, onFailure: { error in
+                    print(error.localizedDescription)
+                    #expect(Bool(false))
+                })
+                .disposed(by: disposeBag)
         }
     }
     
@@ -78,11 +81,8 @@ struct UserPersistenceTests {
             print(error.rawValue)
             #expect(Bool(false))
         }
-        
-        do {
-            try UserPersistenceManager.getUser()
-        } catch {
-            #expect(true)
+        getUser(expect: true) { _ in
+            #expect(Bool(false))
         }
     }
     
@@ -91,5 +91,17 @@ struct UserPersistenceTests {
         UserPersistenceManager.logout()
         let token = UserDefaults.standard.string(forKey: "token")
         #expect(token == nil)
+    }
+    
+    // 킥보드 반환 핸들링
+    private func getUser(expect: Bool = false, completion: @escaping (User) -> Void) {
+        UserPersistenceManager.getUser()
+            .subscribe(onSuccess: { user in
+                completion(user)
+            }, onFailure: { error in
+                print(error.localizedDescription)
+                #expect(Bool(expect))
+            })
+            .disposed(by: disposeBag)
     }
 }
