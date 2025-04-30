@@ -55,7 +55,7 @@ final class UseDetailTableViewCell: BaseTableViewCell {
         rentLocationLabel.do {
             $0.text = "대여장소: 서울특별시 강남구 강남대로 1234"
             $0.textColor = .gray
-            $0.font = .systemFont(ofSize: 13, weight: .regular)
+            $0.font = .systemFont(ofSize: 12, weight: .regular)
         }
         
         stackView.do {

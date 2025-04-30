@@ -1,5 +1,5 @@
 //
-//  UseDetailView.swift
+//  MyRegisterKickboardView.swift
 //  WhatIsKickboard
 //
 //  Created by 백래훈 on 4/30/25.
@@ -10,8 +10,8 @@ import UIKit
 import SnapKit
 import Then
 
-//MARK: - UseDetailView
-final class UseDetailView: BaseView {
+// MARK: - MyRegisterKickboardView
+final class MyRegisterKickboardView: BaseView {
     
     // MARK: - Compoenets
     /// 상단 status bar를 덮을 View
@@ -19,7 +19,7 @@ final class UseDetailView: BaseView {
     /// 상단 dock bar를 덮을 View
     private let dockBarBackgroundView = UIView()
     /// 이용내역  TableView
-    private let useDetailTableView = UITableView()
+    private let myRegisterTableView = UITableView()
     /// 네비게이션 바
     private let navigationBarView = CustomNavigationBarView()
     
@@ -35,20 +35,21 @@ final class UseDetailView: BaseView {
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
         }
         
-        useDetailTableView.do {
-            $0.register(UseDetailTableViewCell.self, forCellReuseIdentifier: UseDetailTableViewCell.className)
+        myRegisterTableView.do {
+            $0.register(MyRegisterKickboardTableViewCell.self, forCellReuseIdentifier: MyRegisterKickboardTableViewCell.className)
         }
         
         navigationBarView.do {
-            $0.configure(title: "이용 내역", showsRightButton: false, rightButtonTitle: nil)
+            $0.configure(title: "킥보드 등록 내역", showsRightButton: false, rightButtonTitle: nil)
         }
+        
     }
     
     //MARK: - Layouts
     override func setLayout() {
         super.setLayout()
         
-        self.addSubviews(statusBarBackgroundView, navigationBarView, useDetailTableView, dockBarBackgroundView)
+        self.addSubviews(statusBarBackgroundView, navigationBarView, myRegisterTableView, dockBarBackgroundView)
         
         statusBarBackgroundView.snp.makeConstraints {
             $0.top.leading.trailing.equalToSuperview()
@@ -61,21 +62,21 @@ final class UseDetailView: BaseView {
             $0.height.equalTo(44)
         }
         
-        useDetailTableView.snp.makeConstraints {
+        myRegisterTableView.snp.makeConstraints {
             $0.top.equalTo(navigationBarView.snp.bottom)
             $0.horizontalEdges.equalTo(safeAreaLayoutGuide)
             $0.bottom.equalTo(safeAreaLayoutGuide)
         }
         
         dockBarBackgroundView.snp.makeConstraints {
-            $0.top.equalTo(useDetailTableView.snp.bottom)
+            $0.top.equalTo(myRegisterTableView.snp.bottom)
             $0.horizontalEdges.equalTo(safeAreaLayoutGuide)
             $0.bottom.equalToSuperview()
         }
     }
     
-    func getUseDetailTableView() -> UITableView {
-        return useDetailTableView
+    func getMyRegisterTableView() -> UITableView {
+        return myRegisterTableView
     }
     
     func getNavigationBarView() -> CustomNavigationBarView {

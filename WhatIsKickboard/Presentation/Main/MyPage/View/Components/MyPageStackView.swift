@@ -18,8 +18,8 @@ final class MyPageStackView: UIStackView {
     let modifyNameButton = MyPageStackButton(title: "이름 수정")
     /// 비밀번호 수정 Button
     let modifyPasswordButton = MyPageStackButton(title: "비밀번호 수정")
-    /// 내가 등록한 킥보드 Button
-    let registerKickboardButton = MyPageStackButton(title: "내가 등록한 킥보드")
+    /// 킥보드 등록 내역 Button
+    let registerKickboardButton = MyPageStackButton(title: "킥보드 등록 내역")
     /// 이용 내역 Button
     let useDetailButton = MyPageStackButton(title: "이용 내역")
     /// 로그아웃 Button

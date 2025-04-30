@@ -1,8 +1,8 @@
 //
-//  UseDetailViewController.swift
+//  MyRegisterKickboardViewController.swift
 //  WhatIsKickboard
 //
-//  Created by 백래훈 on 4/29/25.
+//  Created by 백래훈 on 4/30/25.
 //
 
 import UIKit
@@ -12,25 +12,19 @@ import RxCocoa
 import SnapKit
 import Then
 
-//MARK: - UseDetailViewController
-final class UseDetailViewController: BaseViewController {
+// MARK: - MyRegisterKickboardViewController
+final class MyRegisterKickboardViewController: BaseViewController {
     
     // MARK: - Compoenets
-    let useDetailView = UseDetailView()
+    let myRegisterKickboardView = MyRegisterKickboardView()
     
     // MARK: - Properties
     let dummyData = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     
-    // MARK: - View Life Cycels
     override func loadView() {
         super.loadView()
         
-        view = useDetailView
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
+        view = myRegisterKickboardView
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -39,16 +33,14 @@ final class UseDetailViewController: BaseViewController {
         self.tabBarController?.tabBar.isHidden = true
     }
     
-    // MARK: - Styles
     override func setStyles() {
         super.setStyles()
         
-        useDetailView.getUseDetailTableView().delegate = self
-        useDetailView.getUseDetailTableView().dataSource = self
+        myRegisterKickboardView.getMyRegisterTableView().delegate = self
+        myRegisterKickboardView.getMyRegisterTableView().dataSource = self
         
     }
     
-    // MARK: - Layouts
     override func setLayout() {
         super.setLayout()
         
@@ -57,7 +49,7 @@ final class UseDetailViewController: BaseViewController {
     override func bindViewModel() {
         super.bindViewModel()
         
-        useDetailView.getNavigationBarView().getBackButton().rx.tap
+        myRegisterKickboardView.getNavigationBarView().getBackButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.navigationController?.popViewController(animated: true)
             }
@@ -65,17 +57,17 @@ final class UseDetailViewController: BaseViewController {
     }
 }
 
-extension UseDetailViewController: UITableViewDelegate {
+extension MyRegisterKickboardViewController: UITableViewDelegate {
     
 }
 
-extension UseDetailViewController: UITableViewDataSource {
+extension MyRegisterKickboardViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dummyData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: UseDetailTableViewCell.className, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: MyRegisterKickboardTableViewCell.className, for: indexPath)
         return cell
     }
 }

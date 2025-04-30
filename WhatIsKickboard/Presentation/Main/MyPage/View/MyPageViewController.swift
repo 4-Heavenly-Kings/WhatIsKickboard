@@ -57,10 +57,10 @@ final class MyPageViewController: BaseViewController {
             }
             .disposed(by: disposeBag)
         
-        /// 내가 등록한 킥보드 (registerKickboard)
-        myPageView.myPageStackView.useDetailButton.rx.tap
+        /// 킥보드 등록 내역 (registerKickboard)
+        myPageView.myPageStackView.registerKickboardButton.rx.tap
             .subscribe(with: self) { owner, _ in
-                owner.pushNavigationController(UseDetailViewController())
+                owner.pushNavigationController(MyRegisterKickboardViewController())
             }
             .disposed(by: disposeBag)
         
