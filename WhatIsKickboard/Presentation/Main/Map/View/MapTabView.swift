@@ -98,7 +98,7 @@ final class MapTabView: BaseView {
             let spacer = UIView()
             spacer.frame.size.width = 8
             $0.searchTextField.leftView = spacer
-            
+            // TODO: 오른쪽 패딩
             $0.searchTextField.backgroundColor = UIColor(hex: "#FFFFFF")
             $0.searchTextField.borderStyle = .none
             $0.searchTextField.layer.borderWidth = 4
