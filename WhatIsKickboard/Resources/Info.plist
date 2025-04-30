@@ -12,6 +12,10 @@
 	<string>${CLIENT_ID}</string>
 	<key>CLIENT_SECRET</key>
 	<string>${CLIENT_SECRET}</string>
+    <key>SEARCH_ID</key>
+    <string>${SEARCH_ID}</string>
+    <key>SEARCH_SECRET</key>
+    <string>${SEARCH_SECRET}</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Jalnan2.otf</string>

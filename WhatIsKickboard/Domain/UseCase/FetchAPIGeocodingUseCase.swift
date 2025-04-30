@@ -20,7 +20,7 @@ final class FetchAPIGeocodingUseCase: FetchAPIGeocodingUseCaseInterface {
     
     private let repository = APIGeocodingRepository()
     
-    func fetchSearchResults(for query: String, lat: Double?, lng: Double?) -> Single<GeocodingModel> {
-        return repository.fetchSearchResults(for: query, lat: lat, lng: lng)
+    func fetchSearchResults(for query: String) -> Single<[LocationModel]> {
+        return repository.fetchSearchResults(for: query)
     }
 }

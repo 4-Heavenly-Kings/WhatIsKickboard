@@ -10,6 +10,6 @@ import Foundation
 import RxSwift
 
 protocol GeocodingAPIRepository {
-    /// API를 통한 주소 검색
-    func fetchSearchResults(for query: String, lat: Double?, lng: Double?) -> Single<GeocodingModel>
+    /// API를 통한 지역 검색
+    func fetchSearchResults(for query: String) -> Single<[LocationModel]>
 }

@@ -32,6 +32,8 @@ final class MapTabView: BaseView {
         $0.mapView.isTiltGestureEnabled = false
         $0.mapView.showLegalNotice()
     }
+    /// 나침반 버튼
+    private let compassButton = NMFCompassView()
     /// 지도 관련 버튼을 담고있는 수직 StackView
     private let buttonStackView = UIStackView()
     /// 킥보드 숨기기 버튼
@@ -42,14 +44,18 @@ final class MapTabView: BaseView {
     private let statusBarBackgroundView = UIView()
     /// 네비게이션 바(킥보드 위치 등록 모드 전용)
     private let navigationBarView = CustomNavigationBarView()
-    /// 주소 검색창
+    /// 지역 검색창
     private let searchBar = UISearchBar()
-    /// 나침반 버튼
-    private let compassButton = NMFCompassView()
+    /// 지역 검색 결과
+    private let searchResultTableView = UITableView()
 
     // MARK: - Style Helper
     
     override func setStyles() {
+        compassButton.do {
+            $0.mapView = naverMapView.mapView
+        }
+        
         buttonStackView.do {
             $0.axis = .vertical
             $0.spacing = 15
@@ -90,7 +96,7 @@ final class MapTabView: BaseView {
         searchBar.do {
             $0.searchBarStyle = .minimal
             $0.setImage(UIImage(), for: UISearchBar.Icon.search, state: .normal)
-            $0.placeholder = "주소를 입력해주세요"
+            $0.placeholder = "위치를 입력해주세요"
             $0.searchTextField.font = .systemFont(ofSize: 16)
             
             let spacer = UIView()
@@ -108,19 +114,28 @@ final class MapTabView: BaseView {
             $0.searchTextField.layer.shadowRadius = 2
         }
         
-        compassButton.do {
-            $0.mapView = naverMapView.mapView
+        searchResultTableView.do {
+            $0.register(SearchResultCell.self, forCellReuseIdentifier: SearchResultCell.identifier)
+            $0.rowHeight = UITableView.automaticDimension
         }
     }
     
     // MARK: - Layout Helper
     
     override func setLayout() {
-        self.addSubviews(naverMapView, buttonStackView, statusBarBackgroundView, navigationBarView, searchBar, compassButton)
+        self.addSubviews(naverMapView, compassButton, buttonStackView,
+                         statusBarBackgroundView, navigationBarView,
+                         searchBar, searchResultTableView)
         buttonStackView.addArrangedSubviews(hideKickboardButton, locationButton)
         
         naverMapView.snp.makeConstraints {
             $0.edges.equalToSuperview()
+        }
+        
+        compassButton.snp.makeConstraints {
+            $0.top.equalTo(searchBar.snp.bottom).offset(15)
+            $0.leading.equalTo(self.safeAreaLayoutGuide).inset(15)
+            $0.width.height.equalTo(50)
         }
         
         buttonStackView.snp.makeConstraints {
@@ -153,10 +168,10 @@ final class MapTabView: BaseView {
             $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
         }
         
-        compassButton.snp.makeConstraints {
-            $0.top.equalTo(searchBar.snp.bottom).offset(15)
-            $0.leading.equalTo(self.safeAreaLayoutGuide).inset(15)
-            $0.width.height.equalTo(50)
+        searchResultTableView.snp.makeConstraints {
+            $0.top.equalTo(searchBar.snp.bottom).offset(5)
+            $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(25)
+            $0.height.lessThanOrEqualTo(170)
         }
     }
     
@@ -164,6 +179,8 @@ final class MapTabView: BaseView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        
+        // 코너값, 그림자 설정
         buttonStackView.layoutIfNeeded()
         buttonStackView.subviews.forEach {
             $0.layer.cornerRadius = $0.frame.width / 2
@@ -177,6 +194,8 @@ final class MapTabView: BaseView {
         let bezierCGPath = UIBezierPath(roundedRect: searchTextField.bounds,
                                         cornerRadius: searchTextField.layer.cornerRadius).cgPath
         searchTextField.layer.shadowPath = bezierCGPath
+        
+        searchResultTableView.layer.cornerRadius = 20
     }
     
     // MARK: - Methods
@@ -206,8 +225,12 @@ final class MapTabView: BaseView {
         return navigationBarView
     }
     
-    /// 주소 검색창 반환
+    /// 지역 검색창 반환
     func getSearchBar() -> UISearchBar {
         return searchBar
+    }
+    
+    func getSearchResultTableView() -> UITableView {
+        return searchResultTableView
     }
 }

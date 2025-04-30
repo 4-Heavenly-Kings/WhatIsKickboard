@@ -10,7 +10,6 @@ import Foundation
 import RxSwift
 
 protocol FetchAPIGeocodingUseCaseInterface {
-    // TODO: - 현위치 좌표 전달
-    /// API를 통한 주소 검색
-    func fetchSearchResults(for query: String, lat: Double?, lng: Double?) -> Single<GeocodingModel>
+    /// API를 통한 지역 검색
+    func fetchSearchResults(for query: String) -> Single<[LocationModel]>
 }

@@ -11,24 +11,22 @@ import OSLog
 import RxSwift
 
 final class APIGeocodingRepository: GeocodingAPIRepository {
-    func fetchSearchResults(for query: String, lat: Double?, lng: Double?) -> Single<GeocodingModel> {
+    func fetchSearchResults(for query: String) -> Single<[LocationModel]> {
         let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "APIGeocodingRepository")
         
-        return Single<GeocodingModel>.create { single in
+        return Single<[LocationModel]>.create { single in
             
-            guard var urlComponents = URLComponents(string: "https://maps.apigw.ntruss.com/map-geocode/v2/geocode") else {
+            guard var urlComponents = URLComponents(string: "https://openapi.naver.com/v1/search/local.json") else {
                 let message = NetworkError.invalidURLComponents.rawValue
                 os_log(.error, log: log, "%@", message)
                 single(.failure(NetworkError.invalidURLComponents))
                 return Disposables.create()
             }
             
-            var queryItemArray = [
-                URLQueryItem(name: "query", value: query)
+            let queryItemArray = [
+                URLQueryItem(name: "query", value: query),
+                URLQueryItem(name: "display", value: "5")
             ]
-            if let lat, let lng {
-                queryItemArray.append(URLQueryItem(name: "coordinate", value: "\(lng),\(lat)"))
-            }
             urlComponents.queryItems = queryItemArray
             
             guard let url = urlComponents.url else {
@@ -43,15 +41,14 @@ final class APIGeocodingRepository: GeocodingAPIRepository {
             var urlRequest: URLRequest = URLRequest(url: url)
             urlRequest.httpMethod = "GET"
             
-            guard let clientID = Bundle.main.object(forInfoDictionaryKey: "CLIENT_ID") as? String,
-                  let clientSecret = Bundle.main.object(forInfoDictionaryKey: "CLIENT_SECRET") as? String else {
+            guard let clientID = Bundle.main.object(forInfoDictionaryKey: "SEARCH_ID") as? String,
+                  let clientSecret = Bundle.main.object(forInfoDictionaryKey: "SEARCH_SECRET") as? String else {
                 os_log(.error, log: log, "API KEY 없음")
                 single(.failure(NetworkError.requestFailed))
                 return Disposables.create()
             }
-            urlRequest.addValue(clientID, forHTTPHeaderField: "X-NCP-APIGW-API-KEY-ID")
-            urlRequest.addValue(clientSecret, forHTTPHeaderField: "X-NCP-APIGW-API-KEY")
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.addValue(clientID, forHTTPHeaderField: "X-Naver-Client-Id")
+            urlRequest.addValue(clientSecret, forHTTPHeaderField: "X-Naver-Client-Secret")
 
             let task = URLSession.shared.dataTask(with: urlRequest) { data, response,  error in
                 let successRange: Range = (200..<300)
@@ -66,13 +63,13 @@ final class APIGeocodingRepository: GeocodingAPIRepository {
                     
                     if successRange.contains(response.statusCode) {
                         os_log(.debug, log: log, "data: %@", "\(data)")
-                        guard let geocodingDTO = try? JSONDecoder().decode(GeocodingDTO.self, from: data) else {
+                        guard let searchResultDTO = try? JSONDecoder().decode(SearchResultDTO.self, from: data) else {
                             single(.failure(DataError.parsingFailed))
                             return
                         }
                         
-                        os_log(.debug, log: log, "geocodingDTO: %@", "\(geocodingDTO)")
-                        single(.success(geocodingDTO.toModel()))
+                        os_log(.debug, log: log, "searchResultDTO: %@", "\(searchResultDTO)")
+                        single(.success(searchResultDTO.locations.map { $0.toModel() }))
                     } else {
                         os_log(.error, "%@", NetworkError.requestFailed.rawValue)
                         single(.failure(NetworkError.requestFailed))

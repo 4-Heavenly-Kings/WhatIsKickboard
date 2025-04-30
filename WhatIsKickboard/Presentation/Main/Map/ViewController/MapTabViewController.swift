@@ -109,10 +109,13 @@ final class MapTabViewController: BaseViewController {
             }.disposed(by: disposeBag)
         
         // TODO: 검색 결과 UI에 반영
+        
         viewModel.state.searchResult
-            .observe(on: MainScheduler.instance)
-            .bind(with: self) { owner, model in
-                print(model.addresses)
+            .asDriver(onErrorJustReturn: [])
+            .drive(mapTabView.getSearchResultTableView().rx.items(
+                cellIdentifier: SearchResultCell.identifier,
+                cellType: SearchResultCell.self)) { _, location, cell in
+                    cell.configure(title: location.title)
             }.disposed(by: disposeBag)
         
         // Action ➡️ ViewModel
@@ -123,7 +126,7 @@ final class MapTabViewController: BaseViewController {
                 owner.viewModel.action.onNext(.didlocationButtonTap)
             }.disposed(by: disposeBag)
         
-        // 주소 검색창 텍스트 및 위치 전달
+        // 지역 검색창 텍스트 및 위치 전달
         mapTabView.getSearchBar().rx.text.orEmpty
             .distinctUntilChanged()
             .debounce(.milliseconds(300), scheduler: MainScheduler.instance)

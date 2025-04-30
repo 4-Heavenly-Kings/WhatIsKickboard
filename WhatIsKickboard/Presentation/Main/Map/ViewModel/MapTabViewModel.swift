@@ -31,7 +31,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     enum Action {
         /// 현재 위치 버튼 탭
         case didlocationButtonTap
-        /// 주소 검색창 텍스트
+        /// 지역 검색창 텍스트
         case searchText(text: String)
         /// 바인딩 완료
         case didBinding
@@ -51,7 +51,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         /// 킥보드 리스트
         fileprivate(set) var kickboardList = BehaviorRelay<[Kickboard]>(value: [])
         /// 검색 결과
-        fileprivate(set) var searchResult = PublishRelay<GeocodingModel>()
+        fileprivate(set) var searchResult = PublishRelay<[LocationModel]>()
     }
     var state = State()
     
@@ -134,16 +134,14 @@ private extension MapTabViewModel {
 // MARK: - Location Methods
 
 private extension MapTabViewModel {
-    /// API를 통한 주소 검색
+    /// API를 통한 지역 검색
     func searchLocation(searchText: String) {
-        let lat = locationManager.location?.coordinate.latitude
-        let lng = locationManager.location?.coordinate.longitude
-        
-        apiUseCase.fetchSearchResults(for: searchText, lat: lat, lng: lng)
-            .subscribe(with: self, onSuccess: { owner, model in
-                owner.state.searchResult.accept(model)
+        apiUseCase.fetchSearchResults(for: searchText)
+            .subscribe(with: self, onSuccess: { owner, locations in
+                owner.state.searchResult.accept(locations)
             }, onFailure: { owner, error in
-                os_log(.error, log: owner.log, "주소 검색 실패: %@", "\(error)")
+                owner.state.searchResult.accept([])
+                os_log(.error, log: owner.log, "지역 검색 실패: %@", "\(error)")
             }).disposed(by: disposeBag)
     }
 }
