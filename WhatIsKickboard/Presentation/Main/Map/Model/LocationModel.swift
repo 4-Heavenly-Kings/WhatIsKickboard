@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// 네이버 지역 검색 API 응답 요소 중 개별 검색 결과 Model
 struct LocationModel {
     /// 업체, 기관의 이름
     let title: String

@@ -5,6 +5,7 @@
 //  Created by 서동환 on 5/1/25.
 //
 
+/// 네이버 지역 검색 API 응답 요소 중 개별 검색 결과 DTO
 struct LocationDTO: Decodable {
     let title: String
     let address: String

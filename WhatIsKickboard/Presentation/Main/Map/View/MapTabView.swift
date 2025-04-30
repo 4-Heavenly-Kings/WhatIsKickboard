@@ -11,11 +11,12 @@ import NMapsMap
 import SnapKit
 import Then
 
+/// 지도 탭 View
 final class MapTabView: BaseView {
     
     // MARK: - UI Components
     
-    /// 네이버 지도 View
+    /// 네이버 지도 NMFNaverMapView
     private lazy var naverMapView = NMFNaverMapView(frame: .zero).then {
         $0.showCompass = false
         $0.showScaleBar = false
@@ -32,23 +33,23 @@ final class MapTabView: BaseView {
         $0.mapView.isTiltGestureEnabled = false
         $0.mapView.showLegalNotice()
     }
-    /// 나침반 버튼
+    /// 네이버 지도 나침반 버튼 NMFCompassView
     private let compassButton = NMFCompassView()
-    /// 지도 관련 버튼을 담고있는 수직 StackView
+    /// 지도 관련 버튼을 담고있는 수직 UIStackView
     private let buttonStackView = UIStackView()
-    /// 킥보드 숨기기 버튼
+    /// 킥보드 숨기기 버튼 UIButton
     private let hideKickboardButton = UIButton()
-    /// 현재 위치 버튼
+    /// 현재 위치 버튼 UIButton
     private let locationButton = UIButton()
-    /// 네비게이션 바 흰색
+    /// 네비게이션 바 흰색 UIView
     private let statusBarBackgroundView = UIView()
-    /// 네비게이션 바(킥보드 위치 등록 모드 전용)
+    /// 네비게이션 바(킥보드 위치 등록 모드 전용) CustomNavigationBarView
     private let navigationBarView = CustomNavigationBarView()
-    /// 지역 검색창
+    /// 장소 검색창 UISearchBar
     private let searchBar = UISearchBar()
-    /// searchResultTableView 그림자 효과
+    /// resultTableView 높이 조절 및 그림자 효과 UIView
     private let tableViewContainer = UIView()
-    /// 지역 검색 결과
+    /// 장소 검색 결과 UITableView
     private let resultTableView = UITableView()
     
     // MARK: - Style Helper
@@ -223,34 +224,42 @@ final class MapTabView: BaseView {
     
     // MARK: - Methods
     
+    /// naverMapView 반환
     func getNaverMapView() -> NMFNaverMapView {
         return naverMapView
     }
     
+    /// hideKickboardButton 반환
     func getHideKickboardButton() -> UIButton {
         return hideKickboardButton
     }
     
+    /// locationButton 반환
     func getLocationButton() -> UIButton {
         return locationButton
     }
     
+    /// 네비게이션 바 배경 반환
     func getStatusBarBackgroundView() -> UIView {
         return statusBarBackgroundView
     }
     
+    /// navigationBarView 반환
     func getNavigationBarView() -> CustomNavigationBarView {
         return navigationBarView
     }
     
+    /// searchBar 반환
     func getSearchBar() -> UISearchBar {
         return searchBar
     }
     
+    /// resultTableView 반환
     func getSearchResultTableView() -> UITableView {
         return resultTableView
     }
     
+    /// resultTableView 높이 및 그림자 효과 업데이트
     func updateTableViewContainer(heightTo height: ConstraintRelatableTarget) {
         tableViewContainer.snp.updateConstraints {
             $0.height.equalTo(height)

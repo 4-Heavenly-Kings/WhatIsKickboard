@@ -14,6 +14,7 @@ import RxSwift
 import SnapKit
 import Then
 
+/// 지도 탭 ViewController
 final class MapTabViewController: BaseViewController {
     
     // MARK: - Properties
@@ -108,7 +109,7 @@ final class MapTabViewController: BaseViewController {
                 }
             }.disposed(by: disposeBag)
         
-        // 지역 검색 결과 표시
+        // 장소 검색 결과 표시
         viewModel.state.searchResult
             .asDriver(onErrorJustReturn: [])
             .do(onNext: { [weak self] locationList in
@@ -146,7 +147,7 @@ final class MapTabViewController: BaseViewController {
                 owner.viewModel.action.onNext(.didlocationButtonTap)
             }.disposed(by: disposeBag)
         
-        // 지역 검색창 텍스트 및 위치 전달
+        // 장소 검색창 텍스트 및 위치 전달
         mapTabView.getSearchBar().rx.text.orEmpty
             .distinctUntilChanged()
             .debounce(.milliseconds(300), scheduler: MainScheduler.instance)

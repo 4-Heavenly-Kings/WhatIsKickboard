@@ -12,6 +12,7 @@ import OSLog
 import RxRelay
 import RxSwift
 
+/// 지도 탭 ViewModel
 final class MapTabViewModel: NSObject, ViewModelProtocol {
     
     // MARK: - Properties
@@ -31,7 +32,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     enum Action {
         /// 현재 위치 버튼 탭
         case didlocationButtonTap
-        /// 지역 검색창 텍스트
+        /// 장소 검색창 텍스트
         case searchText(text: String)
         /// 바인딩 완료
         case didBinding
@@ -134,14 +135,14 @@ private extension MapTabViewModel {
 // MARK: - Location Methods
 
 private extension MapTabViewModel {
-    /// API를 통한 지역 검색
+    /// API를 통한 장소 검색
     func searchLocation(searchText: String) {
         apiUseCase.fetchSearchResults(for: searchText)
             .subscribe(with: self, onSuccess: { owner, locations in
                 owner.state.searchResult.accept(locations)
             }, onFailure: { owner, error in
                 owner.state.searchResult.accept([])
-                os_log(.error, log: owner.log, "지역 검색 실패: %@", "\(error)")
+                os_log(.error, log: owner.log, "장소 검색 실패: %@", "\(error)")
             }).disposed(by: disposeBag)
     }
 }

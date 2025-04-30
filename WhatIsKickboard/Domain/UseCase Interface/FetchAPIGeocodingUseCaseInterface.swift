@@ -10,6 +10,6 @@ import Foundation
 import RxSwift
 
 protocol FetchAPIGeocodingUseCaseInterface {
-    /// API를 통한 지역 검색
+    /// API를 통한 장소 검색
     func fetchSearchResults(for query: String) -> Single<[LocationModel]>
 }

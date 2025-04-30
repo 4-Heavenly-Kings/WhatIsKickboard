@@ -10,6 +10,7 @@ import OSLog
 
 import RxSwift
 
+/// 네이버 지역 검색 API 호출 Repository
 final class APIGeocodingRepository: GeocodingAPIRepository {
     func fetchSearchResults(for query: String) -> Single<[LocationModel]> {
         let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "APIGeocodingRepository")

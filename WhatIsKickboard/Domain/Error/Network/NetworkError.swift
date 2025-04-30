@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// 네이버 지역 검색 API 호출 중 발생하는 오류 메세지 모음
 enum NetworkError: String, Error {
     case invalidURLComponents = "유효하지 않은 URL Components"
     case invalidURL = "유효하지 않은 URL"

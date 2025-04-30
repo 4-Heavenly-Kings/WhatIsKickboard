@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// 네이버 지역 검색 API 응답 DTO
 struct SearchResultDTO: Decodable {
     let locationDTOList: [LocationDTO]
     
