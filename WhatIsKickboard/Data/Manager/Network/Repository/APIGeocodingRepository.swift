@@ -11,7 +11,7 @@ import OSLog
 import RxSwift
 
 final class APIGeocodingRepository: GeocodingAPIRepository {
-    func fetchSearchResults(for query: String) -> Single<GeocodingModel> {
+    func fetchSearchResults(for query: String, lat: Double?, lng: Double?) -> Single<GeocodingModel> {
         let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "APIGeocodingRepository")
         
         return Single<GeocodingModel>.create { single in
@@ -23,9 +23,12 @@ final class APIGeocodingRepository: GeocodingAPIRepository {
                 return Disposables.create()
             }
             
-            let queryItemArray = [
+            var queryItemArray = [
                 URLQueryItem(name: "query", value: query)
             ]
+            if let lat, let lng {
+                queryItemArray.append(URLQueryItem(name: "coordinate", value: "\(lng),\(lat)"))
+            }
             urlComponents.queryItems = queryItemArray
             
             guard let url = urlComponents.url else {
@@ -34,6 +37,8 @@ final class APIGeocodingRepository: GeocodingAPIRepository {
                 single(.failure(NetworkError.invalidURL))
                 return Disposables.create()
             }
+            
+            os_log(.debug, log: log, "%@", "\(url)")
             
             var urlRequest: URLRequest = URLRequest(url: url)
             urlRequest.httpMethod = "GET"

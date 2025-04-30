@@ -123,9 +123,9 @@ private extension MapTabViewModel {
     
     /// 최근 업데이트된 좌표 ViewController로 전달
     func updateLastLocation() {
-        let latitude = locationManager.location?.coordinate.latitude
-        let longitude = locationManager.location?.coordinate.longitude
-        let logMsg = "현재 위치: (latitude: \(latitude ?? 0.0), longitude: \(longitude ?? 0.0))"
+        let lat = locationManager.location?.coordinate.latitude
+        let lng = locationManager.location?.coordinate.longitude
+        let logMsg = "현재 위치: (latitude: \(lat ?? 0.0), longitude: \(lng ?? 0.0))"
         os_log(.debug, log: log, "%@", logMsg)
         state.userLocation.accept(locationManager.location?.coordinate)
     }
@@ -136,7 +136,10 @@ private extension MapTabViewModel {
 private extension MapTabViewModel {
     /// API를 통한 주소 검색
     func searchLocation(searchText: String) {
-        apiUseCase.fetchSearchResults(for: searchText)
+        let lat = locationManager.location?.coordinate.latitude
+        let lng = locationManager.location?.coordinate.longitude
+        
+        apiUseCase.fetchSearchResults(for: searchText, lat: lat, lng: lng)
             .subscribe(with: self, onSuccess: { owner, model in
                 owner.state.searchResult.accept(model)
             }, onFailure: { owner, error in

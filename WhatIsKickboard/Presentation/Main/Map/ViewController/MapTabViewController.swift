@@ -123,7 +123,7 @@ final class MapTabViewController: BaseViewController {
                 owner.viewModel.action.onNext(.didlocationButtonTap)
             }.disposed(by: disposeBag)
         
-        // 주소 검색창 텍스트 전달
+        // 주소 검색창 텍스트 및 위치 전달
         mapTabView.getSearchBar().rx.text.orEmpty
             .distinctUntilChanged()
             .debounce(.milliseconds(300), scheduler: MainScheduler.instance)

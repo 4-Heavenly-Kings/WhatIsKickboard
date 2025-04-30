@@ -11,5 +11,5 @@ import RxSwift
 
 protocol GeocodingAPIRepository {
     /// API를 통한 주소 검색
-    func fetchSearchResults(for query: String) -> Single<GeocodingModel>
+    func fetchSearchResults(for query: String, lat: Double?, lng: Double?) -> Single<GeocodingModel>
 }
