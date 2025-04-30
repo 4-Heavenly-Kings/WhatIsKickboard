@@ -16,4 +16,20 @@ final class SplashViewController: BaseViewController {
     override func loadView() {
         view = splashView
     }
+    
+    /// 이미지 속성 설정 후 VC이동
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5){
+            self.showMainView()
+        }
+    }
+    
+    /// VC 네비게이션 설정
+    private func showMainView() {
+        let tabbarVC = TabBarController()
+        tabbarVC.modalPresentationStyle = .fullScreen
+        tabbarVC.modalTransitionStyle = .crossDissolve
+        present(tabbarVC, animated: true)
+    }
 }

@@ -9,6 +9,7 @@ import UIKit
 
 import SnapKit
 import Then
+import RxSwift
 
 final class TabBarController: UITabBarController {
     
@@ -20,6 +21,9 @@ final class TabBarController: UITabBarController {
     private let tabBackgroundView = UIView()
     /// 직전에 표시했던 ViewController의 index 저장
     private var previousIndex: Int = 0
+    
+    private let viewModel = TabbarViewModel()
+    var disposeBag = DisposeBag()
     
     // MARK: - View Life Cycle
     override func viewWillAppear(_ animated: Bool) {
@@ -35,11 +39,13 @@ final class TabBarController: UITabBarController {
         setDelegates()
         
         setTabBarItems()
+        bindViewModel()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         setTabBarHeight()
+        viewModel.action.onNext(.viewDidLoad)
     }
     
     func setStyles() {
@@ -78,6 +84,18 @@ final class TabBarController: UITabBarController {
     
     func setDelegates() {
         self.delegate = self
+    }
+    
+    func bindViewModel() {
+        viewModel.state.user
+            .subscribe(with: self, onNext: { _, user in
+                print("유저정보 조희 성공 \(user)")
+            }, onError: { owner, error in
+                let vc = LoginViewController()
+                vc.modalPresentationStyle = .fullScreen
+                owner.present(vc, animated: true)
+            })
+            .disposed(by: disposeBag)
     }
 }
 
