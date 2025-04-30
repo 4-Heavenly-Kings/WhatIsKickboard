@@ -235,6 +235,8 @@ extension TabBarController: UITabBarControllerDelegate {
 
 extension TabBarController: ChangeSelectedIndexDelegate {
     func changeSelectedIndexToPrevious() {
-        selectedIndex = previousIndex
+        UIView.performWithoutAnimation {
+            selectedIndex = previousIndex
+        }
     }
 }
