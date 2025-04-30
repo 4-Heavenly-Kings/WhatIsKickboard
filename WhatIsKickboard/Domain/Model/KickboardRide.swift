@@ -21,4 +21,5 @@ struct KickboardRide {
     let battery: Int
     let price: Int?
     let imagePath: String?
+    let address: String
 }

@@ -80,7 +80,7 @@ struct KickboardPersistenceTests {
         
         getKickboard(id: uuid) { kickboard in
             Task{
-                try await KickboardPersistenceManager.rentKickboard(id: kickboard.id, latitude: 37.1235, longitude: 127.1235)
+                try await KickboardPersistenceManager.rentKickboard(id: kickboard.id, latitude: 37.1235, longitude: 127.1235, address: "서울특별시 강남구 강남대로 1234")
                 getKickboard(id: kickboard.id) { kickboard in
                     print(kickboard)
                     #expect(kickboard.status == "IMPOSSIBILITY")
