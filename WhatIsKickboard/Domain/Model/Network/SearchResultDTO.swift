@@ -9,11 +9,11 @@ import Foundation
 
 /// 네이버 지역 검색 API 응답 DTO
 struct SearchResultDTO: Decodable {
-    let locationDTOList: [LocationDTO]
-    
     enum CodingKeys: String, CodingKey {
         case locationDTOList = "items"
     }
+    
+    let locationDTOList: [LocationDTO]
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

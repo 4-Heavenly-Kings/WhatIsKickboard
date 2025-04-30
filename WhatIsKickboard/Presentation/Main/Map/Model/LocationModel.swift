@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 /// 네이버 지역 검색 API 응답 요소 중 개별 검색 결과 Model
 struct LocationModel {
@@ -15,8 +16,6 @@ struct LocationModel {
     let address: String
     /// 업체, 기관명의 도로명 주소
     let roadAddress: String
-    /// 업체, 기관이 위치한 장소의 x 좌표(KATECH 좌표계 기준)
-    let mapx: Int
-    /// 업체, 기관이 위치한 장소의 y 좌표(KATECH 좌표계 기준)
-    let mapy: Int
+    /// Core Location 좌표
+    let coordinate: CLLocationCoordinate2D
 }

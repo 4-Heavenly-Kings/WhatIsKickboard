@@ -78,7 +78,10 @@ final class MapTabViewController: BaseViewController {
                     mapView.positionMode = .normal
                     owner.mapPositionMode = .direction
                 }
-                owner.moveMapCamera(to: coordinate)
+                
+                if owner.mapPositionMode == .direction {
+                    owner.moveMapCamera(to: coordinate)
+                }
             }.disposed(by: disposeBag)
         
         // 킥보드 마커 생성
@@ -128,13 +131,13 @@ final class MapTabViewController: BaseViewController {
         mapTabView.getSearchResultTableView().rx
             .modelSelected(LocationModel.self)
             .bind(with: self) { owner, location in
-                // 킥보드 등록
                 if owner.isRegister {
+                    // 킥보드 등록
                     let registerVC = RegisterViewController()
                     owner.navigationController?.pushViewController(registerVC, animated: true)
                 } else {
                     // 지도 카메라 이동
-                    
+                    owner.moveMapCamera(to: location.coordinate)
                 }
             }.disposed(by: disposeBag)
         
@@ -200,18 +203,17 @@ final class MapTabViewController: BaseViewController {
 private extension MapTabViewController {
     /// coordinate 위치로 카메라 이동
     func moveMapCamera(to coordinate: CLLocationCoordinate2D) {
-        if mapPositionMode == .direction {
-            let nmgCoordinate = NMGLatLng(from: coordinate)
-            let cameraUpdate = NMFCameraUpdate(scrollTo: nmgCoordinate, zoomTo: 15)
-            cameraUpdate.animation = .easeIn
-            
-            let mapView = mapTabView.getNaverMapView().mapView
-            DispatchQueue.main.async {
-                mapView.moveCamera(cameraUpdate)
-            }
+        let nmgCoordinate = NMGLatLng(from: coordinate)
+        let cameraUpdate = NMFCameraUpdate(scrollTo: nmgCoordinate, zoomTo: 15)
+        cameraUpdate.animation = .easeIn
+        
+        let mapView = mapTabView.getNaverMapView().mapView
+        DispatchQueue.main.async {
+            mapView.moveCamera(cameraUpdate)
         }
     }
     
+    /// 킥보드 마커 생성
     func makeMarkerList(of data: [Kickboard]) -> [NMFMarker] {
         let markerList = data.map {
             let marker = NMFMarker()
@@ -250,6 +252,7 @@ private extension MapTabViewController {
         return markerList
     }
     
+    /// 마커 숨김 상태 변경
     func toggleMarkerHideState() {
         isAllMarkerHidden.toggle()
         kickboardMarkerList
