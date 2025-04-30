@@ -1,8 +1,8 @@
 //
-//  UsingKickboardView.swift
+//  MapUsingKickboardView.swift
 //  WhatIsKickboard
 //
-//  Created by 백래훈 on 4/28/25.
+//  Created by 백래훈 on 4/29/25.
 //
 
 import UIKit
@@ -10,16 +10,22 @@ import UIKit
 import SnapKit
 import Then
 
-final class UsingKickboardView: BaseView {
+//MARK: - UsingKickboardView
+final class MapUsingKickboardView: BaseView {
     
+    //MARK: - Components
+    /// 포비 킥보드 Image
     let pobyImageView = UIImageView()
+    /// 배터리 잔량 Image
     let batteryImageView = UIImageView()
+    /// 배터리 잔량 Label
     let batteryLabel = UILabel()
-    let userNameLabel = UILabel()
-    let titleLabel = UILabel()
+    /// 킥보드  사용중 Label
     let usingTimeLabel = UILabel()
-    let usingLabel = UILabel()
+    /// 요금 StackView
+    let priceStackView = PriceStackView()
     
+    // MARK: - Styles
     override func setStyles() {
         super.setStyles()
         
@@ -41,67 +47,52 @@ final class UsingKickboardView: BaseView {
             $0.textColor = .black
         }
         
-        userNameLabel.do {
-            $0.text = "회원"
-            $0.font = .systemFont(ofSize: 30, weight: .bold)
-            $0.textColor = UIColor(hex: "#69C6D3")
-        }
-        
-        titleLabel.do {
-            $0.text = "님!"
-            $0.font = .systemFont(ofSize: 30, weight: .regular)
-            $0.textColor = .black
-        }
-        
+        /// 현재는 dummyData로 '15분 이용 중'을 보여주고 있으나
+        /// 대여하기 상황에서는 '사용가능'
+        /// 반납하기 상황에서는 'OO분 이용 중' 으로 보여주면 될 것 같습니다.
+        /// makeAttributedString 메서드 사용법은 본 메서드에 작성되어 있습니다.
         usingTimeLabel.do {
-            $0.text = "15분"
-            $0.font = .systemFont(ofSize: 30, weight: .bold)
+            let text = "15분 이용 중"
+            let attributedText = NSMutableAttributedString.makeAttributedString(
+                text: text,
+                highlightedParts: [
+                    ("15분", .black, UIFont.systemFont(ofSize: 30, weight: .bold)),
+                    ("이용 중", .black, UIFont.systemFont(ofSize: 30, weight: .regular))
+                ]
+            )
+            $0.attributedText = attributedText
+            $0.textAlignment = .center
             $0.textColor = .black
         }
-        
-        usingLabel.do {
-            $0.text = "이용 중"
-            $0.font = .systemFont(ofSize: 30, weight: .regular)
-            $0.textColor = .black
-        }
-        
-        self.addSubviews(pobyImageView, batteryImageView, batteryLabel, userNameLabel, titleLabel, usingTimeLabel, usingLabel)
         
     }
     
+    // MARK: - Layouts
     override func setLayout() {
         super.setLayout()
         
+        self.addSubviews(pobyImageView, batteryImageView, batteryLabel, priceStackView, usingTimeLabel)
+        
         pobyImageView.snp.makeConstraints {
-            $0.top.leading.bottom.equalToSuperview().offset(25)
+            $0.top.leading.equalToSuperview().offset(25)
             $0.width.equalTo(75)
             $0.height.equalTo(pobyImageView.snp.width).multipliedBy(1.5)
-            $0.bottom.equalTo(-16)
+            $0.bottom.equalToSuperview().offset(-16)
         }
         
-        usingLabel.snp.makeConstraints {
+        priceStackView.snp.makeConstraints {
             $0.trailing.equalToSuperview().offset(-25)
             $0.bottom.equalTo(pobyImageView)
         }
         
         usingTimeLabel.snp.makeConstraints {
-            $0.trailing.equalTo(usingLabel.snp.leading).offset(-3)
-            $0.bottom.equalTo(usingLabel)
-        }
-        
-        titleLabel.snp.makeConstraints {
-            $0.trailing.equalTo(usingTimeLabel.snp.leading).offset(-10)
-            $0.bottom.equalTo(usingTimeLabel)
-        }
-        
-        userNameLabel.snp.makeConstraints {
-            $0.trailing.equalTo(titleLabel.snp.leading)
-            $0.bottom.equalTo(titleLabel)
+            $0.trailing.equalToSuperview().offset(-25)
+            $0.bottom.equalTo(priceStackView.snp.top).offset(-5)
         }
         
         batteryLabel.snp.makeConstraints {
             $0.trailing.equalToSuperview().offset(-25)
-            $0.bottom.equalTo(usingLabel.snp.top).offset(-10)
+            $0.bottom.equalTo(usingTimeLabel.snp.top).offset(-10)
         }
         
         batteryImageView.snp.makeConstraints {
