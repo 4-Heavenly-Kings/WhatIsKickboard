@@ -16,7 +16,22 @@ final class MapTabView: BaseView {
     // MARK: - UI Components
     
     /// 네이버 지도 View
-    private let naverMapView = NMFNaverMapView(frame: .zero)
+    private lazy var naverMapView = NMFNaverMapView(frame: .zero).then {
+        $0.showCompass = false
+        $0.showScaleBar = false
+        $0.showZoomControls = false
+        $0.showIndoorLevelPicker = false
+        $0.showLocationButton = false
+        
+        $0.mapView.extent = NMGLatLngBounds(southWestLat: 31.43, southWestLng: 122.37, northEastLat: 44.35, northEastLng: 132)
+        $0.mapView.zoomLevel = 15
+        $0.mapView.minZoomLevel = 5
+        $0.mapView.maxZoomLevel = 18
+        $0.mapView.logoAlign = .leftBottom
+        $0.mapView.logoMargin = UIEdgeInsets(top: 0, left: 15, bottom: 40, right: 0)
+        $0.mapView.isTiltGestureEnabled = false
+        $0.mapView.showLegalNotice()
+    }
     /// 지도 관련 버튼을 담고있는 수직 StackView
     private let buttonStackView = UIStackView()
     /// 킥보드 숨기기 버튼
@@ -35,23 +50,6 @@ final class MapTabView: BaseView {
     // MARK: - Style Helper
     
     override func setStyles() {
-        naverMapView.do {
-            $0.showCompass = false
-            $0.showScaleBar = false
-            $0.showZoomControls = false
-            $0.showIndoorLevelPicker = false
-            $0.showLocationButton = false
-            
-            $0.mapView.extent = NMGLatLngBounds(southWestLat: 31.43, southWestLng: 122.37, northEastLat: 44.35, northEastLng: 132)
-            $0.mapView.zoomLevel = 15
-            $0.mapView.minZoomLevel = 5
-            $0.mapView.maxZoomLevel = 18
-            $0.mapView.logoAlign = .leftBottom
-            $0.mapView.logoMargin = UIEdgeInsets(top: 0, left: 15, bottom: 40, right: 0)
-            $0.mapView.isTiltGestureEnabled = false
-            $0.mapView.showLegalNotice()
-        }
-        
         buttonStackView.do {
             $0.axis = .vertical
             $0.spacing = 15
