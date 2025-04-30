@@ -63,7 +63,7 @@ struct KickboardPersistenceTests {
     
     /// 킥보드 등록 테스트
     @Test func testCreateKickboard() async throws {
-        let id = try await KickboardPersistenceManager.createKickboard(latitude: 37.1234, longitude: 127.1234, battery: 80)
+        let id = try await KickboardPersistenceManager.createKickboard(latitude: 37.1234, longitude: 127.1234, battery: 80, address: "서울특별시 종로구 세종대로 175")
         UserDefaults.standard.set(id.uuidString, forKey: "kickboard_id")
         
         getKickboard(id: id) { kickboard in
