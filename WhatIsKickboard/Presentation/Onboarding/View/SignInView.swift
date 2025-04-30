@@ -211,4 +211,8 @@ final class SignInView: BaseView {
     var getloginButton: UIButton {
         registerButton
     }
+    
+    var getNavigationLogInButton: UIButton {
+        navigationLogInButton
+    }
 }

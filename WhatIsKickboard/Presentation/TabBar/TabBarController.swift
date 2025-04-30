@@ -45,6 +45,7 @@ final class TabBarController: UITabBarController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         setTabBarHeight()
+        viewModel.action.onNext(.viewDidLoad)
     }
     
     func setStyles() {
@@ -86,8 +87,6 @@ final class TabBarController: UITabBarController {
     }
     
     func bindViewModel() {
-        viewModel.action.onNext(.viewDidLoad)
-        
         viewModel.state.user
             .subscribe(with: self, onNext: { _, user in
                 print("유저정보 조희 성공 \(user)")

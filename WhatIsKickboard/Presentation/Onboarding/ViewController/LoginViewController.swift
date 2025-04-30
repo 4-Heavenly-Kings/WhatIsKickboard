@@ -19,6 +19,8 @@ final class LoginViewController: BaseViewController {
     }
     
     override func bindViewModel() {
+        
+        // MARK: - 방출 이벤트
         /// 로그인 버튼 이벤트 방출
         loginView.getloginButton.rx.tap
             .withUnretained(self)
@@ -33,23 +35,33 @@ final class LoginViewController: BaseViewController {
             }
             .disposed(by: disposeBag)
         
+        /// 회원 가입 뷰 이동
+        loginView.getNavigationSignInButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                guard let presenter = owner.presentingViewController else { return }
+
+                owner.dismiss(animated: true) {
+                    let vc = SignInViewController()
+                    vc.modalPresentationStyle = .fullScreen
+                    presenter.present(vc, animated: true)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        // MARK: - 구독 이벤트
         /// 로그인 성공 이벤트 구독
         viewModel.state.loginSuccess
-            .subscribe(with: self, onNext: { owner, user in
+            .subscribe(with: self) { owner, user in
+                guard let presenter = owner.presentingViewController else { return }
                 owner.dismiss(animated: true) {
-                    if user.role == "GUEST" {
-                        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                           let window = scene.windows.first,
-                           let rootVC = window.rootViewController {
-                            
-                            let vc = EditNameViewController()
-                            vc.user = user
-                            vc.modalPresentationStyle = .fullScreen
-                            rootVC.present(vc, animated: true)
-                        }
-                    }
+                    guard user.role == "GUEST" else { return }
+                        
+                    let vc = EditNameViewController()
+                    vc.user = user
+                    vc.modalPresentationStyle = .fullScreen
+                    presenter.present(vc, animated: true)
                 }
-            })
+            }
             .disposed(by: disposeBag)
         
         /// 로그인 실패 이벤트 구독

@@ -19,6 +19,8 @@ final class SignInViewController: BaseViewController {
     }
     
     override func bindViewModel() {
+        
+        // MARK: - 방출 이벤트
         /// 회원가입 버튼 이벤트 방출
         signInView.getloginButton.rx.tap
              .withUnretained(self)
@@ -34,6 +36,20 @@ final class SignInViewController: BaseViewController {
              }
              .disposed(by: disposeBag)
         
+        /// 로그인 뷰 이동
+        signInView.getNavigationLogInButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                guard let presenter = owner.presentingViewController else { return }
+
+                owner.dismiss(animated: true) {
+                    let vc = LoginViewController()
+                    vc.modalPresentationStyle = .fullScreen
+                    presenter.present(vc, animated: true)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        // MARK: - 구독 이벤트
         /// 회원가입 성공 이벤트 구독
         viewModel.state.signInSuccess
             .subscribe(with: self, onNext: { owner, event in
