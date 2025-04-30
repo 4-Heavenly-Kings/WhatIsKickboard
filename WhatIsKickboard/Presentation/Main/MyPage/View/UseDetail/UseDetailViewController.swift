@@ -7,6 +7,8 @@
 
 import UIKit
 
+import RxSwift
+import RxCocoa
 import SnapKit
 import Then
 
@@ -14,10 +16,16 @@ import Then
 final class UseDetailViewController: BaseViewController {
     
     // MARK: - Compoenets
-    let useDetailTableView = UITableView()
+    let useDetailView = UseDetailView()
     
     // MARK: - Properties
     let dummyData = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    
+    override func loadView() {
+        super.loadView()
+        
+        view = useDetailView
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,28 +34,31 @@ final class UseDetailViewController: BaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.navigationController?.navigationBar.isHidden = false
+        self.navigationController?.navigationBar.isHidden = true
+        self.tabBarController?.tabBar.isHidden = true
     }
     
     override func setStyles() {
         super.setStyles()
         
-        useDetailTableView.do {
-            $0.delegate = self
-            $0.dataSource = self
-            $0.register(UseDetailTableViewCell.self, forCellReuseIdentifier: UseDetailTableViewCell.className)
-        }
+        useDetailView.getUseDetailTableView().delegate = self
+        useDetailView.getUseDetailTableView().dataSource = self
         
     }
     
     override func setLayout() {
         super.setLayout()
         
-        view.addSubview(useDetailTableView)
+    }
+    
+    override func bindViewModel() {
+        super.bindViewModel()
         
-        useDetailTableView.snp.makeConstraints {
-            $0.edges.equalTo(view.safeAreaLayoutGuide)
-        }
+        useDetailView.getNavigationBarView().getBackButton().rx.tap
+            .bind(with: self) { owner, _ in
+                owner.navigationController?.popViewController(animated: true)
+            }
+            .disposed(by: disposeBag)
     }
 }
 

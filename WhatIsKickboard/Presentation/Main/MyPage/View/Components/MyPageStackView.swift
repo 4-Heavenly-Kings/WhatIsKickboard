@@ -18,6 +18,8 @@ final class MyPageStackView: UIStackView {
     let modifyNameButton = MyPageStackButton(title: "이름 수정")
     /// 비밀번호 수정 Button
     let modifyPasswordButton = MyPageStackButton(title: "비밀번호 수정")
+    /// 내가 등록한 킥보드 Button
+    let registerKickboardButton = MyPageStackButton(title: "내가 등록한 킥보드")
     /// 이용 내역 Button
     let useDetailButton = MyPageStackButton(title: "이용 내역")
     /// 로그아웃 Button
@@ -44,6 +46,6 @@ final class MyPageStackView: UIStackView {
     
     // MARK: - Layouts
     private func setLayout() {
-        self.addArrangedSubviews(modifyNameButton, modifyPasswordButton, useDetailButton, logoutButton)
+        self.addArrangedSubviews(modifyNameButton, modifyPasswordButton, registerKickboardButton, useDetailButton, logoutButton)
     }
 }
