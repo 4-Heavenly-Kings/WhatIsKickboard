@@ -66,7 +66,6 @@ private extension MyPageViewModel {
     }
     
     func logoutProgress() {
-        // 로그아웃 비즈니스 로직 처리 필요
         state.accessLogout.accept(())
     }
     

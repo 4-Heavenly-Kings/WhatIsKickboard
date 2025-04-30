@@ -33,7 +33,9 @@ final class MyPageViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        myPageViewModel.action.onNext(.viewDidLoad)
+        
+        bindAction()
+        bindUIEvents()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -42,29 +44,13 @@ final class MyPageViewController: BaseViewController {
         self.tabBarController?.tabBar.isHidden = false
     }
     
-    // MARK: - bindViewModel
-    override func bindViewModel() {
-        super.bindViewModel()
-        
-        /// 회원정보 보여주기
-        myPageViewModel.state.user
-            .subscribe(with: self, onNext: { owner, user in
-                owner.user = user
-                guard let user = owner.user, let name = user.name else { return }
-                
-                let attributedText = NSMutableAttributedString.makeAttributedString(
-                    text: "\(name)님, 안녕하세요!",
-                    highlightedParts: [
-                        (name, .core, UIFont.jalnan2(28)),
-                        ("님, 안녕하세요!", .black, UIFont.jalnan2(28))
-                    ]
-                )
-                owner.myPageView.pobyGreetingView.userNameGreetingLabel.attributedText = attributedText
-            }, onError: { owner, error in
-                print("\(owner.className) 유저 정보를 찾을 수 없습니다!")
-            })
-            .disposed(by: disposeBag)
-        
+    // MARK: - bindAction
+    private func bindAction() {
+        myPageViewModel.action.onNext(.viewDidLoad)
+    }
+    
+    // MARK: - bindUIEvents
+    private func bindUIEvents() {
         /// 이름 수정 (modifyNameButton)
         myPageView.myPageStackView.modifyNameButton.rx.tap
             .subscribe(with: self) { owner, _ in
@@ -108,6 +94,38 @@ final class MyPageViewController: BaseViewController {
                 owner.tabBarController?.tabBar.isHidden = true
             }
             .disposed(by: disposeBag)
+    }
+    
+    // MARK: - bindViewModel
+    override func bindViewModel() {
+        super.bindViewModel()
+        
+        /// 회원정보 보여주기
+        myPageViewModel.state.user
+            .subscribe(with: self, onNext: { owner, user in
+                owner.user = user
+                guard let user = owner.user, let name = user.name else { return }
+                
+                let attributedText = NSMutableAttributedString.makeAttributedString(
+                    text: "\(name)님, 안녕하세요!",
+                    highlightedParts: [
+                        (name, .core, UIFont.jalnan2(28)),
+                        ("님, 안녕하세요!", .black, UIFont.jalnan2(28))
+                    ]
+                )
+                owner.myPageView.pobyGreetingView.userNameGreetingLabel.attributedText = attributedText
+            }, onError: { owner, error in
+                print("\(owner.className) 유저 정보를 찾을 수 없습니다!")
+            })
+            .disposed(by: disposeBag)
+        
+        /// 최종적으로 AlertView에서 로그아웃 버튼이 눌린 경우
+        myPageViewModel.state.accessLogout
+            .bind(with: self) { owner, _ in
+                UserPersistenceManager.logout()
+                SceneDelegate.switchToSplash()
+            }
+            .disposed(by: disposeBag)
         
     }
     
@@ -142,6 +160,7 @@ final class MyPageViewController: BaseViewController {
         alert.getSubmitButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.dismissAlertView(alert)
+                owner.myPageViewModel.action.onNext(.logoutAction)
             }
             .disposed(by: disposeBag)
         
