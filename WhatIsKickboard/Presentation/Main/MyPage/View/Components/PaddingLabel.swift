@@ -8,9 +8,11 @@
 
 import UIKit
 
+//MARK: - PaddingLabel
 final class PaddingLabel: UILabel {
 
-    // 원하는 만큼 패딩 설정
+    //MARK: - Properties
+    /// 원하는 만큼 패딩 설정
     var textInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
 
     init(text: String,
@@ -30,12 +32,12 @@ final class PaddingLabel: UILabel {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // 텍스트가 그려질 때 패딩 적용
+    /// 텍스트가 그려질 때 패딩 적용
     override func drawText(in rect: CGRect) {
         super.drawText(in: rect.inset(by: textInsets))
     }
 
-    // intrinsicContentSize (레이아웃 사이즈 계산)에도 패딩 적용
+    /// intrinsicContentSize (레이아웃 사이즈 계산)에도 패딩 적용
     override var intrinsicContentSize: CGSize {
         let size = super.intrinsicContentSize
         return CGSize(
@@ -44,7 +46,7 @@ final class PaddingLabel: UILabel {
         )
     }
 
-    // 사이즈 조정할 때도 패딩 적용
+    /// 사이즈 조정할 때도 패딩 적용
     override func sizeThatFits(_ size: CGSize) -> CGSize {
         let size = super.sizeThatFits(size)
         return CGSize(

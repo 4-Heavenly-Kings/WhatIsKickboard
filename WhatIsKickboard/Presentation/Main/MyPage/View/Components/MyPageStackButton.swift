@@ -7,8 +7,8 @@
 
 import UIKit
 
+//MARK: - MyPageStackButton
 final class MyPageStackButton: UIButton {
-    
     init(title: String, titleColor: UIColor = .black, font: UIFont = .systemFont(ofSize: 15, weight: .bold)) {
         super.init(frame: .zero)
         
