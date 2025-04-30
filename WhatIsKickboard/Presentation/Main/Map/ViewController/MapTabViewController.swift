@@ -41,10 +41,10 @@ final class MapTabViewController: BaseViewController {
             mapTabView.getSearchBar().snp.remakeConstraints {
                 if isRegister {
                     $0.top.equalTo(mapTabView.getNavigationBarView().snp.bottom).offset(10)
-                    $0.leading.trailing.equalTo(mapTabView.safeAreaLayoutGuide).inset(30)
+                    $0.leading.trailing.equalTo(mapTabView.safeAreaLayoutGuide).inset(15)
                 } else {
                     $0.top.equalTo(mapTabView.safeAreaLayoutGuide).inset(10)
-                    $0.leading.trailing.equalTo(mapTabView.safeAreaLayoutGuide).inset(30)
+                    $0.leading.trailing.equalTo(mapTabView.safeAreaLayoutGuide).inset(15)
                 }
             }
         }
@@ -120,7 +120,21 @@ final class MapTabViewController: BaseViewController {
             .drive(mapTabView.getSearchResultTableView().rx.items(
                 cellIdentifier: SearchResultCell.identifier,
                 cellType: SearchResultCell.self)) { _, location, cell in
-                    cell.configure(title: location.title)
+                    cell.configure(location: location)
+            }.disposed(by: disposeBag)
+        
+        // 검색 결과 탭
+        mapTabView.getSearchResultTableView().rx
+            .modelSelected(LocationModel.self)
+            .bind(with: self) { owner, location in
+                // 킥보드 등록
+                if owner.isRegister {
+                    let registerVC = RegisterViewController()
+                    owner.navigationController?.pushViewController(registerVC, animated: true)
+                } else {
+                    // 지도 카메라 이동
+                    
+                }
             }.disposed(by: disposeBag)
         
         
@@ -157,7 +171,6 @@ final class MapTabViewController: BaseViewController {
             .bind(with: self) { owner, _ in
                 owner.toggleMarkerHideState()
             }.disposed(by: disposeBag)
-        
     }
     
     // MARK: - Style Helper
@@ -244,7 +257,7 @@ private extension MapTabViewController {
     }
 }
 
-// MARK: - NMFMapViewTouchDelegate
+// MARK: - NMFMapViewCameraDelegate
 
 extension MapTabViewController: NMFMapViewCameraDelegate {
     func mapView(_ mapView: NMFMapView, cameraWillChangeByReason reason: Int, animated: Bool) {

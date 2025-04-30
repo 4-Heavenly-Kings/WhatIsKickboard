@@ -17,6 +17,8 @@ final class SearchResultCell: BaseTableViewCell {
     
     static let identifier = "SearchResultCell"
     
+    private var location: LocationModel?
+    
     // MARK: - UI Components
     
     private let locationLabel = UILabel()
@@ -51,7 +53,8 @@ final class SearchResultCell: BaseTableViewCell {
     
     // MARK: - Methods
     
-    func configure(title: String) {
-        locationLabel.text = title
+    func configure(location: LocationModel) {
+        self.location = location
+        locationLabel.text = location.title
     }
 }
