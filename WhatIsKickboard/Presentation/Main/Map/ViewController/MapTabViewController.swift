@@ -195,6 +195,7 @@ final class MapTabViewController: BaseViewController {
     
     override func setDelegates() {
         mapTabView.getNaverMapView().mapView.addCameraDelegate(delegate: self)
+        mapTabView.getNaverMapView().mapView.touchDelegate = self
     }
 }
 
@@ -265,8 +266,18 @@ private extension MapTabViewController {
 
 extension MapTabViewController: NMFMapViewCameraDelegate {
     func mapView(_ mapView: NMFMapView, cameraWillChangeByReason reason: Int, animated: Bool) {
+        // 카메라가 현위치를 추적하는 것을 멈춤
         if reason == NMFMapChangedByGesture {
             mapPositionMode = .normal
         }
+    }
+}
+
+// MARK: - NMFMapViewTouchDelegate
+
+extension MapTabViewController: NMFMapViewTouchDelegate {
+    func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
+        // 키보드 내리기
+        mapTabView.getSearchBar().resignFirstResponder()
     }
 }
