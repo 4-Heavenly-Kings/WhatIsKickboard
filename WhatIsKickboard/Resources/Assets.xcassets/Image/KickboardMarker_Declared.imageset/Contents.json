@@ -1,8 +1,19 @@
 {
   "images" : [
     {
-      "filename" : "KickboardMarker_declared.svg",
-      "idiom" : "universal"
+      "filename" : "KickboardMarker_Declared.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "KickboardMarker_Declared@2x.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "KickboardMarker_Declared@3x.png",
+      "idiom" : "universal",
+      "scale" : "3x"
     }
   ],
   "info" : {
