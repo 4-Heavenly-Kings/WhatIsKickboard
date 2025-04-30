@@ -48,6 +48,12 @@ final class TabbarViewModel: ViewModelProtocol {
     
     /// 유저정보 울러오기
     private func getUser() {
-        
+        UserPersistenceManager.getUser()
+            .subscribe(with: self, onSuccess: { owner, user in
+                owner.state.user.onNext(user)
+            }, onFailure: { owner, error in
+                owner.state.user.onError(error)
+            })
+            .disposed(by: disposeBag)
     }
 }
