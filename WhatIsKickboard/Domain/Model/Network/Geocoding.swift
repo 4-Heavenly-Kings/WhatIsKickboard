@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+struct Geocoding: Codable {
+    let total, start, display: Int
+    let items: [Item]
+}
