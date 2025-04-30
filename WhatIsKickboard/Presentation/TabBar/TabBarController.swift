@@ -18,6 +18,8 @@ final class TabBarController: UITabBarController {
     private let registerButton = UIButton()
     /// 탭바의 라운드 곡선 처리를 위한 View
     private let tabBackgroundView = UIView()
+    /// 직전에 표시했던 ViewController의 index 저장
+    private var previousIndex: Int = 0
     
     // MARK: - View Life Cycle
     override func viewWillAppear(_ animated: Bool) {
@@ -30,6 +32,7 @@ final class TabBarController: UITabBarController {
         
         setStyles()
         setLayouts()
+        setDelegates()
         
         setTabBarItems()
     }
@@ -72,6 +75,10 @@ final class TabBarController: UITabBarController {
             $0.height.equalTo(registerButton.snp.width)
         }
     }
+    
+    func setDelegates() {
+        self.delegate = self
+    }
 }
 
 private extension TabBarController {
@@ -103,23 +110,19 @@ private extension TabBarController {
     /// 지도, 등록, 마이페이지 탭바 아이템 설정
     /// (여기서 '등록'은 dummy로 선언)
     func setTabBarItems() {
-        let mapVC = UINavigationController(rootViewController: MyPageViewController())
+        let mapTabViewController = MapTabViewController()
+        mapTabViewController.changeSelectedIndexDelegate = self
+        let mapVC = UINavigationController(rootViewController: mapTabViewController)
+        let registerVC = UIViewController()
         let myPageVC = UINavigationController(rootViewController: MyPageViewController())
         
-        let dummyVC = UIViewController()
-        dummyVC.tabBarItem.isEnabled = false
-        dummyVC.tabBarItem.title = nil
-        dummyVC.tabBarItem.image = UIImage()
-        
-        tabControllers = [mapVC, dummyVC, myPageVC]
+        tabControllers = [mapVC, registerVC, myPageVC]
         
         let appearance = makeTabBarAppearance()
         tabBar.standardAppearance = appearance
         tabBar.itemPositioning = .automatic
         
-        if #available(iOS 15.0, *) {
-            tabBar.scrollEdgeAppearance = appearance
-        }
+        tabBar.scrollEdgeAppearance = appearance
         
         tabBar.backgroundImage = UIImage()
         tabBar.shadowImage = UIImage()
@@ -189,5 +192,31 @@ private extension TabBarController {
         tabFrame.size.height = height
         tabFrame.origin.y = view.frame.size.height - height
         tabBar.frame = tabFrame
+    }
+}
+
+// MARK: - UITabBarControllerDelegate
+
+extension TabBarController: UITabBarControllerDelegate {
+    // MapTabViewController를 찾아 킥보드 위치 등록 상태로 전환시킴
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        guard let index = viewControllers?.firstIndex(of: viewController) else { return }
+        if index == 1 {
+            if let nav = viewControllers?[0] as? UINavigationController,
+               let mapVC = nav.viewControllers.first as? MapTabViewController {
+                selectedIndex = 0
+                mapVC.isRegister = true
+            }
+        } else {
+            previousIndex = index
+        }
+    }
+}
+
+// MARK: - ChangeSelectedIndexDelegate
+
+extension TabBarController: ChangeSelectedIndexDelegate {
+    func changeSelectedIndexToPrevious() {
+        selectedIndex = previousIndex
     }
 }
