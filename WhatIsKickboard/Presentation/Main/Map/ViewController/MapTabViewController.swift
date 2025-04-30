@@ -19,11 +19,11 @@ final class MapTabViewController: BaseViewController {
     // MARK: - Properties
     
     private let viewModel = MapTabViewModel()
+
     /// 지도 애니메이션 상태 관리용
     private var mapPositionMode: NMFMyPositionMode = .disabled
     /// 킥보드 마커 리스트
     private var kickboardMarkerList = [NMFMarker]()
-    
     /// 킥보드 마커 숨김 상태
     private var isAllMarkerHidden: Bool = false {
         didSet {
@@ -32,6 +32,16 @@ final class MapTabViewController: BaseViewController {
             mapTabView.getHideKickboardButton().setImage(buttonImage, for: .normal)
         }
     }
+    /// 킥보드 등록 모드
+    var isRegister: Bool = false {
+        didSet {
+            self.tabBarController?.tabBar.isHidden = isRegister
+            mapTabView.getNavigationBarView().isHidden = !isRegister
+            mapTabView.getStatusBarBackgroundView().isHidden = !isRegister
+        }
+    }
+    /// TabBarController 관련 Delegate
+    weak var changeSelectedIndexDelegate: ChangeSelectedIndexDelegate?
     
     // MARK: - UI Components
     
@@ -40,8 +50,9 @@ final class MapTabViewController: BaseViewController {
     
     // MARK: - Lifecycle
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.isHidden = true
     }
     
     // MARK: - Bind Helper
@@ -57,7 +68,7 @@ final class MapTabViewController: BaseViewController {
                     mapView.positionMode = .normal
                     owner.mapPositionMode = .direction
                 }
-                owner.updateMapCamera(to: coordinate)
+                owner.moveMapCamera(to: coordinate)
             }.disposed(by: disposeBag)
         
         // 킥보드 마커 생성
@@ -99,10 +110,20 @@ final class MapTabViewController: BaseViewController {
         // 바인딩 완료 알림
         viewModel.action.onNext(.didBinding)
         
+        // View ➡️ ViewController
+        // 킥보드 위치 등록 화면 뒤로가기 버튼 탭
+        mapTabView.getNavigationBarView().getBackButton().rx.tap
+            .bind(with: self) { owner, _ in
+                owner.changeSelectedIndexDelegate?.changeSelectedIndexToPrevious()
+                owner.isRegister = false
+            }.disposed(by: disposeBag)
+        
+        // 킥보드 마커 숨김 버튼 탭
         mapTabView.getHideKickboardButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.toggleMarkerHideState()
             }.disposed(by: disposeBag)
+        
     }
     
     // MARK: - Style Helper
@@ -130,7 +151,7 @@ final class MapTabViewController: BaseViewController {
 
 private extension MapTabViewController {
     /// coordinate 위치로 카메라 이동
-    func updateMapCamera(to coordinate: CLLocationCoordinate2D) {
+    func moveMapCamera(to coordinate: CLLocationCoordinate2D) {
         if mapPositionMode == .direction {
             let nmgCoordinate = NMGLatLng(from: coordinate)
             let cameraUpdate = NMFCameraUpdate(scrollTo: nmgCoordinate, zoomTo: 15)
@@ -183,7 +204,9 @@ private extension MapTabViewController {
     
     func toggleMarkerHideState() {
         isAllMarkerHidden.toggle()
-        kickboardMarkerList.forEach { $0.hidden = isAllMarkerHidden }
+        kickboardMarkerList
+            .filter { $0.userInfo["status"] as! String != KickboardStatus.impossibility.rawValue }
+            .forEach { $0.hidden = isAllMarkerHidden }
     }
 }
 
