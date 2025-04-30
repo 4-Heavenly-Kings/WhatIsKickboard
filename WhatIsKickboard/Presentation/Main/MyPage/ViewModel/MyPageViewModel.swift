@@ -13,11 +13,13 @@ import RxRelay
 final class MyPageViewModel: ViewModelProtocol {
 
     enum Action {
+        case viewDidLoad
         case logoutAction
         case withDrawalAction
     }
 
     struct State {
+        let user = PublishSubject<User>()
         let accessLogout = PublishRelay<Void>()
         let accessWithDrawal = PublishRelay<Void>()
     }
@@ -37,6 +39,8 @@ final class MyPageViewModel: ViewModelProtocol {
         actionSubject
             .subscribe(with: self) { owner, action in
                 switch action {
+                case .viewDidLoad:
+                    owner.loadUser()
                 case .logoutAction:
                     owner.logoutProgress()
                 case .withDrawalAction:
@@ -45,13 +49,28 @@ final class MyPageViewModel: ViewModelProtocol {
             }
             .disposed(by: disposeBag)
     }
+}
+
+//MARK: - Extension Private Methods
+private extension MyPageViewModel {
     
-    private func logoutProgress() {
+    /// 유저정보 불러오기
+    func loadUser() {
+        UserPersistenceManager.getUser()
+            .subscribe(with: self, onSuccess: { owner, user in
+                owner.state.user.onNext(user)
+            }, onFailure: { owner, error in
+                owner.state.user.onError(error)
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    func logoutProgress() {
         // 로그아웃 비즈니스 로직 처리 필요
         state.accessLogout.accept(())
     }
     
-    private func withDrawalProgress() {
+    func withDrawalProgress() {
         // 회원탈퇴 비즈니스 로직 처리 필요
         state.accessWithDrawal.accept(())
     }

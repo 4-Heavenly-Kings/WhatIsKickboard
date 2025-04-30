@@ -19,6 +19,9 @@ final class MyPageViewController: BaseViewController {
     private let myPageView = MyPageView()
     private var customAlertView: CustomAlertView?
     
+    // MARK: - Properties
+    private var user: User?
+    
     let myPageViewModel = MyPageViewModel()
     
     // MARK: - View Life Cycle
@@ -30,7 +33,7 @@ final class MyPageViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        myPageViewModel.action.onNext(.viewDidLoad)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -42,6 +45,25 @@ final class MyPageViewController: BaseViewController {
     // MARK: - bindViewModel
     override func bindViewModel() {
         super.bindViewModel()
+        
+        /// 회원정보 보여주기
+        myPageViewModel.state.user
+            .subscribe(with: self, onNext: { owner, user in
+                owner.user = user
+                guard let user = owner.user, let name = user.name else { return }
+                
+                let attributedText = NSMutableAttributedString.makeAttributedString(
+                    text: "\(name)님, 안녕하세요!",
+                    highlightedParts: [
+                        (name, .core, UIFont.jalnan2(28)),
+                        ("님, 안녕하세요!", .black, UIFont.jalnan2(28))
+                    ]
+                )
+                owner.myPageView.pobyGreetingView.userNameGreetingLabel.attributedText = attributedText
+            }, onError: { owner, error in
+                print("\(owner.className) 유저 정보를 찾을 수 없습니다!")
+            })
+            .disposed(by: disposeBag)
         
         /// 이름 수정 (modifyNameButton)
         myPageView.myPageStackView.modifyNameButton.rx.tap
@@ -109,7 +131,9 @@ final class MyPageViewController: BaseViewController {
         let alert = CustomAlertView(frame: .zero, alertType: .logout)
         view.addSubview(alert)
         
-        alert.configure(name: "회원님", minutes: nil, count: nil, price: nil)
+        guard let user, let name = user.name else { return }
+        
+        alert.configure(name: name)
         
         alert.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -134,7 +158,9 @@ final class MyPageViewController: BaseViewController {
         let alert = CustomAlertView(frame: .zero, alertType: .deleteID)
         view.addSubview(alert)
         
-        alert.configure(name: "회원님", minutes: nil, count: nil, price: nil)
+        guard let user, let name = user.name else { return }
+        
+        alert.configure(name: name)
         
         alert.snp.makeConstraints {
             $0.edges.equalToSuperview()
