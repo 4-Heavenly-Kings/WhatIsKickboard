@@ -8,15 +8,15 @@
 import Foundation
 
 struct SearchResultDTO: Decodable {
-    let locations: [LocationDTO]
+    let locationDTOList: [LocationDTO]
     
     enum CodingKeys: String, CodingKey {
-        case locations = "items"
+        case locationDTOList = "items"
     }
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.locations = try container.decode([LocationDTO].self, forKey: .locations)
+        self.locationDTOList = try container.decode([LocationDTO].self, forKey: .locationDTOList)
     }
 }
 

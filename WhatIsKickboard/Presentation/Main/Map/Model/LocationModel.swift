@@ -15,7 +15,7 @@ struct LocationModel {
     /// 업체, 기관명의 도로명 주소
     let roadAddress: String
     /// 업체, 기관이 위치한 장소의 x 좌표(KATECH 좌표계 기준)
-    let mapx: String
+    let mapx: Int
     /// 업체, 기관이 위치한 장소의 y 좌표(KATECH 좌표계 기준)
-    let mapy: String
+    let mapy: Int
 }

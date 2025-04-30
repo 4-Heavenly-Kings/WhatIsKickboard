@@ -69,7 +69,7 @@ final class APIGeocodingRepository: GeocodingAPIRepository {
                         }
                         
                         os_log(.debug, log: log, "searchResultDTO: %@", "\(searchResultDTO)")
-                        single(.success(searchResultDTO.locations.map { $0.toModel() }))
+                        single(.success(searchResultDTO.locationDTOList.map { $0.toModel() }))
                     } else {
                         os_log(.error, "%@", NetworkError.requestFailed.rawValue)
                         single(.failure(NetworkError.requestFailed))

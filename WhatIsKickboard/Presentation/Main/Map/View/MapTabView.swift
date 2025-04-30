@@ -46,9 +46,11 @@ final class MapTabView: BaseView {
     private let navigationBarView = CustomNavigationBarView()
     /// 지역 검색창
     private let searchBar = UISearchBar()
+    /// searchResultTableView 그림자 효과
+    private let tableViewContainer = UIView()
     /// 지역 검색 결과
-    private let searchResultTableView = UITableView()
-
+    private let resultTableView = UITableView()
+    
     // MARK: - Style Helper
     
     override func setStyles() {
@@ -114,9 +116,18 @@ final class MapTabView: BaseView {
             $0.searchTextField.layer.shadowRadius = 2
         }
         
-        searchResultTableView.do {
+        tableViewContainer.do {
+            $0.backgroundColor = .clear
+            $0.layer.shadowColor = UIColor.gray.cgColor
+            $0.layer.shadowOpacity = 1.0
+            $0.layer.shadowOffset = CGSize(width: 0, height: 1.5)
+            $0.layer.shadowRadius = 2
+        }
+        
+        resultTableView.do {
             $0.register(SearchResultCell.self, forCellReuseIdentifier: SearchResultCell.identifier)
-            $0.rowHeight = UITableView.automaticDimension
+            $0.rowHeight = 40
+            $0.isScrollEnabled = false
         }
     }
     
@@ -125,8 +136,9 @@ final class MapTabView: BaseView {
     override func setLayout() {
         self.addSubviews(naverMapView, compassButton, buttonStackView,
                          statusBarBackgroundView, navigationBarView,
-                         searchBar, searchResultTableView)
+                         searchBar, tableViewContainer)
         buttonStackView.addArrangedSubviews(hideKickboardButton, locationButton)
+        tableViewContainer.addSubview(resultTableView)
         
         naverMapView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -168,10 +180,14 @@ final class MapTabView: BaseView {
             $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
         }
         
-        searchResultTableView.snp.makeConstraints {
-            $0.top.equalTo(searchBar.snp.bottom).offset(5)
+        tableViewContainer.snp.makeConstraints {
+            $0.top.equalTo(searchBar.snp.bottom)
             $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(25)
-            $0.height.lessThanOrEqualTo(170)
+            $0.height.equalTo(0)
+        }
+        
+        resultTableView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
     }
     
@@ -191,46 +207,63 @@ final class MapTabView: BaseView {
         searchBar.layoutIfNeeded()
         let searchTextField = searchBar.searchTextField
         searchTextField.layer.cornerRadius = searchTextField.frame.height / 2
-        let bezierCGPath = UIBezierPath(roundedRect: searchTextField.bounds,
+        let searchBarCGPath = UIBezierPath(roundedRect: searchTextField.bounds,
                                         cornerRadius: searchTextField.layer.cornerRadius).cgPath
-        searchTextField.layer.shadowPath = bezierCGPath
+        searchTextField.layer.shadowPath = searchBarCGPath
         
-        searchResultTableView.layer.cornerRadius = 20
+        tableViewContainer.layoutIfNeeded()
+        tableViewContainer.layer.cornerRadius = 10
+        let containerCGPath = UIBezierPath(roundedRect: tableViewContainer.bounds,
+                                        cornerRadius: tableViewContainer.layer.cornerRadius).cgPath
+        tableViewContainer.layer.shadowPath = containerCGPath
+        
+        resultTableView.layoutIfNeeded()
+        resultTableView.layer.cornerRadius = 10
     }
     
     // MARK: - Methods
-
-    /// 네이버 지도 View 반환
+    
     func getNaverMapView() -> NMFNaverMapView {
         return naverMapView
     }
     
-    /// 킥보드 숨기기 버튼 반환
     func getHideKickboardButton() -> UIButton {
         return hideKickboardButton
     }
     
-    /// 현재 위치 버튼 반환
     func getLocationButton() -> UIButton {
         return locationButton
     }
     
-    /// 네비게이션 바 배경 반환
     func getStatusBarBackgroundView() -> UIView {
         return statusBarBackgroundView
     }
     
-    /// 네비게이션 바 반환
     func getNavigationBarView() -> CustomNavigationBarView {
         return navigationBarView
     }
     
-    /// 지역 검색창 반환
     func getSearchBar() -> UISearchBar {
         return searchBar
     }
     
     func getSearchResultTableView() -> UITableView {
-        return searchResultTableView
+        return resultTableView
+    }
+    
+    func updateTableViewContainer(heightTo height: ConstraintRelatableTarget) {
+        tableViewContainer.snp.updateConstraints {
+            $0.height.equalTo(height)
+        }
+        
+        tableViewContainer.layoutIfNeeded()
+        tableViewContainer.layer.shadowColor = UIColor.gray.cgColor
+        tableViewContainer.layer.shadowOpacity = 1.0
+        tableViewContainer.layer.shadowOffset = CGSize(width: 0, height: 1.5)
+        tableViewContainer.layer.shadowRadius = 2
+        
+        let bezierCGPath = UIBezierPath(roundedRect: tableViewContainer.bounds,
+                                        cornerRadius: tableViewContainer.layer.cornerRadius).cgPath
+        tableViewContainer.layer.shadowPath = bezierCGPath
     }
 }

@@ -34,8 +34,7 @@ final class SearchResultCell: BaseTableViewCell {
     
     override func setStyles() {
         locationLabel.do {
-            $0.text = "신림역"
-            $0.font = .systemFont(ofSize: 16)
+            $0.font = .systemFont(ofSize: 15)
         }
     }
     

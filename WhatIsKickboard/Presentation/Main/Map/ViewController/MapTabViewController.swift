@@ -108,15 +108,21 @@ final class MapTabViewController: BaseViewController {
                 }
             }.disposed(by: disposeBag)
         
-        // TODO: 검색 결과 UI에 반영
-        
+        // 지역 검색 결과 표시
         viewModel.state.searchResult
             .asDriver(onErrorJustReturn: [])
+            .do(onNext: { [weak self] locationList in
+                guard let self else { return }
+                
+                let totalHeight = locationList.count * 40
+                self.mapTabView.updateTableViewContainer(heightTo: totalHeight)
+            })
             .drive(mapTabView.getSearchResultTableView().rx.items(
                 cellIdentifier: SearchResultCell.identifier,
                 cellType: SearchResultCell.self)) { _, location, cell in
                     cell.configure(title: location.title)
             }.disposed(by: disposeBag)
+        
         
         // Action ➡️ ViewModel
         // 현재 위치 버튼 탭
@@ -136,6 +142,7 @@ final class MapTabViewController: BaseViewController {
         
         // 바인딩 완료 알림
         viewModel.action.onNext(.didBinding)
+        
         
         // View ➡️ ViewController
         // 킥보드 위치 등록 화면 뒤로가기 버튼 탭

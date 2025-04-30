@@ -33,9 +33,9 @@ struct LocationDTO: Decodable {
 extension LocationDTO {
     func toModel() -> LocationModel {
         LocationModel(title: title,
-                 address: address,
-                 roadAddress: roadAddress,
-                 mapx: mapx,
-                 mapy: mapy)
+                      address: address,
+                      roadAddress: roadAddress,
+                      mapx: Int(mapx) ?? 0,
+                      mapy: Int(mapy) ?? 0)
     }
 }
