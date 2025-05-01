@@ -14,6 +14,7 @@ enum CustomAlertViewType {
     case deleteID
     case emailFailed
     case signIntFailed
+    case failureUserModify
     
     func makeTitle(name: String, minutes: Int? = nil, count: Int? = nil) -> NSAttributedString {
         let fullText: String
@@ -33,7 +34,7 @@ enum CustomAlertViewType {
             } else {
                 fullText = "\(name)님은 아직 포비와 달린적이 없어요"
             }
-        case .emailFailed, .signIntFailed:
+        case .emailFailed, .signIntFailed, .failureUserModify:
             fullText = name
         }
         
@@ -77,13 +78,15 @@ enum CustomAlertViewType {
             return "어디가~? 킥보드 말고 뭐 타려고~?"
         case .emailFailed, .signIntFailed:
             return ""
+        case .failureUserModify:
+            return "다시 시도해줄래~?"
         }
     }
     
     var submitTitle: String {
         switch self {
         case .returnRequest: return "포비와 그만 놀기"
-        case .confirmReturn, .emailFailed, .signIntFailed: return "확인"
+        case .confirmReturn, .emailFailed, .signIntFailed, .failureUserModify: return "확인"
         case .logout: return "로그아웃"
         case .deleteID: return "포비에게 도망가기"
         }
@@ -91,7 +94,7 @@ enum CustomAlertViewType {
     
     var submitTitleColor: UIColor {
         switch self {
-        case .returnRequest, .confirmReturn, .deleteID, .emailFailed, .signIntFailed: return UIColor(hex: "#6B6E82")
+        case .returnRequest, .confirmReturn, .deleteID, .emailFailed, .signIntFailed, .failureUserModify: return UIColor(hex: "#6B6E82")
         case .logout: return UIColor(hex: "#FF4F17")
         }
     }
@@ -100,7 +103,7 @@ enum CustomAlertViewType {
         switch self {
         case .returnRequest: return "더 달리기"
         case .confirmReturn, .emailFailed, .signIntFailed: return ""
-        case .logout: return "취소"
+        case .logout, .failureUserModify: return "취소"
         case .deleteID: return "포비와 더 달리기"
         }
     }

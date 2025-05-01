@@ -61,10 +61,9 @@ final class ModifyStackView: UIStackView {
             modifyTextFiled.placeholder = modidyType.placeholder
             modifyCheckTextFiled.isHidden = true
         } else {
-            modifyTextFiled.placeholder = modidyType.placeholder + " 수정"
+            modifyTextFiled.placeholder = modidyType.placeholder + " 입력"
             modifyCheckTextFiled.placeholder = modidyType.placeholder + " 확인"
         }
-        
     }
     
     // MARK: - Layouts
