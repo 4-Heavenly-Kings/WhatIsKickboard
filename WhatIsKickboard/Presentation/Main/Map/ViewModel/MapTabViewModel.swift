@@ -24,7 +24,6 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     private let locationManager = CLLocationManager()
     
     private let fetchAPIGeocodingUseCase = FetchAPIGeocodingUseCase()
-    private let fetchAPIReverseGeocodingUseCase = FetchAPIReverseGeocodingUseCase()
     
     var disposeBag = DisposeBag()
     
@@ -155,7 +154,7 @@ private extension MapTabViewModel {
     
     func searchCoords(lat: Double, lng: Double) {
         let coordinates = "\(lng),\(lat)"
-        fetchAPIReverseGeocodingUseCase.fetchCoordToAddress(coords: coordinates)
+        fetchAPIGeocodingUseCase.fetchCoordToAddress(coords: coordinates)
             .subscribe(with: self, onSuccess: { owner, results in
                 owner.state.reverseGeoSearchResult.accept(results)
             }, onFailure: { owner, error in

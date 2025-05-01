@@ -9,7 +9,9 @@ import Foundation
 
 import RxSwift
 
-protocol GeocodingAPIRepository {
+protocol APIGeocodingRepositoryInterface {
     /// API를 통한 장소 검색
     func fetchSearchResults(for query: String) -> Single<[LocationModel]>
+    /// API를 통한 좌표 ➡️ 주소 검색
+    func fetchCoordToAddress(coords: String) -> Single<[ReverseGeoResultModel]>
 }
