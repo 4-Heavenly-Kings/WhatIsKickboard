@@ -25,41 +25,21 @@ final class testViewController: BaseViewController {
     private let showAlertButton = UIButton()
     private var customAlertView: CustomAlertView?
     
-    private var storedKickboardId: UUID?
     private var returnPrice: Int = 0
     private var returnBattery: Int = 0
     private var returnMinutes: Int = 0
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        Task {
-            do {
-                let id = try await KickboardPersistenceManager.createKickboard(
-                    latitude: 37.1236,
-                    longitude: 127.1236,
-                    battery: 70,
-                    address: "서울특별시 종로구 세종대로 175"
-                )
-                self.storedKickboardId = id
-            } catch {
-                print("⚠️ 테스트용 킥보드 저장 실패: \(error)")
-            }
-        }
-    }
 
     override func bindViewModel() {
         
         // 1. 버튼 탭 → UseCase 실행 트리거
         showAlertButton.rx.tap
-            .compactMap { [weak self] in self?.storedKickboardId }
-            .map { TestViewModel.Action.requestReturn(kickboardId: $0) }
+            .map { TestViewModel.Action.requestReturn }
             .bind(to: viewModel.action)
             .disposed(by: disposeBag)
         
         // 2. 킥보드 + 유저 정보 수신 → Alert 구성
         Observable
-            .combineLatest(viewModel.state.kickboard, viewModel.state.user)
+            .combineLatest(viewModel.state.kickboardRide, viewModel.state.user)
             .observe(on: MainScheduler.instance)
             .bind { [weak self] kickboard, user in
                 self?.showCustomAlert(user: user, kickboard: kickboard)
@@ -97,7 +77,7 @@ final class testViewController: BaseViewController {
         }
     }
     
-    private func showCustomAlert(user: User, kickboard: Kickboard) {
+    private func showCustomAlert(user: User, kickboard: KickboardRide) {
         let name = user.name ?? "이름 없음"
         self.returnMinutes = calculateElapsedMinutes(kickboard: kickboard, userId: user.id)
         self.returnPrice = (returnMinutes * 100) + 500
@@ -137,9 +117,8 @@ final class testViewController: BaseViewController {
         self.customAlertView = alert
     }
     
-    private func calculateElapsedMinutes(kickboard: Kickboard, userId: UUID) -> Int {
-        guard let ride = kickboard.rides?.last(where: { $0.userId == userId }) else { return 0 }
-        let startTime = ride.startTime
+    private func calculateElapsedMinutes(kickboard: KickboardRide, userId: UUID) -> Int {
+        let startTime = kickboard.startTime
         let now = Date()
         let minutes = Calendar.current.dateComponents([.minute], from: startTime, to: now).minute ?? 0
         return minutes
