@@ -31,7 +31,6 @@ final class MapTabView: BaseView {
         $0.mapView.logoAlign = .leftBottom
         $0.mapView.logoMargin = UIEdgeInsets(top: 0, left: 15, bottom: 40, right: 0)
         $0.mapView.isTiltGestureEnabled = false
-        $0.mapView.showLegalNotice()
     }
     /// 네이버 지도 나침반 버튼 NMFCompassView
     private let compassButton = NMFCompassView()
