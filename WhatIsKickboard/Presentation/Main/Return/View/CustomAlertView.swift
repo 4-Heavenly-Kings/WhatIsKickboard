@@ -109,7 +109,7 @@ final class CustomAlertView: BaseView {
     override func setLayout() {
         
         switch alertType {
-        case .returnRequest, .logout, .deleteID, .failureUserModify:
+        case .returnRequest, .logout, .deleteID:
             addSubviews(containerView)
             containerView.addSubviews(imageView, titleLabel, subtitleLabel, buttonStackView, verticalSeparator, horizontalSeparator)
             buttonStackView.addArrangedSubviews(submitButton, cancelButton)
@@ -155,7 +155,7 @@ final class CustomAlertView: BaseView {
                 $0.bottom.equalTo(buttonStackView.snp.bottom)
                 $0.width.equalTo(1)
             }
-        case .confirmReturn, .emailFailed ,.signIntFailed:
+        case .confirmReturn, .emailFailed ,.signIntFailed, .failureUserModify:
             addSubviews(containerView)
             containerView.addSubviews(imageView, titleLabel, horizontalSeparator, buttonStackView)
             buttonStackView.addArrangedSubviews(submitButton)

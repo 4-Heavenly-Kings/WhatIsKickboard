@@ -41,14 +41,6 @@ final class UseDetailTableViewCell: BaseTableViewCell {
         }
         
         usingComment.do {
-            let text = "포비와 강남구에서 15분 놀았어요!"
-            let attributedText = NSMutableAttributedString.makeBoldAttributedString(
-                fullText: text,
-                boldParts: ["강남구", "15분"],
-                regularFont: .systemFont(ofSize: 15, weight: .regular),
-                boldFont: .systemFont(ofSize: 15, weight: .bold),
-                color: .black)
-            $0.attributedText = attributedText
             $0.textAlignment = .center
         }
         
@@ -84,6 +76,28 @@ final class UseDetailTableViewCell: BaseTableViewCell {
             $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().offset(-16)
         }
+    }
+    
+    func configureCell(_ item: KickboardRide) {
+        let address = item.address.components(separatedBy: " ")
+        let minutes = Calendar.current.dateComponents([.minute], from: item.startTime, to: item.endTime!).minute ?? 0
+        
+        let text = "포비와 \(address[1])에서 \(minutes)분 놀았어요!"
+        let attributedText = NSMutableAttributedString.makeBoldAttributedString(
+            fullText: text,
+            boldParts: [address[1], String(minutes)],
+            regularFont: .systemFont(ofSize: 15, weight: .regular),
+            boldFont: .systemFont(ofSize: 15, weight: .bold),
+            color: .black)
+        
+        if let imagePath = item.imagePath,
+           let image = UIImage(contentsOfFile: imagePath) {
+            returnImage.image = image
+        }
+        
+        usingComment.attributedText = attributedText
+        rentLocationLabel.text = "대여장소: \(item.address)"
+        
     }
     
 }

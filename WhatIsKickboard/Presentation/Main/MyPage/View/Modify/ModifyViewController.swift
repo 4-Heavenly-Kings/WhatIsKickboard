@@ -104,6 +104,7 @@ final class ModifyViewController: BaseViewController {
             .disposed(by: disposeBag)
         
         modifyViewModel.state.errorMessage
+            .observe(on: MainScheduler.asyncInstance)
             .bind(with: self) { owner, message in
                 owner.showModifyAlert(message)
             }
