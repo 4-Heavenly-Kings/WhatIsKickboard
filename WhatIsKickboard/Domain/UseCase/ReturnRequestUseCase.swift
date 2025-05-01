@@ -12,4 +12,5 @@ import RxSwift
 protocol ReturnRequestUseCase {
     func getCurrentUser() -> Single<User>
     func getKickboard(id: UUID) -> Single<Kickboard>
+    func getKickboardRide(id: UUID) -> Single<KickboardRide>
 }

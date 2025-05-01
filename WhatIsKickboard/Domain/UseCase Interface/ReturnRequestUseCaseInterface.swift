@@ -17,10 +17,14 @@ final class ReturnRequestUseCaseInterface: ReturnRequestUseCase {
     }
 
     func getCurrentUser() -> Single<User> {
-        return repository.getCurrentUser()
+        repository.getCurrentUser()
     }
 
     func getKickboard(id: UUID) -> Single<Kickboard> {
-        return repository.getKickboard(id: id)
+        repository.getKickboard(id: id)
+    }
+
+    func getKickboardRide(id: UUID) -> Single<KickboardRide> {
+        repository.getKickboardRide(id: id)
     }
 }
