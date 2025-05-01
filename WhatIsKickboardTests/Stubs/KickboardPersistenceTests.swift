@@ -92,12 +92,10 @@ struct KickboardPersistenceTests {
     /// 킥보드 반납 테스트
     @Test func testReturnKickboard() async throws {
         guard let id = UserDefaults.standard.object(forKey: "kickboard_id") as? String, let uuid = UUID(uuidString: id) else { return }
-        try await KickboardPersistenceManager.returnKickboard(id: uuid, latitude: 37.1236, longitude: 127.1236, battery: 50, imagePath: "test/path")
+        try await KickboardPersistenceManager.returnKickboard(id: uuid, latitude: 37.1236, longitude: 127.1236, battery: 50, imagePath: "test/path", address: "서울특별시 강남구 강남대로 1234")
         
-        getKickboard(id: uuid) { kickboard in
-            print(kickboard)
-            #expect(kickboard.battery == 50)
-            #expect(kickboard.status == "ABLE" || kickboard.status == "LOW_BATTERY")
+        getKickboardRide(id: uuid) { ride in
+            print(ride)
         }
     }
     

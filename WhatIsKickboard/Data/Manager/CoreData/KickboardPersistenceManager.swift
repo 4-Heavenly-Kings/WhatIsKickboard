@@ -90,7 +90,9 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
         let kickboard = try getKickboardData(id: id)
         
         let ride = KickboardRideEntity(context: context)
-        ride.id = UUID()
+        let rideId = UUID()
+        
+        ride.id = rideId
         ride.user_id = userId
         ride.kickboard_id = id
         ride.start_time = Date()
@@ -105,23 +107,22 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
         
         // kickboard/user의 rides에 ride 추가
         kickboard.addToRides(ride)
-        user.addToRides(ride)
-        
         kickboard.status = "IMPOSSIBILITY"
+        
+        user.addToRides(ride)
+        user.current_kickboard_ride_id = rideId
+        
         try await saveContext("킥보드 대여")
     }
     
     /// 킥보드 반납
-    static func returnKickboard(id: UUID, latitude: Double, longitude: Double, battery: Int, imagePath: String) async throws {
+    static func returnKickboard(id: UUID, latitude: Double, longitude: Double, battery: Int, imagePath: String, address: String) async throws {
         let userId = try getCurrentUserId()
         
         let user = try getUserData(id: userId)
         let kickboard = try getKickboardData(id: id)
-        
-        /// 탑승 정보 CoreData에서 호출
-        guard let latestRide = try getRideListData(userId: userId).last else {
-            throw KickboardPersistenceError.rideNotFound
-        }
+        guard let rideId = user.current_kickboard_ride_id else { throw KickboardPersistenceError.rideNotFound }
+        let ride = try getRideData(id: rideId)
         
         let now = Date()
         
@@ -132,15 +133,17 @@ final class KickboardPersistenceManager: BaseCoreDataManager {
         kickboard.status = setStatus(battery: battery)
         
         // 해당 킥보드의 가장 최신 탑승 정보 수정
-        latestRide.end_latitude = latitude
-        latestRide.end_longitude = longitude
-        latestRide.end_time = now
-        latestRide.price = calculateCharge(from: latestRide.start_time ?? now, to: now)
-        latestRide.image_path = imagePath
-        latestRide.battery = kickboard.battery
+        ride.end_latitude = latitude
+        ride.end_longitude = longitude
+        ride.end_time = now
+        ride.price = calculateCharge(from: ride.start_time ?? now, to: now)
+        ride.image_path = imagePath
+        ride.battery = kickboard.battery
+        ride.address = address
         
-        latestRide.kickboard = kickboard
-        latestRide.user = user
+        user.current_kickboard_ride_id = nil
+        ride.kickboard = kickboard
+        ride.user = user
 
         try await saveContext("킥보드 반납")
     }
