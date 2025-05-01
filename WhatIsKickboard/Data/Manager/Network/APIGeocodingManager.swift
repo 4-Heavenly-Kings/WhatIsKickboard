@@ -1,8 +1,8 @@
 //
-//  APIGeocodingRepository.swift
+//  APIGeocodingManager.swift
 //  WhatIsKickboard
 //
-//  Created by 서동환 on 4/30/25.
+//  Created by 유영웅 on 5/1/25.
 //
 
 import Foundation
@@ -10,8 +10,8 @@ import OSLog
 
 import RxSwift
 
-/// 네이버 지역 검색 API 호출 Repository
-final class APIGeocodingRepository: GeocodingAPIRepository {
+/// 네이버 지역 검색 API 호출 Manager
+final class APIGeocodingManager {
     func fetchSearchResults(for query: String) -> Single<[LocationModel]> {
         let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "APIGeocodingRepository")
         
