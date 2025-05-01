@@ -32,7 +32,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     
     enum Action {
         /// 현재 위치 버튼 탭
-        case didlocationButtonTap
+        case didLocationButtonTap
         /// 장소 검색창 텍스트
         case searchText(text: String)
         /// 카메라 아이들 상태일 때 Reverse Geocoding 검색
@@ -75,7 +75,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         state.actionSubject
             .subscribe(with: self) { owner, action in
                 switch action {
-                case .didlocationButtonTap:
+                case .didLocationButtonTap:
                     owner.updateLastLocation()
                 case let .searchText(text):
                     owner.searchLocation(searchText: text)

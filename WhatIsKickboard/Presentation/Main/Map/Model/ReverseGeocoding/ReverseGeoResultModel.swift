@@ -7,7 +7,10 @@
 
 import Foundation
 
+/// 응답 결과
 struct ReverseGeoResultModel {
+    /// 주소 정보
     let region: RegionModel
+    /// 상세 주소 정보
     let land: LandModel?
 }

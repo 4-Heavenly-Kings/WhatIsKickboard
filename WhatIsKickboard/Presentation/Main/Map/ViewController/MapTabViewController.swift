@@ -129,29 +129,46 @@ final class MapTabViewController: BaseViewController {
                     cell.configure(location: location)
             }.disposed(by: disposeBag)
         
-        // 검색 결과 탭
-        mapTabView.getSearchResultTableView().rx
-            .modelSelected(LocationModel.self)
-            .bind(with: self) { owner, location in
-                if owner.isRegister {
-                    // 킥보드 등록
-                    let registerVC = RegisterViewController()
-                    owner.navigationController?.pushViewController(registerVC, animated: true)
+        viewModel.state.reverseGeoSearchResult
+            .asDriver(onErrorJustReturn: [])
+            .drive(with: self) { owner, location in
+                guard let nearest = location.first else { return }
+                let region = nearest.region
+                let land = nearest.land
+                
+                var address = "\(region.area1.name) \(region.area2.name)"
+                if let roadName = land?.name, let roadNum = land?.number1 {
+                    // 도로명 주소
+                    address += " \(roadName) \(roadNum)"
                 } else {
-                    // 지도 카메라 이동
-                    owner.mapTabView.getSearchBar().text = location.title
-                    owner.moveMapCamera(to: location.coordinates)
-                    owner.dismissKeyboard()
+                    // 지번 주소
+                    address += " \(region.area3.name)"
+                    if !region.area4.name.isEmpty {
+                        address += " \(region.area4.name)"
+                    }
+                    if let addrNum1 = land?.number1, let addrNum2 = land?.number2 {
+                        address += " \(addrNum1) \(addrNum2)"
+                    }
                 }
+                
+                if let buildingName = land?.addition0.value {
+                    // + 건물 이름
+                    address += " \(buildingName)"
+                }
+                
+                owner.mapTabView.getSearchBar().text = address
             }.disposed(by: disposeBag)
         
+        // TODO: 등록) 위도 경도Double, 한글주소String
+        
+        // TODO: 반납) 킥보드 UUID
         
         // Action ➡️ ViewModel
         // 현재 위치 버튼 탭
         mapTabView.getLocationButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.mapPositionMode = .direction
-                owner.viewModel.action.onNext(.didlocationButtonTap)
+                owner.viewModel.action.onNext(.didLocationButtonTap)
             }.disposed(by: disposeBag)
         
         // 장소 검색창 텍스트 및 위치 전달
@@ -168,6 +185,22 @@ final class MapTabViewController: BaseViewController {
         
         // View ➡️ ViewController
         // 킥보드 위치 등록 화면 뒤로가기 버튼 탭
+        // 검색 결과 탭
+        mapTabView.getSearchResultTableView().rx
+            .modelSelected(LocationModel.self)
+            .bind(with: self) { owner, location in
+                if owner.isRegister {
+                    // 킥보드 등록
+                    let registerVC = RegisterViewController()
+                    owner.navigationController?.pushViewController(registerVC, animated: true)
+                } else {
+                    // 지도 카메라 이동
+                    owner.mapTabView.getSearchBar().text = location.title
+                    owner.moveMapCamera(to: location.coordinates)
+                    owner.dismissKeyboard()
+                }
+            }.disposed(by: disposeBag)
+        
         mapTabView.getNavigationBarView().getBackButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.changeSelectedIndexDelegate?.changeSelectedIndexToPrevious()
