@@ -125,7 +125,6 @@ final class MapTabView: BaseView {
         }
         
         resultTableView.do {
-            $0.register(SearchResultCell.self, forCellReuseIdentifier: SearchResultCell.identifier)
             $0.rowHeight = 40
             $0.isScrollEnabled = false
         }

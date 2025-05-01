@@ -122,7 +122,7 @@ final class MapTabViewController: BaseViewController {
                 self.mapTabView.updateTableViewAppearance(heightTo: totalHeight)
             })
             .drive(mapTabView.getSearchResultTableView().rx.items(
-                cellIdentifier: SearchResultCell.identifier,
+                cellIdentifier: SearchResultCell.className,
                 cellType: SearchResultCell.self)) { _, location, cell in
                     cell.configure(location: location)
             }.disposed(by: disposeBag)
@@ -210,6 +210,12 @@ final class MapTabViewController: BaseViewController {
     override func setDelegates() {
         mapTabView.getNaverMapView().mapView.addCameraDelegate(delegate: self)
         mapTabView.getNaverMapView().mapView.touchDelegate = self
+    }
+    
+    // MARK: - Register Helper
+    
+    override func setRegister() {
+        mapTabView.getSearchResultTableView().register(SearchResultCell.self, forCellReuseIdentifier: SearchResultCell.className)
     }
 }
 

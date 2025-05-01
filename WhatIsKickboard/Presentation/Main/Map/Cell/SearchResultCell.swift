@@ -15,8 +15,6 @@ final class SearchResultCell: BaseTableViewCell {
     
     // MARK: - Properties
     
-    static let identifier = "SearchResultCell"
-    
     private var location: LocationModel?
     
     // MARK: - UI Components
