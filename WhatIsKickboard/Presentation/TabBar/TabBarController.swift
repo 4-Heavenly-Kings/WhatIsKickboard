@@ -132,7 +132,12 @@ private extension TabBarController {
         mapTabViewController.changeSelectedIndexDelegate = self
         let mapVC = UINavigationController(rootViewController: mapTabViewController)
         let registerVC = UIViewController()
-        let myPageVC = UINavigationController(rootViewController: MyPageViewController())
+        
+        // 의존성 주입 코드로 변경 (현재는 DIContainer X)
+        let modifyRepository = ModifyRepository()
+        let modifyUseCase = ModifyUseCase(repository: modifyRepository)
+        let myPageViewModel = MyPageViewModel(modifyUseCase: modifyUseCase)
+        let myPageVC = UINavigationController(rootViewController: MyPageViewController(myPageViewModel: myPageViewModel))
         
         tabControllers = [mapVC, registerVC, myPageVC]
         

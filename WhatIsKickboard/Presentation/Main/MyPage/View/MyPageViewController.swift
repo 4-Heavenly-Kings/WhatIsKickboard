@@ -22,7 +22,16 @@ final class MyPageViewController: BaseViewController {
     // MARK: - Properties
     private var user: User?
     
-    let myPageViewModel = MyPageViewModel()
+    let myPageViewModel: MyPageViewModel
+    
+    init(myPageViewModel: MyPageViewModel) {
+        self.myPageViewModel = myPageViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - View Life Cycle
     override func loadView() {
@@ -55,28 +64,33 @@ final class MyPageViewController: BaseViewController {
         /// 이름 수정 (modifyNameButton)
         myPageView.myPageStackView.modifyNameButton.rx.tap
             .subscribe(with: self) { owner, _ in
-                owner.pushNavigationController(ModifyViewController(modityType: .name))
+                
+                owner.pushNavigationController(ModifyViewController(modityType: .name, modifyViewModel: owner.setModifyViewModel(modifyType: .name)))
             }
             .disposed(by: disposeBag)
         
         /// 비밀번호 수정 (modifyPasswordButton)
         myPageView.myPageStackView.modifyPasswordButton.rx.tap
             .subscribe(with: self) { owner, _ in
-                owner.pushNavigationController(ModifyViewController(modityType: .password))
+                owner.pushNavigationController(ModifyViewController(modityType: .password, modifyViewModel: owner.setModifyViewModel(modifyType: .password)))
             }
             .disposed(by: disposeBag)
         
         /// 킥보드 등록 내역 (registerKickboard)
         myPageView.myPageStackView.registerKickboardButton.rx.tap
             .subscribe(with: self) { owner, _ in
-                owner.pushNavigationController(MyRegisterKickboardViewController())
+                let listRepository = ListRepository()
+                let listUsecase = ListUseCase(repository: listRepository)
+                owner.pushNavigationController(MyRegisterKickboardViewController(viewModel: MyRegisterKickboardViewModel(listUseCase: listUsecase)))
             }
             .disposed(by: disposeBag)
         
         /// 이용 내역 (useDetailButton)
         myPageView.myPageStackView.useDetailButton.rx.tap
             .subscribe(with: self) { owner, _ in
-                owner.pushNavigationController(UseDetailViewController())
+                let listRepository = ListRepository()
+                let listUsecase = ListUseCase(repository: listRepository)
+                owner.pushNavigationController(UseDetailViewController(viewModel: UseDetailViewModel(listUseCase: listUsecase)))
             }
             .disposed(by: disposeBag)
         
@@ -150,6 +164,14 @@ final class MyPageViewController: BaseViewController {
         
     }
     
+    private func setModifyViewModel(modifyType: ModifyType) -> ModifyViewModel {
+        let modifyRepository = ModifyRepository()
+        let modifyUseCase = ModifyUseCase(repository: modifyRepository)
+        let modifyViewModel = ModifyViewModel(modifyUseCase: modifyUseCase)
+
+        return modifyViewModel
+    }
+    
     private func pushNavigationController(_ viewController: UIViewController) {
         self.navigationController?.pushViewController(viewController, animated: true)
     }
@@ -197,7 +219,7 @@ final class MyPageViewController: BaseViewController {
         alert.getSubmitButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.dismissAlertView(alert)
-                owner.pushNavigationController(ModifyViewController(modityType: .withdrawal))
+                owner.pushNavigationController(ModifyViewController(modityType: .withdrawal, modifyViewModel: owner.setModifyViewModel(modifyType: .withdrawal)))
             }
             .disposed(by: disposeBag)
         

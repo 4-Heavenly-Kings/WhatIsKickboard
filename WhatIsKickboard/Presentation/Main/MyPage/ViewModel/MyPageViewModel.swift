@@ -30,8 +30,11 @@ final class MyPageViewModel: ViewModelProtocol {
 
     let state = State()
     let disposeBag = DisposeBag()
+    
+    let modifyUseCase: ModifyUseCase
 
-    init() {
+    init(modifyUseCase: ModifyUseCase) {
+        self.modifyUseCase = modifyUseCase
         bind()
     }
 
@@ -56,7 +59,7 @@ private extension MyPageViewModel {
     
     /// 유저정보 불러오기
     func loadUser() {
-        UserPersistenceManager.getUser()
+        modifyUseCase.getUser()
             .subscribe(with: self, onSuccess: { owner, user in
                 owner.state.user.onNext(user)
             }, onFailure: { owner, error in

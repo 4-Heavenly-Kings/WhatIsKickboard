@@ -38,8 +38,11 @@ final class ModifyViewModel: ViewModelProtocol {
     let state = State()
     var user: User?
     let disposeBag = DisposeBag()
+    
+    private let modifyUseCase: ModifyUseCase
 
-    init() {
+    init(modifyUseCase: ModifyUseCase) {
+        self.modifyUseCase = modifyUseCase
         bind()
         loadUser()
     }

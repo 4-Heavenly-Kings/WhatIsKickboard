@@ -21,10 +21,11 @@ final class ModifyViewController: BaseViewController {
     
     // MARK: - Properties
     private var modityType: ModifyType
-    private let modifyViewModel = ModifyViewModel()
+    private let modifyViewModel: ModifyViewModel
     
-    init(modityType: ModifyType) {
+    init(modityType: ModifyType, modifyViewModel: ModifyViewModel) {
         self.modityType = modityType
+        self.modifyViewModel = modifyViewModel
         super.init(nibName: nil, bundle: nil)
     }
     

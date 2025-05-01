@@ -18,7 +18,16 @@ final class MyRegisterKickboardViewController: BaseViewController {
     // MARK: - Compoenets
     let myRegisterKickboardView = MyRegisterKickboardView()
     
-    let myRegisterKickboardViewModel = MyRegisterKickboardViewModel()
+    private let viewModel: MyRegisterKickboardViewModel
+    
+    init(viewModel: MyRegisterKickboardViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func loadView() {
         super.loadView()
@@ -52,7 +61,7 @@ final class MyRegisterKickboardViewController: BaseViewController {
     override func bindViewModel() {
         super.bindViewModel()
         
-        myRegisterKickboardViewModel.state.kickboardList
+        viewModel.state.kickboardList
             .bind(to: myRegisterKickboardView.getMyRegisterTableView().rx.items(cellIdentifier: MyRegisterKickboardTableViewCell.className, cellType: MyRegisterKickboardTableViewCell.self)) { row, element, cell in
                 cell.configureCell(element)
             }
@@ -61,7 +70,7 @@ final class MyRegisterKickboardViewController: BaseViewController {
     }
     
     private func bindAction() {
-        myRegisterKickboardViewModel.action.onNext(.viewDidLoad)
+        viewModel.action.onNext(.viewDidLoad)
     }
     
     private func bindUIEvents() {

@@ -19,7 +19,16 @@ final class UseDetailViewController: BaseViewController {
     let useDetailView = UseDetailView()
     
     // MARK: - Properties
-    let useDetailViewModel = UseDetailViewModel()
+    private let viewModel: UseDetailViewModel
+    
+    init(viewModel: UseDetailViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - View Life Cycels
     override func loadView() {
@@ -56,7 +65,7 @@ final class UseDetailViewController: BaseViewController {
     override func bindViewModel() {
         super.bindViewModel()
         
-        useDetailViewModel.state.useDetailList
+        viewModel.state.useDetailList
             .bind(to: useDetailView.getUseDetailTableView().rx.items(cellIdentifier: UseDetailTableViewCell.className, cellType: UseDetailTableViewCell.self)) { row, element, cell in
                 cell.configureCell(element)
             }
@@ -72,6 +81,6 @@ final class UseDetailViewController: BaseViewController {
     }
     
     private func bindAction() {
-        useDetailViewModel.action.onNext(.viewDidLoad)
+        viewModel.action.onNext(.viewDidLoad)
     }
 }

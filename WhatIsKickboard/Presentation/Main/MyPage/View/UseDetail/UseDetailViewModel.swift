@@ -29,7 +29,10 @@ final class UseDetailViewModel: ViewModelProtocol {
     let state = State()
     let disposeBag = DisposeBag()
     
-    init() {
+    private let listUseCase: ListUseCase
+    
+    init(listUseCase: ListUseCase) {
+        self.listUseCase = listUseCase
         bind()
     }
     
@@ -52,7 +55,7 @@ final class UseDetailViewModel: ViewModelProtocol {
 
 private extension UseDetailViewModel {
     func fetchKickboardList(userId: UUID) {
-        KickboardPersistenceManager.getKickboardRideList(userId: userId)
+        listUseCase.getKickboardRideList(userId: userId)
             .subscribe(with: self) { owner, kickboardRideList in
                 print("getKickboardRideList 호출 성공")
                 print("CoreData 이용 내역리스트: \(kickboardRideList)")
