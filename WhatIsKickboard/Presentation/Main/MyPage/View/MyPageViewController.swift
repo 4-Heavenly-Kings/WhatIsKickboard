@@ -34,7 +34,6 @@ final class MyPageViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        bindAction()
         bindUIEvents()
     }
     
@@ -42,11 +41,13 @@ final class MyPageViewController: BaseViewController {
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.isHidden = true
         self.tabBarController?.tabBar.isHidden = false
+        
+        bindAction()
     }
     
     // MARK: - bindAction
     private func bindAction() {
-        myPageViewModel.action.onNext(.viewDidLoad)
+        myPageViewModel.action.onNext(.viewWillAppear)
     }
     
     // MARK: - bindUIEvents
@@ -106,7 +107,6 @@ final class MyPageViewController: BaseViewController {
             .subscribe(with: self, onNext: { owner, user in
                 owner.user = user
                 guard let user = owner.user, let name = user.name else { return }
-                
                 let attributedText = NSMutableAttributedString.makeAttributedString(
                     text: "\(name)님, 안녕하세요!",
                     highlightedParts: [

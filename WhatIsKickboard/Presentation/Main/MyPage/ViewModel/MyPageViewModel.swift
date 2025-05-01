@@ -13,7 +13,7 @@ import RxRelay
 final class MyPageViewModel: ViewModelProtocol {
 
     enum Action {
-        case viewDidLoad
+        case viewWillAppear
         case logoutAction
         case withDrawalAction
     }
@@ -39,7 +39,7 @@ final class MyPageViewModel: ViewModelProtocol {
         actionSubject
             .subscribe(with: self) { owner, action in
                 switch action {
-                case .viewDidLoad:
+                case .viewWillAppear:
                     owner.loadUser()
                 case .logoutAction:
                     owner.logoutProgress()
