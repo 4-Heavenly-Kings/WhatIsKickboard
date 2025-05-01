@@ -15,5 +15,4 @@ struct Kickboard {
     var battery: Int
     var address: String
     var status: String       // "ABLE", "DECLARED", "LOW_BATTERY", "IMPOSSIBILITY"
-    var rides: [KickboardRide]?
 }

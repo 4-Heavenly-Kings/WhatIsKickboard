@@ -32,6 +32,8 @@ final class LoginView: BaseView {
     // MARK: - Style
     override func setStyles() {
         
+        bindKeyboardAdjustments()
+        
         backgroundColor = UIColor(hex: "F5F6F8", alpha: 1.0)
         overrideUserInterfaceStyle = .light
         
