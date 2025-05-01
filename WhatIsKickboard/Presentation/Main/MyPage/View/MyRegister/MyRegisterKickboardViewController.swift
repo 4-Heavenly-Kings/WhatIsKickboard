@@ -18,6 +18,8 @@ final class MyRegisterKickboardViewController: BaseViewController {
     // MARK: - Compoenets
     let myRegisterKickboardView = MyRegisterKickboardView()
     
+    let myRegisterKickboardViewModel = MyRegisterKickboardViewModel()
+    
     // MARK: - Properties
     let dummyData = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     
