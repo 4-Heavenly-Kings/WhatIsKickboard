@@ -53,6 +53,12 @@ final class MapTabView: BaseView {
     /// 킥보드 등록 위치 표시 마커
     private let centerMarkerImageView = UIImageView()
     
+    private let modalLikeContainerView = UIView()
+    
+    private let mapUsingKickboardView = MapUsingKickboardView()
+    
+    private let customButton = CustomSubmitButton()
+    
     // MARK: - Style Helper
     
     override func setStyles() {
@@ -138,6 +144,14 @@ final class MapTabView: BaseView {
             $0.backgroundColor = .clear
             $0.isHidden = true
         }
+        
+        modalLikeContainerView.do {
+            $0.backgroundColor = UIColor(hex: "#FFFFFF")
+            $0.layer.cornerRadius = 10
+            $0.isHidden = true
+        }
+        
+        customButton.configure(buttonTitle: "대여하기")
     }
     
     // MARK: - Layout Helper
@@ -146,9 +160,10 @@ final class MapTabView: BaseView {
         self.addSubviews(naverMapView, compassButton, buttonStackView,
                          statusBarBackgroundView, navigationBarView,
                          searchBar, tableViewContainer,
-                         centerMarkerImageView)
+                         centerMarkerImageView, modalLikeContainerView)
         buttonStackView.addArrangedSubviews(hideKickboardButton, locationButton)
         tableViewContainer.addSubview(resultTableView)
+        modalLikeContainerView.addSubviews(mapUsingKickboardView, customButton)
         
         naverMapView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -204,6 +219,22 @@ final class MapTabView: BaseView {
             $0.centerX.equalTo(self.safeAreaLayoutGuide)
             $0.centerY.equalTo(self.safeAreaLayoutGuide).offset(-8)
             $0.width.height.equalTo(50)
+        }
+        
+        modalLikeContainerView.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+        
+        mapUsingKickboardView.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(customButton.snp.top).offset(-16)
+        }
+        
+        customButton.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(25)
+            $0.bottom.equalTo(self.safeAreaLayoutGuide)
+            $0.height.equalTo(50)
         }
     }
     
@@ -278,6 +309,18 @@ final class MapTabView: BaseView {
         return centerMarkerImageView
     }
     
+    func getModalLikeContainerView() -> UIView {
+        return modalLikeContainerView
+    }
+    
+    func getMapUsingKickboardView() -> MapUsingKickboardView {
+        return mapUsingKickboardView
+    }
+    
+    func getCustomButton() -> CustomSubmitButton {
+        return customButton
+    }
+    
     /// resultTableView(tableViewContainer) 높이 및 그림자 효과 업데이트
     func updateTableViewAppearance(heightTo height: ConstraintRelatableTarget) {
         tableViewContainer.snp.updateConstraints {
@@ -299,5 +342,18 @@ final class MapTabView: BaseView {
     func updateTableViewHideState(to state: Bool) {
         tableViewContainer.isHidden = state
         resultTableView.isHidden = state
+    }
+    
+    func updateUsingKickboardViewTimeLabel(elapsedMinutes: Int) {
+        let text = "\(elapsedMinutes)분 이용 중"
+        let attributedText = NSMutableAttributedString.makeAttributedString(
+            text: text,
+            highlightedParts: [
+                ("\(elapsedMinutes)분", .black, UIFont.systemFont(ofSize: 30, weight: .bold))
+            ]
+        )
+        mapUsingKickboardView.usingTimeLabel.attributedText = attributedText
+        mapUsingKickboardView.usingTimeLabel.textAlignment = .center
+        mapUsingKickboardView.usingTimeLabel.textColor = .black
     }
 }

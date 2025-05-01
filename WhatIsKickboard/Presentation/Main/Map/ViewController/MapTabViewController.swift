@@ -53,6 +53,10 @@ final class MapTabViewController: BaseViewController {
         }
     }
     
+    
+    private var timer: Timer?
+    private var elapsedMinutes = 0
+    
     /// 지도 카메라 좌표
     private var cameraCoordinates = NMGLatLng()
     /// 검색창 주소
@@ -215,6 +219,28 @@ final class MapTabViewController: BaseViewController {
             .bind(with: self) { owner, _ in
                 owner.mapTabView.updateTableViewHideState(to: true)
             }.disposed(by: disposeBag)
+        
+        
+        mapTabView.getCustomButton().rx.tap
+            .bind(with: self) { owner, _ in
+                if owner.mapTabView.getCustomButton().titleLabel?.text == "대여하기" {
+                    
+                    owner.mapTabView.getCustomButton().configure(buttonTitle: "반납하기")
+                    owner.elapsedMinutes = 0
+                    owner.timer?.invalidate()
+                    owner.timer = Timer.scheduledTimer(timeInterval: 60.0,
+                                                 target: owner,
+                                                 selector: #selector(owner.updateTimer),
+                                                 userInfo: nil,
+                                                 repeats: true)
+                    owner.mapTabView.updateUsingKickboardViewTimeLabel(elapsedMinutes: owner.elapsedMinutes)
+                } else {
+//                    owner.mapTabView.getCustomButton().configure(buttonTitle: "대여하기")
+                    
+                    
+                    
+                }
+            }.disposed(by: disposeBag)
     }
     
     // MARK: - Style Helper
@@ -244,6 +270,14 @@ final class MapTabViewController: BaseViewController {
     
     override func setRegister() {
         mapTabView.getSearchResultTableView().register(SearchResultCell.self, forCellReuseIdentifier: SearchResultCell.className)
+    }
+
+}
+
+@objc private extension MapTabViewController {
+    func updateTimer() {
+        elapsedMinutes += 1
+        mapTabView.updateUsingKickboardViewTimeLabel(elapsedMinutes: elapsedMinutes)
     }
 }
 
@@ -295,11 +329,48 @@ private extension MapTabViewController {
             }
             marker.iconImage = iconImage
             
-            marker.touchHandler = { (overlay: NMFOverlay) -> Bool in
-                overlay.userInfo["id"]
-                let modalVC = MapModalViewController()
-                // TODO: 킥보드 사용 모달 구현
+            
+            marker.touchHandler = { [weak self] (overlay: NMFOverlay) -> Bool in
+                guard let self else { return true }
+                // TODO: - 반납할때 위도 경도 주소
+                let id = overlay.userInfo["id"] as! UUID
+                let latitude = overlay.userInfo["latitude"] as! Double
+                let longtitude = overlay.userInfo["longitude"] as! Double
+                let battery = overlay.userInfo["battery"] as! Int
+                let status = overlay.userInfo["status"] as! String
+                
+                self.tabBarController?.tabBar.isHidden = true
+                self.mapTabView.getModalLikeContainerView().isHidden = false
+                
+                mapTabView.getMapUsingKickboardView().do {
+                    $0.usingTimeLabel.do {
+                        let text: String
+                        switch status {
+                        case KickboardStatus.able.rawValue:
+                            text = "사용가능"
+                        case KickboardStatus.declared.rawValue:
+                            text = "신고 접수 중"
+                        case KickboardStatus.lowBattery.rawValue:
+                            text = "배터리 부족"
+                        default:  // IMPOSSIBILITY
+                            text = "배터리 부족"
+                        }
+                        
+                        let attributedText = NSMutableAttributedString.makeAttributedString(
+                            text: text,
+                            highlightedParts: [
+                                (text, .black, UIFont.systemFont(ofSize: 30, weight: .bold)),
+                            ]
+                        )
+                        $0.attributedText = attributedText
+                        $0.textAlignment = .center
+                        $0.textColor = .black
+                    }
+                }
+                
                 return true
+                
+                // TODO: 킥보드 사용 모달 구현
             }
             
             return marker
