@@ -23,4 +23,8 @@ final class FetchAPIGeocodingUseCase: FetchAPIGeocodingUseCaseInterface {
     func fetchSearchResults(for query: String) -> Single<[LocationModel]> {
         return repository.fetchSearchResults(for: query)
     }
+    
+    func fetchCoordToAddress(coords: String) -> Single<[ReverseGeoResultModel]>  {
+        return repository.fetchCoordToAddress(coords: coords)
+    }
 }
