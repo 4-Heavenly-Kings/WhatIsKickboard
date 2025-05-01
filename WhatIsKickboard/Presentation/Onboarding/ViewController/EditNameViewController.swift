@@ -29,6 +29,7 @@ final class EditNameViewController: BaseViewController {
             }
             .bind { owner, name in
                 owner.user?.name = name
+                owner.user?.role = "USER"
                 guard let user = owner.user else { return }
                 owner.viewModel.action.onNext(.didTapConfirm(user: user))
             }
