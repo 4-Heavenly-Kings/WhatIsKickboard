@@ -33,6 +33,8 @@ final class SignInView: BaseView {
     // MARK: - Style
     override func setStyles() {
         
+        bindKeyboardAdjustments()
+        
         backgroundColor = UIColor(hex: "F5F6F8", alpha: 1.0)
         overrideUserInterfaceStyle = .light
         
@@ -173,7 +175,7 @@ final class SignInView: BaseView {
         }
         
         inputStackView.snp.makeConstraints {
-            $0.top.equalTo(titleLogoTitleView.snp.bottom).offset(72)
+            $0.bottom.equalTo(safeAreaLayoutGuide).offset(-36)
             $0.horizontalEdges.equalToSuperview().inset(45)
             $0.centerX.equalToSuperview()
         }
