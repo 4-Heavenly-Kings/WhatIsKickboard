@@ -14,6 +14,7 @@ import RxSwift
 import SnapKit
 import Then
 
+/// 지도 탭 ViewController
 final class MapTabViewController: BaseViewController {
     
     // MARK: - Properties
@@ -36,8 +37,17 @@ final class MapTabViewController: BaseViewController {
     var isRegister: Bool = false {
         didSet {
             self.tabBarController?.tabBar.isHidden = isRegister
-            mapTabView.getNavigationBarView().isHidden = !isRegister
             mapTabView.getStatusBarBackgroundView().isHidden = !isRegister
+            mapTabView.getNavigationBarView().isHidden = !isRegister
+            mapTabView.getSearchBar().snp.remakeConstraints {
+                if isRegister {
+                    $0.top.equalTo(mapTabView.getNavigationBarView().snp.bottom).offset(10)
+                    $0.leading.trailing.equalTo(mapTabView.safeAreaLayoutGuide).inset(15)
+                } else {
+                    $0.top.equalTo(mapTabView.safeAreaLayoutGuide).inset(10)
+                    $0.leading.trailing.equalTo(mapTabView.safeAreaLayoutGuide).inset(15)
+                }
+            }
         }
     }
     /// TabBarController 관련 Delegate
@@ -68,7 +78,10 @@ final class MapTabViewController: BaseViewController {
                     mapView.positionMode = .normal
                     owner.mapPositionMode = .direction
                 }
-                owner.moveMapCamera(to: coordinate)
+                
+                if owner.mapPositionMode == .direction {
+                    owner.moveMapCamera(to: coordinate)
+                }
             }.disposed(by: disposeBag)
         
         // 킥보드 마커 생성
@@ -99,6 +112,36 @@ final class MapTabViewController: BaseViewController {
                 }
             }.disposed(by: disposeBag)
         
+        // 장소 검색 결과 표시
+        viewModel.state.searchResult
+            .asDriver(onErrorJustReturn: [])
+            .do(onNext: { [weak self] locationList in
+                guard let self else { return }
+                
+                let totalHeight = locationList.count * 40
+                self.mapTabView.updateTableViewAppearance(heightTo: totalHeight)
+            })
+            .drive(mapTabView.getSearchResultTableView().rx.items(
+                cellIdentifier: SearchResultCell.className,
+                cellType: SearchResultCell.self)) { _, location, cell in
+                    cell.configure(location: location)
+            }.disposed(by: disposeBag)
+        
+        // 검색 결과 탭
+        mapTabView.getSearchResultTableView().rx
+            .modelSelected(LocationModel.self)
+            .bind(with: self) { owner, location in
+                if owner.isRegister {
+                    // 킥보드 등록
+                    let registerVC = RegisterViewController()
+                    owner.navigationController?.pushViewController(registerVC, animated: true)
+                } else {
+                    // 지도 카메라 이동
+                    owner.moveMapCamera(to: location.coordinate)
+                }
+            }.disposed(by: disposeBag)
+        
+        
         // Action ➡️ ViewModel
         // 현재 위치 버튼 탭
         mapTabView.getLocationButton().rx.tap
@@ -107,8 +150,17 @@ final class MapTabViewController: BaseViewController {
                 owner.viewModel.action.onNext(.didlocationButtonTap)
             }.disposed(by: disposeBag)
         
+        // 장소 검색창 텍스트 및 위치 전달
+        mapTabView.getSearchBar().rx.text.orEmpty
+            .distinctUntilChanged()
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+            .bind(with: self) { owner, text in
+                owner.viewModel.action.onNext(.searchText(text: text))
+            }.disposed(by: disposeBag)
+        
         // 바인딩 완료 알림
         viewModel.action.onNext(.didBinding)
+        
         
         // View ➡️ ViewController
         // 킥보드 위치 등록 화면 뒤로가기 버튼 탭
@@ -124,6 +176,17 @@ final class MapTabViewController: BaseViewController {
                 owner.toggleMarkerHideState()
             }.disposed(by: disposeBag)
         
+        // 검색창 활성화, 검색 결과 표시
+        mapTabView.getSearchBar().rx.textDidBeginEditing
+            .bind(with: self) { owner, _ in
+                owner.mapTabView.updateTableViewHideState(to: false)
+            }.disposed(by: disposeBag)
+        
+        // 검색창 비활성화, 검색 결과 숨김
+        mapTabView.getSearchBar().rx.textDidEndEditing
+            .bind(with: self) { owner, _ in
+                owner.mapTabView.updateTableViewHideState(to: true)
+            }.disposed(by: disposeBag)
     }
     
     // MARK: - Style Helper
@@ -142,8 +205,17 @@ final class MapTabViewController: BaseViewController {
         }
     }
     
+    // MARK: - Delegate Helper
+    
     override func setDelegates() {
         mapTabView.getNaverMapView().mapView.addCameraDelegate(delegate: self)
+        mapTabView.getNaverMapView().mapView.touchDelegate = self
+    }
+    
+    // MARK: - Register Helper
+    
+    override func setRegister() {
+        mapTabView.getSearchResultTableView().register(SearchResultCell.self, forCellReuseIdentifier: SearchResultCell.className)
     }
 }
 
@@ -152,18 +224,17 @@ final class MapTabViewController: BaseViewController {
 private extension MapTabViewController {
     /// coordinate 위치로 카메라 이동
     func moveMapCamera(to coordinate: CLLocationCoordinate2D) {
-        if mapPositionMode == .direction {
-            let nmgCoordinate = NMGLatLng(from: coordinate)
-            let cameraUpdate = NMFCameraUpdate(scrollTo: nmgCoordinate, zoomTo: 15)
-            cameraUpdate.animation = .easeIn
-            
-            let mapView = mapTabView.getNaverMapView().mapView
-            DispatchQueue.main.async {
-                mapView.moveCamera(cameraUpdate)
-            }
+        let nmgCoordinate = NMGLatLng(from: coordinate)
+        let cameraUpdate = NMFCameraUpdate(scrollTo: nmgCoordinate, zoomTo: 15)
+        cameraUpdate.animation = .easeIn
+        
+        let mapView = mapTabView.getNaverMapView().mapView
+        DispatchQueue.main.async {
+            mapView.moveCamera(cameraUpdate)
         }
     }
     
+    /// 킥보드 마커 생성
     func makeMarkerList(of data: [Kickboard]) -> [NMFMarker] {
         let markerList = data.map {
             let marker = NMFMarker()
@@ -185,13 +256,13 @@ private extension MapTabViewController {
             let iconImage: NMFOverlayImage
             switch $0.status {
             case KickboardStatus.able.rawValue:
-                iconImage = .init(image: .kickboardMarkerAvailable)
+                iconImage = .init(image: .kickboardMarkerAvailableShadow)
             case KickboardStatus.declared.rawValue:
-                iconImage = .init(image: .kickboardMarkerDeclared)
+                iconImage = .init(image: .kickboardMarkerDeclaredShadow)
             case KickboardStatus.lowBattery.rawValue:
-                iconImage = .init(image: .kickboardMarkerUnavailable)
+                iconImage = .init(image: .kickboardMarkerUnavailableShadow)
             default:  // IMPOSSIBILITY
-                iconImage = .init(image: .kickboardMarkerUnavailable)
+                iconImage = .init(image: .kickboardMarkerUnavailableShadow)
                 marker.hidden = true
             }
             marker.iconImage = iconImage
@@ -202,6 +273,7 @@ private extension MapTabViewController {
         return markerList
     }
     
+    /// 마커 숨김 상태 변경
     func toggleMarkerHideState() {
         isAllMarkerHidden.toggle()
         kickboardMarkerList
@@ -210,12 +282,22 @@ private extension MapTabViewController {
     }
 }
 
-// MARK: - NMFMapViewTouchDelegate
+// MARK: - NMFMapViewCameraDelegate
 
 extension MapTabViewController: NMFMapViewCameraDelegate {
     func mapView(_ mapView: NMFMapView, cameraWillChangeByReason reason: Int, animated: Bool) {
+        // 카메라가 현위치를 추적하는 것을 멈춤
         if reason == NMFMapChangedByGesture {
             mapPositionMode = .normal
         }
+    }
+}
+
+// MARK: - NMFMapViewTouchDelegate
+
+extension MapTabViewController: NMFMapViewTouchDelegate {
+    func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
+        // 키보드 내리기
+        mapTabView.getSearchBar().resignFirstResponder()
     }
 }
