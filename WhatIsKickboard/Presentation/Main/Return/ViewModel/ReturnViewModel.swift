@@ -13,26 +13,71 @@ import RxRelay
 final class ReturnViewModel: ViewModelProtocol {
 
     enum Action {
-
+        case returnKickboard(
+            latitude: Double,
+            longitude: Double,
+            battery: Int,
+            imagePath: String,
+            address: String
+        )
     }
 
     struct State {
-
+        let success = PublishRelay<Void>()
+        let error = PublishRelay<Error>()
     }
 
     private let actionSubject = PublishSubject<Action>()
-    
     var action: AnyObserver<Action> { actionSubject.asObserver() }
+    
+    private let returnKickboardUseCase: ReturnKickboardUseCase
 
+    init(returnKickboardUseCase: ReturnKickboardUseCase) {
+        self.returnKickboardUseCase = returnKickboardUseCase
+        bind()
+    }
+    
     let state = State()
     let disposeBag = DisposeBag()
 
-    init() {
-        bind()
-    }
-
     private func bind() {
-
+        actionSubject
+            .subscribe(onNext: { [weak self] action in
+                guard let self else { return }
+                switch action {
+                case let .returnKickboard(latitude, longitude, battery, imagePath, address):
+                    self.handleReturnKickboard(
+                        latitude: latitude,
+                        longitude: longitude,
+                        battery: battery,
+                        imagePath: imagePath,
+                        address: address
+                    )
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    private func handleReturnKickboard(
+        latitude: Double,
+        longitude: Double,
+        battery: Int,
+        imagePath: String,
+        address: String
+    ) {
+        returnKickboardUseCase.execute(
+            latitude: latitude,
+            longitude: longitude,
+            battery: battery,
+            imagePath: imagePath,
+            address: address
+        )
+        .subscribe(onSuccess: { [weak self] in
+            self?.state.success.accept(())
+        }, onFailure: { [weak self] error in
+            self?.state.error.accept(error)
+        })
+        .disposed(by: disposeBag)
     }
     
 
