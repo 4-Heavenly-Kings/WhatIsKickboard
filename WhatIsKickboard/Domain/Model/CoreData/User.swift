@@ -14,5 +14,5 @@ struct User {
     var password: String
     var name: String?
     var role: String
-    var rides: [KickboardRide]?
+    var currentKickboardRideId: UUID?
 }

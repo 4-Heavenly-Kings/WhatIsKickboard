@@ -10,7 +10,6 @@ import Foundation
 // MARK: User + Mapper
 extension UserEntity {
     func toModel() -> User {
-        let rides = (self.rides as? Set<KickboardRideEntity>)?.map { $0.toModel() } ?? []
-        return User(id: self.id!, email: self.email!, password: self.password!, name: self.name, role: self.role!, rides: rides)
+        return User(id: self.id!, email: self.email!, password: self.password!, name: self.name, role: self.role!, currentKickboardRideId: self.current_kickboard_ride_id)
     }
 }
