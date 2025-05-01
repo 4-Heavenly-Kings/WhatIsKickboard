@@ -9,16 +9,16 @@ import Foundation
 
 import RxSwift
 
-final class UserPersistenceUseCase: UserPersistenceUseCaseInterface {
+final class AuthenticationUseCase: AuthenticationUseCaseInterface {
     
     // TODO: 의존성 주입할 때 주석 해제
-    //    private let repository: UserPersistenceRepository
+    //    private let repository: AuthenticationRepository
     //
-    //    init(repository: UserPersistenceRepository) {
+    //    init(repository: AuthenticationRepository) {
     //        self.repository = repository
     //    }
     
-    private let repository = UserPersistenceRepository()
+    private let repository = AuthenticationRepository()
     
     /// 로그인
     func login(_ email: String, _ password: String) -> Single<User> {
@@ -38,15 +38,5 @@ final class UserPersistenceUseCase: UserPersistenceUseCaseInterface {
     /// 유저정보 수정
     func patchUser(_ user: User) -> RxSwift.Single<User> {
         repository.patchUser(user)
-    }
-    
-    /// 로그아웃
-    func logout() {
-        repository.logout()
-    }
-    
-    /// 회원 탈퇴
-    func deleteUser(password: String) async throws {
-        try await repository.deleteUser(password: password)
     }
 }

@@ -14,10 +14,10 @@ import RxSwift
 final class UserPersistenceManager: BaseCoreDataManager {
     
     /// 로그인
-    func login(_ email: String, _ password: String) -> Single<User> {
+    static func login(_ email: String, _ password: String) -> Single<User> {
         return Single.create { single in
             do {
-                let user = try self.getUserData(email: email)
+                let user = try getUserData(email: email)
                 
                 guard user.password == password else {
                     throw UserPersistenceError.passwordIsWorng
@@ -35,22 +35,22 @@ final class UserPersistenceManager: BaseCoreDataManager {
     }
     
     /// 회원가입
-    func createUser(_ email: String, _ password: String) -> Single<User> {
+    static func createUser(_ email: String, _ password: String) -> Single<User> {
         return Single.create { single in
             do {
                 do {
-                    try self.getUserData(email: email)
+                    try getUserData(email: email)
                     throw UserPersistenceError.alreayUser
                 } catch let error as UserPersistenceError {
                     if error == .userNotFound {
-                        let user = UserEntity(context: self.context)
+                        let user = UserEntity(context: context)
                         user.id = UUID()
                         user.email = email
                         user.password = password
                         user.role = "GUEST"
-                        
+
                         UserDefaults.standard.set(user.id?.uuidString, forKey: "token")
-                        try self.context.save()
+                        try context.save()
                         single(.success(user.toModel()))
                     } else {
                         throw error
@@ -59,21 +59,21 @@ final class UserPersistenceManager: BaseCoreDataManager {
             } catch {
                 single(.failure(error))
             }
-            
+
             return Disposables.create()
         }
     }
     
     
     /// 유저정보 조회
-    func getUser() -> Single<User> {
+    static func getUser() -> Single<User> {
         return Single.create { single in
             do {
                 guard let id = UserDefaults.standard.object(forKey: "token") as? String else {
                     throw UserPersistenceError.tokenNotValid
                 }
                 print("유저정보 조회 성공")
-                let user = try self.getUserData(id: UUID(uuidString: id))
+                let user = try getUserData(id: UUID(uuidString: id))
                 single(.success(user.toModel()))
             } catch {
                 single(.failure(error))
@@ -83,17 +83,17 @@ final class UserPersistenceManager: BaseCoreDataManager {
     }
     
     /// 유저정보 변경
-    func patchUser(_ user: User) -> Single<User> {
+    static func patchUser(_ user: User) -> Single<User> {
         return Single.create { single in
             do {
-                let userData = try self.getUserData(id: user.id)
+                let userData = try getUserData(id: user.id)
                 
                 userData.name = user.name
                 userData.role = user.role
                 userData.email = user.email
                 userData.password = user.password
                 
-                try self.context.save()
+                try context.save()
                 single(.success(userData.toModel()))
             } catch {
                 single(.failure(error))
@@ -103,13 +103,13 @@ final class UserPersistenceManager: BaseCoreDataManager {
     }
     
     /// 로그아웃
-    func logout() {
+    static func logout() {
         print("로그아웃")
         UserDefaults.standard.removeObject(forKey: "token")
     }
     
     /// 회원탈퇴
-    func deleteUser(password: String) async throws {
+    static func deleteUser(password: String) async throws {
         guard let id = UserDefaults.standard.object(forKey: "token") as? String else {
             throw UserPersistenceError.tokenNotValid
         }
@@ -130,7 +130,7 @@ extension UserPersistenceManager {
     
     /// CoreData Persistence 저장소에서 유저 Entity 추출
     @discardableResult
-    private func getUserData(id: UUID? = nil, email: String? = nil) throws -> UserEntity {
+    private static func getUserData(id: UUID? = nil, email: String? = nil) throws -> UserEntity {
         let request = NSFetchRequest<UserEntity>(entityName: UserEntity.className)
         
         if let id {
