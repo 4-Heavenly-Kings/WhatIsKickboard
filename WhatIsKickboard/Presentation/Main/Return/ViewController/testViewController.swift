@@ -99,7 +99,6 @@ final class testViewController: BaseViewController {
 
         alert.getSubmitButton().rx.tap
             .bind { [weak self, weak alert] in
-                print("getSubmitButton")
                 alert?.removeFromSuperview()
                 self?.customAlertView = nil
                 self?.openCamera()
@@ -108,7 +107,6 @@ final class testViewController: BaseViewController {
 
         alert.getCancelButton().rx.tap
             .bind { [weak self, weak alert] in
-                print("getCancelButton")
                 alert?.removeFromSuperview()
                 self?.customAlertView = nil
             }
