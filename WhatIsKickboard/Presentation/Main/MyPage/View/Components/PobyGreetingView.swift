@@ -31,13 +31,6 @@ final class PobyGreetingView: BaseView {
         }
         
         userNameGreetingLabel.do {
-            let text = "회원님, 안녕하세요!"
-            let attributedString = NSMutableAttributedString(string: text)
-            attributedString.addAttribute(.foregroundColor, value: UIColor(hex: "#69C6D3"), range: (text as NSString).range(of: "회원"))
-            attributedString.addAttribute(.foregroundColor, value: UIColor.black, range: (text as NSString).range(of: "님, 안녕하세요!"))
-
-            $0.attributedText = attributedString
-            $0.font = UIFont(name: "Jalnan2", size: 28)
             $0.textAlignment = .center
         }
         
