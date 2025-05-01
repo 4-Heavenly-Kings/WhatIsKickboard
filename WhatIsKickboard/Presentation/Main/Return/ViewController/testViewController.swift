@@ -149,12 +149,20 @@ extension testViewController: UIImagePickerControllerDelegate, UINavigationContr
         picker.dismiss(animated: true) {
             if let image = info[.originalImage] as? UIImage {
                 if let imagePath = self.saveImageToDocuments(image: image) {
-                    let returnVC = ReturnViewController(
+                    let repository = ReturnKickboardRepository()
+                    let useCase = ReturnKickboardUseCaseInterface(repository: repository)
+                    let viewModel = ReturnViewModel(returnKickboardUseCase: useCase)
+                    let returnUIModel = ReturnUIModel(
                         imagePath: imagePath,
                         price: self.returnPrice,
                         battery: self.returnBattery,
-                        returnMinutes: self.returnMinutes
+                        returnMinutes: self.returnMinutes,
+                        /// 하기의 값에 위도, 경도, 주소를 순서로 넣으면 됩니다.
+                        latitude: 37.1234,
+                        longitude: 127.5678,
+                        address: "서울특별시 종로구 세종대로 175"
                     )
+                    let returnVC = ReturnViewController(viewModel: viewModel, returnUIModel: returnUIModel)
                     self.navigationController?.pushViewController(returnVC, animated: true)
                 }
             }
