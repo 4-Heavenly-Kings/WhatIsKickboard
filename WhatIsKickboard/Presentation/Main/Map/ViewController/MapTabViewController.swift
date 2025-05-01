@@ -39,6 +39,7 @@ final class MapTabViewController: BaseViewController {
             self.tabBarController?.tabBar.isHidden = isRegister
             mapTabView.getStatusBarBackgroundView().isHidden = !isRegister
             mapTabView.getNavigationBarView().isHidden = !isRegister
+            mapTabView.getCenterMarkerImageView().isHidden = !isRegister
             mapTabView.getSearchBar().snp.remakeConstraints {
                 if isRegister {
                     $0.top.equalTo(mapTabView.getNavigationBarView().snp.bottom).offset(10)
@@ -50,6 +51,7 @@ final class MapTabViewController: BaseViewController {
             }
         }
     }
+    
     /// TabBarController 관련 Delegate
     weak var changeSelectedIndexDelegate: ChangeSelectedIndexDelegate?
     
@@ -72,7 +74,7 @@ final class MapTabViewController: BaseViewController {
         // 사용자 위치로 카메라 이동
         viewModel.state.userLocation
             .compactMap { $0 }
-            .bind(with: self) { owner, coordinate in
+            .bind(with: self) { owner, coordinates in
                 let mapView = owner.mapTabView.getNaverMapView().mapView
                 if mapView.positionMode == .disabled {
                     mapView.positionMode = .normal
@@ -80,7 +82,7 @@ final class MapTabViewController: BaseViewController {
                 }
                 
                 if owner.mapPositionMode == .direction {
-                    owner.moveMapCamera(to: coordinate)
+                    owner.moveMapCamera(to: coordinates)
                 }
             }.disposed(by: disposeBag)
         
@@ -113,7 +115,7 @@ final class MapTabViewController: BaseViewController {
             }.disposed(by: disposeBag)
         
         // 장소 검색 결과 표시
-        viewModel.state.searchResult
+        viewModel.state.locationSearchResult
             .asDriver(onErrorJustReturn: [])
             .do(onNext: { [weak self] locationList in
                 guard let self else { return }
@@ -137,7 +139,9 @@ final class MapTabViewController: BaseViewController {
                     owner.navigationController?.pushViewController(registerVC, animated: true)
                 } else {
                     // 지도 카메라 이동
-                    owner.moveMapCamera(to: location.coordinate)
+                    owner.mapTabView.getSearchBar().text = location.title
+                    owner.moveMapCamera(to: location.coordinates)
+                    owner.dismissKeyboard()
                 }
             }.disposed(by: disposeBag)
         
@@ -169,6 +173,11 @@ final class MapTabViewController: BaseViewController {
                 owner.changeSelectedIndexDelegate?.changeSelectedIndexToPrevious()
                 owner.isRegister = false
             }.disposed(by: disposeBag)
+        
+        mapTabView.getNavigationBarView().getRightButton().rx.tap
+            .bind(with: self) { owner, _ in
+                
+            }
         
         // 킥보드 마커 숨김 버튼 탭
         mapTabView.getHideKickboardButton().rx.tap
@@ -222,9 +231,9 @@ final class MapTabViewController: BaseViewController {
 // MARK: - Private Methods
 
 private extension MapTabViewController {
-    /// coordinate 위치로 카메라 이동
-    func moveMapCamera(to coordinate: CLLocationCoordinate2D) {
-        let nmgCoordinate = NMGLatLng(from: coordinate)
+    /// coordinates 위치로 카메라 이동
+    func moveMapCamera(to coordinates: CLLocationCoordinate2D) {
+        let nmgCoordinate = NMGLatLng(from: coordinates)
         let cameraUpdate = NMFCameraUpdate(scrollTo: nmgCoordinate, zoomTo: 15)
         cameraUpdate.animation = .easeIn
         
@@ -280,6 +289,10 @@ private extension MapTabViewController {
             .filter { $0.userInfo["status"] as! String != KickboardStatus.impossibility.rawValue }
             .forEach { $0.hidden = isAllMarkerHidden }
     }
+    
+    func dismissKeyboard() {
+        mapTabView.getSearchBar().resignFirstResponder()
+    }
 }
 
 // MARK: - NMFMapViewCameraDelegate
@@ -291,6 +304,13 @@ extension MapTabViewController: NMFMapViewCameraDelegate {
             mapPositionMode = .normal
         }
     }
+    
+    func mapViewCameraIdle(_ mapView: NMFMapView) {
+        if isRegister {
+            let coordinates = mapView.cameraPosition.target
+            viewModel.action.onNext(.mapViewCameraIdle(lat: coordinates.lat, lng: coordinates.lng))
+        }
+    }
 }
 
 // MARK: - NMFMapViewTouchDelegate
@@ -298,6 +318,6 @@ extension MapTabViewController: NMFMapViewCameraDelegate {
 extension MapTabViewController: NMFMapViewTouchDelegate {
     func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
         // 키보드 내리기
-        mapTabView.getSearchBar().resignFirstResponder()
+        dismissKeyboard()
     }
 }
