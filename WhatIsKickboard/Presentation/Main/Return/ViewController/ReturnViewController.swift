@@ -18,12 +18,17 @@ final class ReturnViewController: BaseViewController {
     private var customAlertView: CustomAlertView?
     
     private let imagePath: String
-
+    private let price: Int
+    private let battery: Int
+    private let returnMinutes: Int
     
     // MARK: - View Life Cycle
     
-    init(imagePath: String) {
+    init(imagePath: String, price: Int, battery: Int, returnMinutes: Int) {
         self.imagePath = imagePath
+        self.price = price
+        self.battery = battery
+        self.returnMinutes = returnMinutes
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -67,8 +72,8 @@ final class ReturnViewController: BaseViewController {
         view.backgroundColor = .white
         
         contentView.navigationBarView.configure(title: "반납하기", showsRightButton: false, rightButtonTitle: nil)
-        contentView.feeLabelView.configure(extraFee: "2,200")
-        contentView.returnStackView.configure(time: 22, battery: 55, fee: "2,700")
+        contentView.feeLabelView.configure(extraFee: "\(price - 500 >= 0 ? price - 500 : 0 )")
+        contentView.returnStackView.configure(time: returnMinutes, battery: battery, fee: "\(price)")
         contentView.customSubmitButton.configure(buttonTitle: "반납하기")
     }
     

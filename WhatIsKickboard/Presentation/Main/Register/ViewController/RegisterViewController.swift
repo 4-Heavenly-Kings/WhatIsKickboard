@@ -42,8 +42,6 @@ final class RegisterViewController: BaseViewController {
                 print("저장버튼")
             }
             .disposed(by: disposeBag)
-        
-
     }
 
     override func setStyles() {

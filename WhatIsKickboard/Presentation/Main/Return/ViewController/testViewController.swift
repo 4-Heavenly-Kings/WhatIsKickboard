@@ -15,17 +15,67 @@ import UniformTypeIdentifiers
 
 final class testViewController: BaseViewController {
     
+    private let viewModel: TestViewModel
+    
+    init(viewModel: TestViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
     private let showAlertButton = UIButton()
     private var customAlertView: CustomAlertView?
+    
+    private var storedKickboardId: UUID?
+    private var returnPrice: Int = 0
+    private var returnBattery: Int = 0
+    private var returnMinutes: Int = 0
 
-    override func bindViewModel() {
-        showAlertButton.rx.tap
-            .bind { [weak self] in
-                self?.showCustomAlert()
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        Task {
+            do {
+                let id = try await KickboardPersistenceManager.createKickboard(
+                    latitude: 37.1236,
+                    longitude: 127.1236,
+                    battery: 70,
+                    address: "서울특별시 종로구 세종대로 175"
+                )
+                self.storedKickboardId = id
+            } catch {
+                print("⚠️ 테스트용 킥보드 저장 실패: \(error)")
             }
-            .disposed(by: disposeBag)
+        }
     }
 
+    override func bindViewModel() {
+        
+        // 1. 버튼 탭 → UseCase 실행 트리거
+        showAlertButton.rx.tap
+            .compactMap { [weak self] in self?.storedKickboardId }
+            .map { TestViewModel.Action.requestReturn(kickboardId: $0) }
+            .bind(to: viewModel.action)
+            .disposed(by: disposeBag)
+        
+        // 2. 킥보드 + 유저 정보 수신 → Alert 구성
+        Observable
+            .combineLatest(viewModel.state.kickboard, viewModel.state.user)
+            .observe(on: MainScheduler.instance)
+            .bind { [weak self] kickboard, user in
+                self?.showCustomAlert(user: user, kickboard: kickboard)
+            }
+            .disposed(by: disposeBag)
+        
+        // 3. 에러 핸들링
+        viewModel.state.error
+            .observe(on: MainScheduler.instance)
+            .bind { error in
+                print("오류 발생: \(error.localizedDescription)")
+            }
+            .disposed(by: disposeBag)
+        
+    }
+    
     override func setStyles() {
         view.backgroundColor = .white
         
@@ -47,42 +97,57 @@ final class testViewController: BaseViewController {
         }
     }
     
-    private func showCustomAlert() {
+    private func showCustomAlert(user: User, kickboard: Kickboard) {
+        let name = user.name ?? "이름 없음"
+        self.returnMinutes = calculateElapsedMinutes(kickboard: kickboard, userId: user.id)
+        self.returnPrice = (returnMinutes * 100) + 500
+        self.returnBattery = kickboard.battery
+        
+        
+        print(returnPrice)
+
         let alert = CustomAlertView(frame: .zero, alertType: .returnRequest)
-        
         view.addSubview(alert)
-        
-        alert.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-        
+        alert.snp.makeConstraints { $0.edges.equalToSuperview() }
+
         alert.configure(
-            name: "천성우",
-            minutes: 22,
+            name: name,
+            minutes: returnMinutes,
             count: nil,
-            price: "5,000"
+            price: "\(returnPrice)"
         )
-        
+
         alert.getSubmitButton().rx.tap
             .bind { [weak self, weak alert] in
+                print("getSubmitButton")
                 alert?.removeFromSuperview()
                 self?.customAlertView = nil
-                print("포비와 그만 놀기 버튼 눌림")
                 self?.openCamera()
             }
             .disposed(by: disposeBag)
-        
+
         alert.getCancelButton().rx.tap
             .bind { [weak self, weak alert] in
+                print("getCancelButton")
                 alert?.removeFromSuperview()
                 self?.customAlertView = nil
-                print("더 달리기 버튼 눌림")
             }
             .disposed(by: disposeBag)
-        
+
         self.customAlertView = alert
     }
     
+    private func calculateElapsedMinutes(kickboard: Kickboard, userId: UUID) -> Int {
+        guard let ride = kickboard.rides?.last(where: { $0.userId == userId }) else { return 0 }
+        let startTime = ride.startTime
+        let now = Date()
+        let minutes = Calendar.current.dateComponents([.minute], from: startTime, to: now).minute ?? 0
+        return minutes
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 extension testViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -105,13 +170,18 @@ extension testViewController: UIImagePickerControllerDelegate, UINavigationContr
         picker.dismiss(animated: true) {
             if let image = info[.originalImage] as? UIImage {
                 if let imagePath = self.saveImageToDocuments(image: image) {
-                    let returnVC = ReturnViewController(imagePath: imagePath)
+                    let returnVC = ReturnViewController(
+                        imagePath: imagePath,
+                        price: self.returnPrice,
+                        battery: self.returnBattery,
+                        returnMinutes: self.returnMinutes
+                    )
                     self.navigationController?.pushViewController(returnVC, animated: true)
                 }
             }
         }
     }
-
+    
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }
