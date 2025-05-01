@@ -36,11 +36,11 @@ struct LocationDTO: Decodable {
 
 extension LocationDTO {
     func toModel() -> LocationModel {
-        let coordinate = convertMapCoordinates(mapx: mapx, mapy: mapy)
+        let coordinates = convertMapCoordinates(mapx: mapx, mapy: mapy)
         return LocationModel(title: title,
                       address: address,
                       roadAddress: roadAddress,
-                      coordinate: coordinate ?? CLLocationCoordinate2D())
+                      coordinates: coordinates ?? CLLocationCoordinate2D())
     }
     
     /// 개별 검색 결과 DTO의 mapx, mapy를 CLLocationCoordinate2D 형태로 반환하는 메서드

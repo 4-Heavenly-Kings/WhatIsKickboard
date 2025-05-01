@@ -17,5 +17,5 @@ struct LocationModel {
     /// 업체, 기관명의 도로명 주소
     let roadAddress: String
     /// Core Location 좌표
-    let coordinate: CLLocationCoordinate2D
+    let coordinates: CLLocationCoordinate2D
 }
