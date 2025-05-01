@@ -106,15 +106,15 @@ final class MyPageViewController: BaseViewController {
         myPageViewModel.state.user
             .subscribe(with: self, onNext: { owner, user in
                 owner.user = user
-                guard let user = owner.user, let name = user.name else { return }
-                let attributedText = NSMutableAttributedString.makeAttributedString(
-                    text: "\(name)님, 안녕하세요!",
-                    highlightedParts: [
-                        (name, .core, UIFont.jalnan2(28)),
-                        ("님, 안녕하세요!", .black, UIFont.jalnan2(28))
-                    ]
-                )
-                owner.myPageView.pobyGreetingView.userNameGreetingLabel.attributedText = attributedText
+                owner.myPageView.removeComponents()
+                // 현재 유저의 상태를 보여주기 (킥보드 이용 or 이용 X)
+                if user.currentKickboardRideId != nil {
+                    owner.myPageView.kickboardUsingLayout()
+                    owner.myPageView.kickboardUsingconfigure(user: user)
+                } else {
+                    owner.myPageView.pobyGreetingLayout()
+                    owner.myPageView.pobyGreetingConfigure(user: user)
+                }
             }, onError: { owner, error in
                 print("\(owner.className) 유저 정보를 찾을 수 없습니다!")
             })

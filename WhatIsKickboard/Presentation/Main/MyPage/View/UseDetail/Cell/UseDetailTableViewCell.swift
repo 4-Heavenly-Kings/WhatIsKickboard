@@ -91,13 +91,48 @@ final class UseDetailTableViewCell: BaseTableViewCell {
             color: .black)
         
         if let imagePath = item.imagePath,
-           let image = UIImage(contentsOfFile: imagePath) {
-            returnImage.image = image
+           let image = loadImageFromDirectory(with: imagePath) {
+             returnImage.image = image
         }
         
         usingComment.attributedText = attributedText
         rentLocationLabel.text = "대여장소: \(item.address)"
         
+    }
+    
+    func loadImageFromDirectory(with identifier: String) -> UIImage? {
+        let fileManager = FileManager.default
+        // 파일 경로로 접근
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileURL = documentsDirectory.appendingPathComponent(identifier, conformingTo: .jpeg)
+        
+        // 이미지 파일이 존재한다면, 이미지로 변환 후 리턴
+        guard fileManager.fileExists(atPath: fileURL.path) else { return nil }
+        
+        return UIImage(contentsOfFile: fileURL.path)
+    }
+    
+    func testLoadImageFromDirectory() -> UIImage {
+        // 1. 임의 이미지 생성
+        let size = CGSize(width: 100, height: 100)
+        UIGraphicsBeginImageContext(size)
+        UIColor.red.setFill()
+        UIRectFill(CGRect(origin: .zero, size: size))
+        let testImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        // 2. 파일 저장 (테스트 내부에서만)
+        let fileManager = FileManager.default
+        let identifier = "test_image"
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileURL = documentsDirectory.appendingPathComponent(identifier, conformingTo: .jpeg)
+        if let data = testImage?.jpegData(compressionQuality: 1.0) {
+            try? data.write(to: fileURL)
+        }
+        // 3. 함수 테스트
+        let loadedImage = loadImageFromDirectory(with: identifier)
+        
+        return loadedImage!
     }
     
 }

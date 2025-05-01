@@ -48,28 +48,10 @@ final class MyPageUsingKickboardView: BaseView {
         }
         
         userNameLabel.do {
-            let text = "회원님!"
-            let attributedText = NSMutableAttributedString.makeAttributedString(
-                text: text,
-                highlightedParts: [
-                    ("회원", UIColor(hex: "#69C6D3"), UIFont.systemFont(ofSize: 30, weight: .bold)),
-                    ("님!", UIColor.black, UIFont.systemFont(ofSize: 30, weight: .regular))
-                ]
-            )
-            $0.attributedText = attributedText
             $0.textAlignment = .center
         }
         
         usingTimeLabel.do {
-            let text = "15분 이용 중"
-            let attributedText = NSMutableAttributedString.makeAttributedString(
-                text: text,
-                highlightedParts: [
-                    ("15분", .black, UIFont.systemFont(ofSize: 30, weight: .bold)),
-                    ("이용 중", .black, UIFont.systemFont(ofSize: 30, weight: .regular))
-                ]
-            )
-            $0.attributedText = attributedText
             $0.textAlignment = .center
             $0.textColor = .black
         }
