@@ -173,7 +173,7 @@ final class SignInView: BaseView {
         }
         
         inputStackView.snp.makeConstraints {
-            $0.top.equalTo(titleLogoTitleView.snp.bottom).offset(72)
+            $0.bottom.equalTo(safeAreaLayoutGuide).offset(-36)
             $0.horizontalEdges.equalToSuperview().inset(45)
             $0.centerX.equalToSuperview()
         }
