@@ -49,7 +49,19 @@ private extension MyRegisterKickboardViewModel {
         KickboardPersistenceManager.getKickboardList()
             .subscribe(with: self) { owner, kickboardList in
                 print("getKickboardList 호출 성공")
-                print("킥보드 리스트: \(kickboardList)")
+                print("CoreData 킥보드 리스트: \(kickboardList)")
+                
+                let kickboad = Kickboard(id: UUID(),
+                                         latitude: 128.12,
+                                         longitude: 37.33,
+                                         battery: 30,
+                                         address: "서울시",
+                                         status: "ABLE")
+                
+                print("MockData 킥보드 리스트: \(kickboad.getMockList())")
+                
+                // 여기서 MockData가 아닌 CoreData를 넘겨줘야함
+                owner.state.kickboardList.accept(kickboad.getMockList())
             } onFailure: { owner, error in
                 print("getKickboardList 호출 실패")
             }
