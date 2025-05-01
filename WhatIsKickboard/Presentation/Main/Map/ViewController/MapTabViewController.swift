@@ -40,6 +40,7 @@ final class MapTabViewController: BaseViewController {
             mapTabView.getStatusBarBackgroundView().isHidden = !isRegister
             mapTabView.getNavigationBarView().isHidden = !isRegister
             mapTabView.getCenterMarkerImageView().isHidden = !isRegister
+            mapTabView.getSearchBar().text = ""
             mapTabView.getSearchBar().snp.remakeConstraints {
                 if isRegister {
                     $0.top.equalTo(mapTabView.getNavigationBarView().snp.bottom).offset(10)
@@ -51,6 +52,11 @@ final class MapTabViewController: BaseViewController {
             }
         }
     }
+    
+    /// 지도 카메라 좌표
+    private var cameraCoordinates = NMGLatLng()
+    /// 검색창 주소
+    private var address = ""
     
     /// TabBarController 관련 Delegate
     weak var changeSelectedIndexDelegate: ChangeSelectedIndexDelegate?
@@ -129,37 +135,15 @@ final class MapTabViewController: BaseViewController {
                     cell.configure(location: location)
             }.disposed(by: disposeBag)
         
+        // 좌표 검색 결과 표시
         viewModel.state.reverseGeoSearchResult
             .asDriver(onErrorJustReturn: [])
             .drive(with: self) { owner, location in
                 guard let nearest = location.first else { return }
-                let region = nearest.region
-                let land = nearest.land
-                
-                var address = "\(region.area1.name) \(region.area2.name)"
-                if let roadName = land?.name, let roadNum = land?.number1 {
-                    // 도로명 주소
-                    address += " \(roadName) \(roadNum)"
-                } else {
-                    // 지번 주소
-                    address += " \(region.area3.name)"
-                    if !region.area4.name.isEmpty {
-                        address += " \(region.area4.name)"
-                    }
-                    if let addrNum1 = land?.number1, let addrNum2 = land?.number2 {
-                        address += " \(addrNum1) \(addrNum2)"
-                    }
-                }
-                
-                if let buildingName = land?.addition0.value {
-                    // + 건물 이름
-                    address += " \(buildingName)"
-                }
-                
-                owner.mapTabView.getSearchBar().text = address
+                owner.address = owner.makeAddress(location: nearest)
+                owner.mapTabView.getSearchBar().text = owner.address
             }.disposed(by: disposeBag)
         
-        // TODO: 등록) 위도 경도Double, 한글주소String
         
         // TODO: 반납) 킥보드 UUID
         
@@ -171,7 +155,7 @@ final class MapTabViewController: BaseViewController {
                 owner.viewModel.action.onNext(.didLocationButtonTap)
             }.disposed(by: disposeBag)
         
-        // 장소 검색창 텍스트 및 위치 전달
+        // 장소 검색창 텍스트 전달
         mapTabView.getSearchBar().rx.text.orEmpty
             .distinctUntilChanged()
             .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
@@ -184,33 +168,35 @@ final class MapTabViewController: BaseViewController {
         
         
         // View ➡️ ViewController
-        // 킥보드 위치 등록 화면 뒤로가기 버튼 탭
+        
         // 검색 결과 탭
         mapTabView.getSearchResultTableView().rx
             .modelSelected(LocationModel.self)
             .bind(with: self) { owner, location in
-                if owner.isRegister {
-                    // 킥보드 등록
-                    let registerVC = RegisterViewController()
-                    owner.navigationController?.pushViewController(registerVC, animated: true)
-                } else {
-                    // 지도 카메라 이동
-                    owner.mapTabView.getSearchBar().text = location.title
-                    owner.moveMapCamera(to: location.coordinates)
-                    owner.dismissKeyboard()
-                }
+                // 지도 카메라 이동
+                owner.mapPositionMode = .normal
+                owner.mapTabView.getSearchBar().text = location.title
+                owner.moveMapCamera(to: location.coordinates)
+                owner.dismissKeyboard()
             }.disposed(by: disposeBag)
         
+        // 킥보드 위치 등록 화면) 뒤로가기 버튼 탭
         mapTabView.getNavigationBarView().getBackButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.changeSelectedIndexDelegate?.changeSelectedIndexToPrevious()
                 owner.isRegister = false
             }.disposed(by: disposeBag)
         
+        // 킥보드 위치 등록 화면) 등록 버튼 탭
         mapTabView.getNavigationBarView().getRightButton().rx.tap
+            .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, _ in
-                
-            }
+                // 킥보드 등록
+                let lat = owner.cameraCoordinates.lat
+                let lng = owner.cameraCoordinates.lng
+                let registerVC = RegisterViewController(lat: lat, lng: lng, address: owner.address)
+                owner.navigationController?.pushViewController(registerVC, animated: true)
+            }.disposed(by: disposeBag)
         
         // 킥보드 마커 숨김 버튼 탭
         mapTabView.getHideKickboardButton().rx.tap
@@ -309,6 +295,13 @@ private extension MapTabViewController {
             }
             marker.iconImage = iconImage
             
+            marker.touchHandler = { (overlay: NMFOverlay) -> Bool in
+                overlay.userInfo["id"]
+                let modalVC = MapModalViewController()
+                // TODO: 킥보드 사용 모달 구현
+                return true
+            }
+            
             return marker
         }
         
@@ -323,8 +316,36 @@ private extension MapTabViewController {
             .forEach { $0.hidden = isAllMarkerHidden }
     }
     
+    /// 키보드 내림
     func dismissKeyboard() {
         mapTabView.getSearchBar().resignFirstResponder()
+    }
+    
+    func makeAddress(location: ReverseGeoResultModel) -> String {
+        let region = location.region
+        let land = location.land
+        
+        var address = "\(region.area1.name) \(region.area2.name)"
+        if let roadName = land?.name, let roadNum = land?.number1 {
+            // 도로명 주소
+            address += " \(roadName) \(roadNum)"
+        } else {
+            // 지번 주소
+            address += " \(region.area3.name)"
+            if !region.area4.name.isEmpty {
+                address += " \(region.area4.name)"
+            }
+            if let addrNum1 = land?.number1, let addrNum2 = land?.number2 {
+                address += " \(addrNum1) \(addrNum2)"
+            }
+        }
+        
+        if let buildingName = land?.addition0.value {
+            // + 건물 이름
+            address += " \(buildingName)"
+        }
+        
+        return address
     }
 }
 
@@ -339,8 +360,9 @@ extension MapTabViewController: NMFMapViewCameraDelegate {
     }
     
     func mapViewCameraIdle(_ mapView: NMFMapView) {
+        let coordinates = mapView.cameraPosition.target
+        cameraCoordinates = coordinates
         if isRegister {
-            let coordinates = mapView.cameraPosition.target
             viewModel.action.onNext(.mapViewCameraIdle(lat: coordinates.lat, lng: coordinates.lng))
         }
     }
@@ -354,3 +376,6 @@ extension MapTabViewController: NMFMapViewTouchDelegate {
         dismissKeyboard()
     }
 }
+
+
+// TODO: 지도 뷰 켜졌을 때 탑승중인 킥보드 있는지 확인

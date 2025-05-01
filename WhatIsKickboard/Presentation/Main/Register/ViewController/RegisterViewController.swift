@@ -15,7 +15,18 @@ import Then
 final class RegisterViewController: BaseViewController {
         
     private let contentView = RegisterView()
-
+    
+    
+    // TODO: 임시 init
+    init(lat: Double, lng: Double, address: String) {
+        super.init(nibName: nil, bundle: nil)
+        print("[\(lat), \(lng)] : \(address)")
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     
     // MARK: - View Life Cycle
 
