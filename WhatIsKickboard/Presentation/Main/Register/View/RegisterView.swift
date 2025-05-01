@@ -37,9 +37,11 @@ final class RegisterView: BaseView {
     override func setLayout() {
         addSubviews(statusBarBackgroundView, navigationBarView, registerStackView)
         
+        let statusBarHeight = getStatusBarHeight()
+        
         statusBarBackgroundView.snp.makeConstraints {
             $0.top.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(safeAreaLayoutGuide.snp.top)
+            $0.height.equalTo(statusBarHeight)
         }
         
         navigationBarView.snp.makeConstraints {
@@ -55,21 +57,16 @@ final class RegisterView: BaseView {
         
     }
     
-    func getStatusBarBackgroundView() -> UIView {
-        return statusBarBackgroundView
-    }
-    
-    private func getSafeAreaTop() -> CGFloat {
-        return UIApplication.shared.connectedScenes
+    /// State Bar에 노치가 있는 기종은 높이가 44 아닐 경우 20으로 지정
+    private func getStatusBarHeight() -> CGFloat {
+        let topInset = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
             .first { $0.isKeyWindow }?
-            .safeAreaInsets.top ?? 20 // fallback
+            .safeAreaInsets.top ?? 20
+
+        return topInset > 20 ? 44 : 20
     }
     
-    func updateStatusBarHeight(_ height: CGFloat) {
-        statusBarBackgroundView.snp.updateConstraints {
-            $0.height.equalTo(height)
-        }
-    }
+
 }
