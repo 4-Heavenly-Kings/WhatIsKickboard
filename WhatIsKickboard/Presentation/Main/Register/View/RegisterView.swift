@@ -52,6 +52,9 @@ final class RegisterView: BaseView {
             $0.centerX.equalToSuperview()
         }
         
-
+    }
+    
+    func getStatusBarBackgroundView() -> UIView {
+        return statusBarBackgroundView
     }
 }

@@ -20,7 +20,7 @@ final class RegisterViewController: BaseViewController {
     private var customAlertView: CustomAlertView?
 
     private let registerUIModel: RegisterUIModel
-    
+     
     // MARK: - View Life Cycle
 
     init(viewModel: RegisterViewModel, registerUIModel: RegisterUIModel) {
@@ -36,7 +36,7 @@ final class RegisterViewController: BaseViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+        self.navigationController?.navigationBar.isHidden = true
     }
     
     override func bindViewModel() {

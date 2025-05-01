@@ -50,6 +50,8 @@ final class MapTabView: BaseView {
     private let tableViewContainer = UIView()
     /// 장소 검색 결과 UITableView
     private let resultTableView = UITableView()
+    /// 킥보드 등록 위치 표시 마커
+    private let centerMarkerImageView = UIImageView()
     
     // MARK: - Style Helper
     
@@ -100,6 +102,7 @@ final class MapTabView: BaseView {
             $0.setImage(UIImage(), for: UISearchBar.Icon.search, state: .normal)
             $0.placeholder = "장소를 입력해주세요"
             $0.searchTextField.font = .systemFont(ofSize: 16)
+            $0.searchTextField.textColor = UIColor(hex: "#000000")
             
             let spacer = UIView()
             spacer.frame.size.width = 8
@@ -128,6 +131,13 @@ final class MapTabView: BaseView {
             $0.rowHeight = 40
             $0.isScrollEnabled = false
         }
+        
+        centerMarkerImageView.do {
+            $0.image = .centerMarker
+            $0.contentMode = .scaleAspectFit
+            $0.backgroundColor = .clear
+            $0.isHidden = true
+        }
     }
     
     // MARK: - Layout Helper
@@ -135,7 +145,8 @@ final class MapTabView: BaseView {
     override func setLayout() {
         self.addSubviews(naverMapView, compassButton, buttonStackView,
                          statusBarBackgroundView, navigationBarView,
-                         searchBar, tableViewContainer)
+                         searchBar, tableViewContainer,
+                         centerMarkerImageView)
         buttonStackView.addArrangedSubviews(hideKickboardButton, locationButton)
         tableViewContainer.addSubview(resultTableView)
         
@@ -187,6 +198,12 @@ final class MapTabView: BaseView {
         
         resultTableView.snp.makeConstraints {
             $0.edges.equalToSuperview()
+        }
+        
+        centerMarkerImageView.snp.makeConstraints {
+            $0.centerX.equalTo(self.safeAreaLayoutGuide)
+            $0.centerY.equalTo(self.safeAreaLayoutGuide).offset(-8)
+            $0.width.height.equalTo(50)
         }
     }
     
@@ -255,6 +272,10 @@ final class MapTabView: BaseView {
     /// resultTableView 반환
     func getSearchResultTableView() -> UITableView {
         return resultTableView
+    }
+    
+    func getCenterMarkerImageView() -> UIImageView {
+        return centerMarkerImageView
     }
     
     /// resultTableView(tableViewContainer) 높이 및 그림자 효과 업데이트

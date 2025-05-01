@@ -1,0 +1,19 @@
+//
+// Config.xcconfig
+// WhatIsKickboard
+//
+// Created by 백래훈 on 4/25/25.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+// MARK: - 네이버 지도, Reverse Geocoding API
+
+CLIENT_ID = kdita8pt0x
+CLIENT_SECRET = hE3Xa3RSCiFJSfB1dwF3K0fvz42RPVAqKsSheTMT
+
+// MARK: - 네이버 지역 검색 API
+
+SEARCH_ID = V6v6AhKS4o0ytEwMkOfh
+SEARCH_SECRET = JKxcf0pKSV
