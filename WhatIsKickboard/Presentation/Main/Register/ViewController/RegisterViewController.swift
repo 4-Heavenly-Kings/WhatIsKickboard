@@ -87,7 +87,7 @@ final class RegisterViewController: BaseViewController {
 
     override func setStyles() {
         contentView.navigationBarView.configure(title: "킥보드 정보 설정", showsRightButton: true, rightButtonTitle: "저장")
-        contentView.registerStackView.configure(location: "서울 구로구")
+        contentView.registerStackView.configure(location: "\(registerUIModel.address)")
     }
     
     private func showAlert(type: CustomAlertViewType, onDismiss: (() -> Void)? = nil) {
