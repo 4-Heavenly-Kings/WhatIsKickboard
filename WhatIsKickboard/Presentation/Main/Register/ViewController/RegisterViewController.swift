@@ -33,10 +33,32 @@ final class RegisterViewController: BaseViewController {
         view = contentView
     }
     
+//    override func viewDidLoad() {
+//        super.viewDidLoad()
+//        print("🔍 safeAreaInsets.top: \(view.safeAreaInsets.top)")
+//        print("🔍 statusBarBackgroundView frame: \(contentView.getStatusBarBackgroundView().frame)")
+//    }
+//    
+//    override func viewDidLayoutSubviews() {
+//        super.viewDidLayoutSubviews()
+//        let safeAreaTop = view.safeAreaInsets.top
+//        print("🔁 Recalculated safeAreaInsets.top:", safeAreaTop)
+//        contentView.updateStatusBarHeight(safeAreaTop)
+//    }
+//    
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//
+//        if let topInset = view.window?.safeAreaInsets.top {
+//            print("✅ window 기반 safeAreaInsets.top: \(topInset)")
+//            contentView.updateStatusBarHeight(topInset)
+//        }
+//    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.navigationController?.navigationBar.isHidden = true
+        self.tabBarController?.tabBar.isHidden = true
     }
     
     override func bindViewModel() {
@@ -89,6 +111,13 @@ final class RegisterViewController: BaseViewController {
         contentView.navigationBarView.configure(title: "킥보드 정보 설정", showsRightButton: true, rightButtonTitle: "저장")
         contentView.registerStackView.configure(location: "서울 구로구")
     }
+    
+//    override func setLayout() {
+//        view.addSubview(contentView)
+//        contentView.snp.makeConstraints {
+//            $0.edges.equalToSuperview()
+//        }
+//    }
     
     private func showAlert(type: CustomAlertViewType, onDismiss: (() -> Void)? = nil) {
         let alert = CustomAlertView(frame: .zero, alertType: type)
