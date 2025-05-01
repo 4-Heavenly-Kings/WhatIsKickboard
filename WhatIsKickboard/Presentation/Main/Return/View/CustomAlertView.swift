@@ -46,7 +46,7 @@ final class CustomAlertView: BaseView {
         }
         
         switch alertType {
-        case .returnRequest, .logout, .deleteID, .emailFailed, .signIntFailed:
+        case .returnRequest, .logout, .deleteID, .emailFailed, .signIntFailed, .failureUserModify:
             imageView.do {
                 $0.image = UIImage(named: "PobyHi")
             }
@@ -109,7 +109,7 @@ final class CustomAlertView: BaseView {
     override func setLayout() {
         
         switch alertType {
-        case .returnRequest, .logout, .deleteID:
+        case .returnRequest, .logout, .deleteID, .failureUserModify:
             addSubviews(containerView)
             containerView.addSubviews(imageView, titleLabel, subtitleLabel, buttonStackView, verticalSeparator, horizontalSeparator)
             buttonStackView.addArrangedSubviews(submitButton, cancelButton)

@@ -12,6 +12,7 @@ import OSLog
 import RxRelay
 import RxSwift
 
+/// 지도 탭 ViewModel
 final class MapTabViewModel: NSObject, ViewModelProtocol {
     
     // MARK: - Properties
@@ -22,15 +23,19 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     /// Core Location Manager
     private let locationManager = CLLocationManager()
     
+    private let apiUseCase = FetchAPIGeocodingUseCase()
+    
     var disposeBag = DisposeBag()
     
     // MARK: - Action (ViewController ➡️ ViewModel)
     
     enum Action {
-        /// 바인딩 완료
-        case didBinding
         /// 현재 위치 버튼 탭
         case didlocationButtonTap
+        /// 장소 검색창 텍스트
+        case searchText(text: String)
+        /// 바인딩 완료
+        case didBinding
     }
     var action: AnyObserver<Action> {
         return state.actionSubject.asObserver()
@@ -46,6 +51,8 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         fileprivate(set) var userLocation = BehaviorRelay<CLLocationCoordinate2D?>(value: nil)
         /// 킥보드 리스트
         fileprivate(set) var kickboardList = BehaviorRelay<[Kickboard]>(value: [])
+        /// 검색 결과
+        fileprivate(set) var searchResult = PublishRelay<[LocationModel]>()
     }
     var state = State()
     
@@ -67,12 +74,14 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
                     owner.updateKickboardList()
                 case .didlocationButtonTap:
                     owner.updateLastLocation()
+                case let .searchText(text):
+                    owner.searchLocation(searchText: text)
                 }
             }.disposed(by: disposeBag)
     }
 }
 
-// MARK: - Location Methods
+// MARK: - Map Methods
 
 private extension MapTabViewModel {
     /// 디바이스 위치 서비스가 활성화 상태인지 확인
@@ -115,11 +124,26 @@ private extension MapTabViewModel {
     
     /// 최근 업데이트된 좌표 ViewController로 전달
     func updateLastLocation() {
-        let latitude = locationManager.location?.coordinate.latitude
-        let longitude = locationManager.location?.coordinate.longitude
-        let logMsg = "현재 위치: (latitude: \(latitude ?? 0.0), longitude: \(longitude ?? 0.0))"
+        let lat = locationManager.location?.coordinate.latitude
+        let lng = locationManager.location?.coordinate.longitude
+        let logMsg = "현재 위치: (latitude: \(lat ?? 0.0), longitude: \(lng ?? 0.0))"
         os_log(.debug, log: log, "%@", logMsg)
         state.userLocation.accept(locationManager.location?.coordinate)
+    }
+}
+
+// MARK: - Location Methods
+
+private extension MapTabViewModel {
+    /// API를 통한 장소 검색
+    func searchLocation(searchText: String) {
+        apiUseCase.fetchSearchResults(for: searchText)
+            .subscribe(with: self, onSuccess: { owner, locations in
+                owner.state.searchResult.accept(locations)
+            }, onFailure: { owner, error in
+                owner.state.searchResult.accept([])
+                os_log(.error, log: owner.log, "장소 검색 실패: %@", "\(error)")
+            }).disposed(by: disposeBag)
     }
 }
 

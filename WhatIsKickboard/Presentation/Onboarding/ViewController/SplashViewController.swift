@@ -20,16 +20,24 @@ final class SplashViewController: BaseViewController {
     /// 이미지 속성 설정 후 VC이동
     override func viewDidLoad() {
         super.viewDidLoad()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5){
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             self.showMainView()
         }
     }
     
     /// VC 네비게이션 설정
     private func showMainView() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first else {
+            return
+        }
+        
         let tabbarVC = TabBarController()
-        tabbarVC.modalPresentationStyle = .fullScreen
         tabbarVC.modalTransitionStyle = .crossDissolve
-        present(tabbarVC, animated: true)
+        
+        // 애니메이션 효과를 위해 UIView transition 사용
+        UIView.transition(with: window, duration: 0.4, options: .transitionCrossDissolve) {
+            window.rootViewController = tabbarVC
+        }
     }
 }

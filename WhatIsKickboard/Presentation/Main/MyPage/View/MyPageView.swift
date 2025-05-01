@@ -54,6 +54,8 @@ final class MyPageView: BaseView {
             $0.configuration = config
             $0.contentHorizontalAlignment = .center
         }
+        
+        usingKickboardView.isHidden = true
     }
     
     // MARK: - Layouts
@@ -62,10 +64,10 @@ final class MyPageView: BaseView {
         
         self.addSubviews(pobyGreetingView, usingKickboardView, dividingLine, myPageStackView, withDrawalButton)
         
-//        pobyGreetingView.snp.makeConstraints {
-//            $0.top.equalTo(safeAreaLayoutGuide)
-//            $0.horizontalEdges.equalTo(safeAreaLayoutGuide)
-//        }
+        pobyGreetingView.snp.makeConstraints {
+            $0.top.equalTo(safeAreaLayoutGuide)
+            $0.horizontalEdges.equalTo(safeAreaLayoutGuide)
+        }
         
         usingKickboardView.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide)
@@ -73,7 +75,7 @@ final class MyPageView: BaseView {
         }
         
         dividingLine.snp.makeConstraints {
-            $0.top.equalTo(usingKickboardView.snp.bottom).offset(16)
+            $0.top.equalTo(pobyGreetingView.snp.bottom).offset(16)
             $0.horizontalEdges.equalTo(safeAreaLayoutGuide).inset(20)
             $0.height.equalTo(1)
         }
