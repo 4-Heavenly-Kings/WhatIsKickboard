@@ -11,34 +11,36 @@ import RxSwift
 
 final class UserPersistenceRepository: UserPersistenceRepositoryInterface {
     
+    let manager = UserPersistenceManager()
+    
     /// 로그인
-    static func login(_ email: String, _ password: String) -> RxSwift.Single<User> {
-        UserPersistenceManager.login(email, password)
+    func login(_ email: String, _ password: String) -> RxSwift.Single<User> {
+        manager.login(email, password)
     }
     
     /// 회원가입
-    static func createUser(_ email: String, _ password: String) -> RxSwift.Single<User> {
-        UserPersistenceManager.createUser(email, password)
+    func createUser(_ email: String, _ password: String) -> RxSwift.Single<User> {
+        manager.createUser(email, password)
     }
     
     /// 유저정보
-    static func getUser() -> RxSwift.Single<User> {
-        UserPersistenceManager.getUser()
+    func getUser() -> RxSwift.Single<User> {
+        manager.getUser()
     }
     
     /// 유저정보 수정
-    static func patchUser(_ user: User) -> RxSwift.Single<User> {
-        UserPersistenceManager.patchUser(user)
+    func patchUser(_ user: User) -> RxSwift.Single<User> {
+        manager.patchUser(user)
     }
     
     /// 로그아웃
-    static func logout() {
-        UserPersistenceManager.logout()
+    func logout() {
+        manager.logout()
     }
     
     /// 회원 탈퇴
-    static func deleteUser(password: String) async throws {
-        try await UserPersistenceManager.deleteUser(password: password)
+    func deleteUser(password: String) async throws {
+        try await manager.deleteUser(password: password)
     }
     
 }
