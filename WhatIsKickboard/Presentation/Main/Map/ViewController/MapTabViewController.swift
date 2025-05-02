@@ -19,8 +19,9 @@ final class MapTabViewController: BaseViewController {
     
     // MARK: - Properties
     
-    private let viewModel = MapTabViewModel()
+    private let viewModel: MapTabViewModel
 
+    private var selectedKickboard: Kickboard?
     /// 지도 애니메이션 상태 관리용
     private var mapPositionMode: NMFMyPositionMode = .disabled
     /// 킥보드 마커 리스트
@@ -53,6 +54,7 @@ final class MapTabViewController: BaseViewController {
         }
     }
     
+    private var isUsingKickboard: Bool = false
     
     private var timer: Timer?
     private var elapsedMinutes = 0
@@ -69,6 +71,15 @@ final class MapTabViewController: BaseViewController {
     
     /// 지도 탭 View
     private let mapTabView = MapTabView()
+    
+    init(viewModel: MapTabViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Lifecycle
     
@@ -228,6 +239,15 @@ final class MapTabViewController: BaseViewController {
             .bind(with: self) { owner, _ in
                 if owner.mapTabView.getCustomButton().titleLabel?.text == "대여하기" {
                     // 킥보드 대여
+                    guard let selectedKickboard = owner.selectedKickboard else { return }
+                    
+                    owner.viewModel.action.onNext(.didRentButtonTap(id: selectedKickboard.id,
+                                                                    latitude: selectedKickboard.latitude,
+                                                                    longitude: selectedKickboard.longitude,
+                                                                    address: selectedKickboard.address))
+                    
+                    owner.isUsingKickboard = true
+                    
                     owner.mapTabView.getCustomButton().configure(buttonTitle: "반납하기")
                     owner.elapsedMinutes = 0
                     owner.timer?.invalidate()
@@ -238,12 +258,10 @@ final class MapTabViewController: BaseViewController {
                                                  repeats: true)
                     owner.mapTabView.updateUsingKickboardViewTimeLabel(elapsedMinutes: owner.elapsedMinutes)
                 } else {
-                    // 킥보드 반납
-//                    owner.mapTabView.getCustomButton().configure(buttonTitle: "대여하기")
-                    // TODO: - 반납할때 위도 경도 주소
+                    owner.isUsingKickboard = false
+                    // MARK: - 킥보드 반납 버튼 상태
                     
-                    
-                    
+                    owner.mapTabView.getCustomButton().configure(buttonTitle: "대여하기")
                 }
             }.disposed(by: disposeBag)
     }
@@ -344,8 +362,18 @@ private extension MapTabViewController {
                     self.mapTabView.showModalUpAnimation()
                 }
                 
+                let id = overlay.userInfo["id"] as! UUID
+                let latitude = overlay.userInfo["latitude"] as! Double
+                let longtitude = overlay.userInfo["longtitude"] as! Double
                 let battery = overlay.userInfo["battery"] as! Int
                 let status = overlay.userInfo["status"] as! String
+                
+                selectedKickboard = Kickboard(id: id,
+                                              latitude: latitude,
+                                              longitude: longtitude,
+                                              battery: battery,
+                                              address: address,
+                                              status: status)
                 
                 let usingKickboardView = self.mapTabView.getMapUsingKickboardView()
                 let customButton = self.mapTabView.getCustomButton()
@@ -470,9 +498,10 @@ extension MapTabViewController: NMFMapViewCameraDelegate {
 
 extension MapTabViewController: NMFMapViewTouchDelegate {
     func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
-        // 키보드 내리기
         dismissKeyboard()
-        mapTabView.showModalDownAnimation()
+        if !isUsingKickboard {
+            mapTabView.showModalDownAnimation()
+        }
     }
 }
 

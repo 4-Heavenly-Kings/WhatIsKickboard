@@ -128,8 +128,14 @@ private extension TabBarController {
     /// 지도, 등록, 마이페이지 탭바 아이템 설정
     /// (여기서 '등록'은 dummy로 선언)
     func setTabBarItems() {
-        let mapTabViewController = MapTabViewController()
+        let apiGeocodingRepository = APIGeocodingRepository()
+        let rentKickboardrepository = RentKickboardRepository()
+        let fetchAPIGeocodingUseCase = FetchAPIGeocodingUseCase(repository: apiGeocodingRepository)
+        let rentKickboardUseCase = RentKickboardUseCase(repository: rentKickboardrepository)
+        let viewModel = MapTabViewModel(fetchAPIGeocodingUseCase: fetchAPIGeocodingUseCase, rentKickboardUseCase: rentKickboardUseCase)
+        let mapTabViewController = MapTabViewController(viewModel: viewModel)
         mapTabViewController.changeSelectedIndexDelegate = self
+        
         let mapVC = UINavigationController(rootViewController: mapTabViewController)
         let registerVC = UIViewController()
         let myPageVC = UINavigationController(rootViewController: MyPageViewController())

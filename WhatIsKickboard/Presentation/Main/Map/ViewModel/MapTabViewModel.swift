@@ -19,11 +19,12 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     
     private let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MapViewModel")
     /// 킥보드 목업 데이터
-    private let mockKickboard = Kickboard(id: UUID(), latitude: 37.2064, longitude: 127.0681, battery: 80, address: "서울특별시 종로구 세종대로 175", status: "ABLE")
+//    private let mockKickboard = Kickboard(id: UUID(), latitude: 37.2064, longitude: 127.0681, battery: 80, address: "서울특별시 종로구 세종대로 175", status: "ABLE")
     /// Core Location Manager
     private let locationManager = CLLocationManager()
     
-    private let fetchAPIGeocodingUseCase = FetchAPIGeocodingUseCase()
+    private let fetchAPIGeocodingUseCase: FetchAPIGeocodingUseCase
+    private let rentKickboardUseCase: RentKickboardUseCase
     
     var disposeBag = DisposeBag()
     
@@ -36,6 +37,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         case searchText(text: String)
         /// 카메라 아이들 상태일 때 Reverse Geocoding 검색
         case mapViewCameraIdle(lat: Double, lng: Double)
+        case didRentButtonTap(id: UUID, latitude: Double, longitude: Double, address: String)
         /// 바인딩 완료
         case didBinding
     }
@@ -62,7 +64,12 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     
     // MARK: - Initializer
     
-    override init() {
+    init(fetchAPIGeocodingUseCase: FetchAPIGeocodingUseCase,
+         rentKickboardUseCase: RentKickboardUseCase) {
+        
+        self.fetchAPIGeocodingUseCase = fetchAPIGeocodingUseCase
+        self.rentKickboardUseCase = rentKickboardUseCase
+        
         super.init()
         
         locationManager.do {
@@ -80,6 +87,8 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
                     owner.searchLocation(searchText: text)
                 case let .mapViewCameraIdle(lat, lng):
                     owner.searchCoords(lat: lat, lng: lng)
+                case let .didRentButtonTap(id, latitude, longitude, address):
+                    owner.rentKickboard(id: id, latitude: latitude, longitude: longitude, address: address)
                 case .didBinding:
                     owner.updateKickboardList()
                 }
@@ -125,11 +134,14 @@ private extension MapTabViewModel {
     
     /// 킥보드 리스트 ViewController로 전달
     func updateKickboardList() {
-//        KickboardPersistenceManager.getKickboardList()
-//            .subscribe(with: self) { owner, kickboardList in
-//                owner.state.kickboardList.accept(kickboardList)
-//            }.disposed(by: disposeBag)
-        state.kickboardList.accept(mockKickboard.getMockList())
+        KickboardPersistenceManager.getKickboardList()
+            .subscribe(with: self) { owner, kickboardList in
+                owner.state.kickboardList.accept(kickboardList)
+            }.disposed(by: disposeBag)
+    }
+    
+    func rentKickboard(id: UUID, latitude: Double, longitude: Double, address: String) {
+        rentKickboardUseCase.execute(id: id, latitude: latitude, longitude: longitude, address: address)
     }
     
     /// 최근 업데이트된 좌표 ViewController로 전달
