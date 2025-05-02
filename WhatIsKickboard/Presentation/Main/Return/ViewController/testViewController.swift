@@ -59,6 +59,7 @@ final class testViewController: BaseViewController {
     override func setStyles() {
         view.backgroundColor = .white
         
+        /// 반납하기 버튼입니다.
         showAlertButton.do {
             $0.setTitle("반납하기", for: .normal)
             $0.setTitleColor(.white, for: .normal)
@@ -148,8 +149,8 @@ extension testViewController: UIImagePickerControllerDelegate, UINavigationContr
             if let image = info[.originalImage] as? UIImage {
                 if let imagePath = self.saveImageToDocuments(image: image) {
                     let repository = ReturnKickboardRepository()
-                    let useCase = ReturnKickboardUseCaseInterface(repository: repository)
-                    let viewModel = ReturnViewModel(returnKickboardUseCase: useCase)
+                    let useCaseInterface = ReturnKickboardUseCase(repository: repository)
+                    let viewModel = ReturnViewModel(returnKickboardUseCaseInterface: useCaseInterface)
                     let returnUIModel = ReturnUIModel(
                         imagePath: imagePath,
                         price: self.returnPrice,

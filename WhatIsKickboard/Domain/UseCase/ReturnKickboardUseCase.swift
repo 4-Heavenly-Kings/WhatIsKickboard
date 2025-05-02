@@ -9,12 +9,26 @@ import Foundation
 
 import RxSwift
 
-protocol ReturnKickboardUseCase {
+final class ReturnKickboardUseCase: ReturnKickboardUseCaseInterface {
+    private let repository: ReturnKickboardRepositoryInterface
+
+    init(repository: ReturnKickboardRepositoryInterface) {
+        self.repository = repository
+    }
+
     func execute(
         latitude: Double,
         longitude: Double,
         battery: Int,
         imagePath: String,
         address: String
-    ) -> Single<Void>
+    ) -> Single<Void> {
+        return repository.returnKickboard(
+            latitude: latitude,
+            longitude: longitude,
+            battery: battery,
+            imagePath: imagePath,
+            address: address
+        )
+    }
 }

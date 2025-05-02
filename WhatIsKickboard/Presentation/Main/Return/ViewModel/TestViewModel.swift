@@ -28,11 +28,11 @@ final class TestViewModel: ViewModelProtocol {
     let state = State()
     let disposeBag = DisposeBag()
 
-    private let returnRequestUseCase: ReturnRequestUseCase
+    private let returnRequestUseCaseInterface: ReturnRequestUseCaseInterface
     private var storedKickboardId: UUID?
 
-    init(returnRequestUseCase: ReturnRequestUseCase) {
-        self.returnRequestUseCase = returnRequestUseCase
+    init(returnRequestUseCaseInterface: ReturnRequestUseCaseInterface) {
+        self.returnRequestUseCaseInterface = returnRequestUseCaseInterface
         bind()
         Task {
             do {
@@ -62,7 +62,7 @@ final class TestViewModel: ViewModelProtocol {
     }
     
     private func handleReturnRequest() {
-        returnRequestUseCase.getCurrentUser()
+        returnRequestUseCaseInterface.getCurrentUser()
             .flatMap { [weak self] user -> Single<(KickboardRide, User)> in
                 guard let self = self else {
                     return .error(NSError(domain: "ViewModel deallocated", code: -1))
@@ -72,7 +72,7 @@ final class TestViewModel: ViewModelProtocol {
                     return .error(NSError(domain: "No current ride ID", code: -2))
                 }
 
-                return self.returnRequestUseCase.getKickboardRide(id: rideId)
+                return self.returnRequestUseCaseInterface.getKickboardRide(id: rideId)
                     .map { ride in (ride, user) }
             }
             .subscribe(onSuccess: { [weak self] ride, user in

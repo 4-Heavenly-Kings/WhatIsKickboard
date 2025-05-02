@@ -27,11 +27,11 @@ final class RegisterViewModel: ViewModelProtocol {
     let state = State()
     let disposeBag = DisposeBag()
     
-    private let createKickboardUseCase: CreateKickboardUseCase
+    private let createKickboardUseCaseInterface: CreateKickboardUseCaseInterface
 
 
-    init(createKickboardUseCase: CreateKickboardUseCase) {
-        self.createKickboardUseCase = createKickboardUseCase
+    init(createKickboardUseCaseInterface: CreateKickboardUseCaseInterface) {
+        self.createKickboardUseCaseInterface = createKickboardUseCaseInterface
         bind()
     }
 
@@ -48,7 +48,7 @@ final class RegisterViewModel: ViewModelProtocol {
     }
 
     private func createKickboard(model: RegisterUIModel, battery: Int) {
-        createKickboardUseCase.execute(
+        createKickboardUseCaseInterface.execute(
             latitude: model.latitude,
             longitude: model.longitude,
             battery: battery,

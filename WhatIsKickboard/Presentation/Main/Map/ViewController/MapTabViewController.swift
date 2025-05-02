@@ -210,8 +210,8 @@ final class MapTabViewController: BaseViewController {
                 let item: RegisterUIModel = .init(latitude: lat, longitude: lng, address: owner.address)
                 
                 let repository = CreateKickboardRepository()
-                let useCase = CreateKickboardUseCaseInterface(repository: repository)
-                let viewModel = RegisterViewModel(createKickboardUseCase: useCase)
+                let useCaseInterface = CreateKickboardUseCase(repository: repository)
+                let viewModel = RegisterViewModel(createKickboardUseCaseInterface: useCaseInterface)
                 let registerVC = RegisterViewController(viewModel: viewModel, registerUIModel: item)
                 owner.navigationController?.pushViewController(registerVC, animated: true)
             }.disposed(by: disposeBag)
