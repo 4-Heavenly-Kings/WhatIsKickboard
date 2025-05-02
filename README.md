@@ -218,7 +218,7 @@ struct IndivisualData: Codable {
 
 struct MyPuzzle: Codable {
     let nickname: String
-    let puzzleCount: Int
+    let puzzleCount: Int 
 }
 
 struct UserPuzzleBoard: Codable {
@@ -492,7 +492,7 @@ func printProperty(property: Int) {
 // 그건 PR에서 하는걸로..?
 ```
 
-
+</details>
 
 <br>
 
@@ -730,6 +730,7 @@ WhatIsKickboard/
 
 </div>
 </details>
+<details>
 <summary> 천성우 </summary>
 <div markdown="1">
 
