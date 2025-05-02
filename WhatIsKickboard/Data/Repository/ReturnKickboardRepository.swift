@@ -20,15 +20,30 @@ final class ReturnKickboardRepository: ReturnKickboardRepositoryInterface {
         return Single.create { single in
             Task {
                 do {
-                    let id = try KickboardPersistenceManager.getCurrentUserId()
+                    let userId = try KickboardPersistenceManager.getCurrentUserId()
+                    
+                    let rideList = try await withCheckedThrowingContinuation { continuation in
+                        _ = KickboardPersistenceManager.getKickboardRideList(userId: userId)
+                            .subscribe(onSuccess: { rides in
+                                continuation.resume(returning: rides)
+                            }, onFailure: { error in
+                                continuation.resume(throwing: error)
+                            })
+                    }
+
+                    guard let currentRide = rideList.last else {
+                        throw KickboardPersistenceError.rideNotFound
+                    }
+
                     try await KickboardPersistenceManager.returnKickboard(
-                        id: id,
+                        id: currentRide.kickboardId,
                         latitude: latitude,
                         longitude: longitude,
                         battery: battery,
                         imagePath: imagePath,
                         address: address
                     )
+                    
                     single(.success(()))
                 } catch {
                     single(.failure(error))
