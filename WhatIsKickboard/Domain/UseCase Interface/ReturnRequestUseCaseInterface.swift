@@ -9,22 +9,8 @@ import Foundation
 
 import RxSwift
 
-final class ReturnRequestUseCaseInterface: ReturnRequestUseCase {
-    private let repository: ReturnRequestRepositoryInterface
-
-    init(repository: ReturnRequestRepositoryInterface) {
-        self.repository = repository
-    }
-
-    func getCurrentUser() -> Single<User> {
-        repository.getCurrentUser()
-    }
-
-    func getKickboard(id: UUID) -> Single<Kickboard> {
-        repository.getKickboard(id: id)
-    }
-
-    func getKickboardRide(id: UUID) -> Single<KickboardRide> {
-        repository.getKickboardRide(id: id)
-    }
+protocol ReturnRequestUseCaseInterface {
+    func getCurrentUser() -> Single<User>
+    func getKickboard(id: UUID) -> Single<Kickboard>
+    func getKickboardRide(id: UUID) -> Single<KickboardRide>
 }

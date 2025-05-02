@@ -30,10 +30,10 @@ final class ReturnViewModel: ViewModelProtocol {
     private let actionSubject = PublishSubject<Action>()
     var action: AnyObserver<Action> { actionSubject.asObserver() }
     
-    private let returnKickboardUseCase: ReturnKickboardUseCase
+    private let returnKickboardUseCaseInterface: ReturnKickboardUseCaseInterface
 
-    init(returnKickboardUseCase: ReturnKickboardUseCase) {
-        self.returnKickboardUseCase = returnKickboardUseCase
+    init(returnKickboardUseCaseInterface: ReturnKickboardUseCaseInterface) {
+        self.returnKickboardUseCaseInterface = returnKickboardUseCaseInterface
         bind()
     }
     
@@ -65,7 +65,7 @@ final class ReturnViewModel: ViewModelProtocol {
         imagePath: String,
         address: String
     ) {
-        returnKickboardUseCase.execute(
+        returnKickboardUseCaseInterface.execute(
             latitude: latitude,
             longitude: longitude,
             battery: battery,
