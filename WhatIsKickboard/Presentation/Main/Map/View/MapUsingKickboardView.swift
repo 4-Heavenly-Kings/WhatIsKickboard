@@ -52,11 +52,11 @@ final class MapUsingKickboardView: BaseView {
         /// 반납하기 상황에서는 'OO분 이용 중' 으로 보여주면 될 것 같습니다.
         /// makeAttributedString 메서드 사용법은 본 메서드에 작성되어 있습니다.
         usingTimeLabel.do {
-            let text = "15분 이용 중"
+            let text = "0분 이용 중"
             let attributedText = NSMutableAttributedString.makeAttributedString(
                 text: text,
                 highlightedParts: [
-                    ("15분", .black, UIFont.systemFont(ofSize: 30, weight: .bold)),
+                    ("0분", .black, UIFont.systemFont(ofSize: 30, weight: .bold)),
                     ("이용 중", .black, UIFont.systemFont(ofSize: 30, weight: .regular))
                 ]
             )
