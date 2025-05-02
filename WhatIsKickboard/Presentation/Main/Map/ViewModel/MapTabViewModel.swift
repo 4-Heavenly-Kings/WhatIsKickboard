@@ -125,6 +125,10 @@ private extension MapTabViewModel {
     
     /// 킥보드 리스트 ViewController로 전달
     func updateKickboardList() {
+//        KickboardPersistenceManager.getKickboardList()
+//            .subscribe(with: self) { owner, kickboardList in
+//                owner.state.kickboardList.accept(kickboardList)
+//            }.disposed(by: disposeBag)
         state.kickboardList.accept(mockKickboard.getMockList())
     }
     

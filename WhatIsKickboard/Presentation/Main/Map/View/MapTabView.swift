@@ -148,10 +148,13 @@ final class MapTabView: BaseView {
         modalLikeContainerView.do {
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
             $0.layer.cornerRadius = 10
-            $0.isHidden = true
+            $0.layer.borderWidth = 1
+            $0.layer.borderColor = UIColor(hex: "#E7E7E7").cgColor
         }
         
         customButton.configure(buttonTitle: "대여하기")
+        
+        setModalLikeTransform()
     }
     
     // MARK: - Layout Helper
@@ -223,7 +226,7 @@ final class MapTabView: BaseView {
         
         modalLikeContainerView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview()
+            $0.height.equalTo(290)
         }
         
         mapUsingKickboardView.snp.makeConstraints {
@@ -342,6 +345,24 @@ final class MapTabView: BaseView {
     func updateTableViewHideState(to state: Bool) {
         tableViewContainer.isHidden = state
         resultTableView.isHidden = state
+    }
+    
+    func setModalLikeTransform() {
+        modalLikeContainerView.transform = CGAffineTransform(translationX: 0, y: 400)
+    }
+    
+    func showModalUpAnimation() {
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            guard let self else { return }
+            self.modalLikeContainerView.transform = CGAffineTransform(translationX: 0, y: 20)
+        }
+    }
+    
+    func showModalDownAnimation() {
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            guard let self else { return }
+            self.modalLikeContainerView.transform = CGAffineTransform(translationX: 0, y: 400)
+        }
     }
     
     func updateUsingKickboardViewTimeLabel(elapsedMinutes: Int) {

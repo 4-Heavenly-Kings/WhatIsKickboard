@@ -149,8 +149,6 @@ final class MapTabViewController: BaseViewController {
             }.disposed(by: disposeBag)
         
         
-        // TODO: 반납) 킥보드 UUID
-        
         // Action ➡️ ViewModel
         // 현재 위치 버튼 탭
         mapTabView.getLocationButton().rx.tap
@@ -224,7 +222,7 @@ final class MapTabViewController: BaseViewController {
         mapTabView.getCustomButton().rx.tap
             .bind(with: self) { owner, _ in
                 if owner.mapTabView.getCustomButton().titleLabel?.text == "대여하기" {
-                    
+                    // 킥보드 대여
                     owner.mapTabView.getCustomButton().configure(buttonTitle: "반납하기")
                     owner.elapsedMinutes = 0
                     owner.timer?.invalidate()
@@ -235,7 +233,9 @@ final class MapTabViewController: BaseViewController {
                                                  repeats: true)
                     owner.mapTabView.updateUsingKickboardViewTimeLabel(elapsedMinutes: owner.elapsedMinutes)
                 } else {
+                    // 킥보드 반납
 //                    owner.mapTabView.getCustomButton().configure(buttonTitle: "대여하기")
+                    // TODO: - 반납할때 위도 경도 주소
                     
                     
                     
@@ -271,7 +271,6 @@ final class MapTabViewController: BaseViewController {
     override func setRegister() {
         mapTabView.getSearchResultTableView().register(SearchResultCell.self, forCellReuseIdentifier: SearchResultCell.className)
     }
-
 }
 
 @objc private extension MapTabViewController {
@@ -330,30 +329,56 @@ private extension MapTabViewController {
             marker.iconImage = iconImage
             
             
+            // 마커 눌렀을 때 핸들러
             marker.touchHandler = { [weak self] (overlay: NMFOverlay) -> Bool in
                 guard let self else { return true }
-                // TODO: - 반납할때 위도 경도 주소
-                let id = overlay.userInfo["id"] as! UUID
-                let latitude = overlay.userInfo["latitude"] as! Double
-                let longtitude = overlay.userInfo["longitude"] as! Double
-                let battery = overlay.userInfo["battery"] as! Int
-                let status = overlay.userInfo["status"] as! String
                 
                 self.tabBarController?.tabBar.isHidden = true
                 self.mapTabView.getModalLikeContainerView().isHidden = false
+                DispatchQueue.main.async {
+                    self.mapTabView.showModalUpAnimation()
+                }
                 
-                mapTabView.getMapUsingKickboardView().do {
+                let battery = overlay.userInfo["battery"] as! Int
+                let status = overlay.userInfo["status"] as! String
+                
+                let usingKickboardView = self.mapTabView.getMapUsingKickboardView()
+                let customButton = self.mapTabView.getCustomButton()
+                
+                switch battery {
+                case 0...10:
+                    usingKickboardView.batteryImageView.image = UIImage(systemName: "battery.0percent")?.withRenderingMode(.alwaysOriginal).withTintColor(.systemRed)
+                case 11...30:
+                    usingKickboardView.batteryImageView.image = UIImage(systemName: "battery.25percent")
+                case 31...65:
+                    usingKickboardView.batteryImageView.image = UIImage(systemName: "battery.50percent")
+                case 66...90:
+                    usingKickboardView.batteryImageView.image = UIImage(systemName: "battery.75percent")
+                default:
+                    usingKickboardView.batteryImageView.image = UIImage(systemName: "battery.100percent")
+                }
+                usingKickboardView.batteryLabel.text = "배터리 \(battery)%"
+                
+                usingKickboardView.do {
                     $0.usingTimeLabel.do {
                         let text: String
                         switch status {
                         case KickboardStatus.able.rawValue:
                             text = "사용가능"
+                            customButton.backgroundColor = .core
+                            customButton.isEnabled = true
                         case KickboardStatus.declared.rawValue:
                             text = "신고 접수 중"
+                            customButton.backgroundColor = .placeholderText
+                            customButton.isEnabled = false
                         case KickboardStatus.lowBattery.rawValue:
                             text = "배터리 부족"
+                            customButton.backgroundColor = .placeholderText
+                            customButton.isEnabled = false
                         default:  // IMPOSSIBILITY
                             text = "배터리 부족"
+                            customButton.backgroundColor = .placeholderText
+                            customButton.isEnabled = false
                         }
                         
                         let attributedText = NSMutableAttributedString.makeAttributedString(
@@ -367,10 +392,7 @@ private extension MapTabViewController {
                         $0.textColor = .black
                     }
                 }
-                
                 return true
-                
-                // TODO: 킥보드 사용 모달 구현
             }
             
             return marker
@@ -445,8 +467,8 @@ extension MapTabViewController: NMFMapViewTouchDelegate {
     func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
         // 키보드 내리기
         dismissKeyboard()
+        mapTabView.showModalDownAnimation()
     }
 }
-
 
 // TODO: 지도 뷰 켜졌을 때 탑승중인 킥보드 있는지 확인
