@@ -494,11 +494,6 @@ private extension MapTabViewController {
             }
         }
         
-        if let buildingName = land?.addition0.value {
-            // + 건물 이름
-            address += " \(buildingName)"
-        }
-        
         return address
     }
     
@@ -614,9 +609,12 @@ extension MapTabViewController: UIImagePickerControllerDelegate, UINavigationCon
                         battery: self.returnBattery,
                         returnMinutes: self.returnMinutes,
                         /// 하기의 값에 위도, 경도, 주소를 순서로 넣으면 됩니다.
-                        latitude: 37.1234,
-                        longitude: 127.5678,
-                        address: "서울특별시 종로구 세종대로 175"
+                        /// 이거대로 테스트 해볼게요 래훈님
+                        /// 네네 실기기는 공유를 못해서
+                        /// 1분을 기다려야 함니다
+                        latitude: self.cameraCoordinates.lat,
+                        longitude: self.cameraCoordinates.lng,
+                        address: self.address
                     )
                     let returnVC = ReturnViewController(viewModel: viewModel, returnUIModel: returnUIModel)
                     self.navigationController?.pushViewController(returnVC, animated: true)

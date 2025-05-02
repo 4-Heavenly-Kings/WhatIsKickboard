@@ -38,6 +38,7 @@ final class RegisterStackView: UIStackView {
             $0.font = .systemFont(ofSize: 12, weight: .regular)
             $0.layer.cornerRadius = 25
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
+            $0.textColor = UIColor(hex: "#000000")
             
             let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 0))
             $0.leftView = paddingView

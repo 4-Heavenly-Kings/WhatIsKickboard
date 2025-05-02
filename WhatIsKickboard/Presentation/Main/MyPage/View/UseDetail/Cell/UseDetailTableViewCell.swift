@@ -80,7 +80,7 @@ final class UseDetailTableViewCell: BaseTableViewCell {
     
     func configureCell(_ item: KickboardRide) {
         let address = item.address.components(separatedBy: " ")
-        let minutes = Calendar.current.dateComponents([.minute], from: item.startTime, to: item.endTime!).minute ?? 0
+        let minutes = Calendar.current.dateComponents([.minute], from: item.startTime, to: item.endTime ?? Date()).minute ?? 0
         
         let text = "포비와 \(address[1])에서 \(minutes)분 놀았어요!"
         let attributedText = NSMutableAttributedString.makeBoldAttributedString(
