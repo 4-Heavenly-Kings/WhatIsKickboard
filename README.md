@@ -740,3 +740,182 @@ WhatIsKickboard/
 
 </div>
 </details>
+
+## DB & API 설계
+<details>
+<summary> DB & API 설계 </summary>
+
+- ERD
+<img width="787" alt="스크린샷 2025-05-02 오후 1 53 24" src="https://github.com/user-attachments/assets/039fc260-5cf9-4709-9e06-24b8caeeb311" />
+
+```
+Table users {
+  id uuid [pk]
+  name String
+  email String
+  password String
+  role: String
+  current_kickboard_ride_id uuid [ref: > rides.id]
+}
+
+Table kickboard {
+  id uuid [pk]
+  latitude float
+  longitude float
+  battery int
+  address String
+  status String 
+}
+
+Table rides {
+  id UUID [pk]
+  userId UUID [ref: > users.id]
+  kickboardId UUID [ref: > kickboard.id]
+  startTime Date
+  endTime Date
+  address String
+  startLatitude Double
+  startLongitude Double
+  endLatitude Double
+  endLongitude Double
+  battery Int
+  price Int
+  imagePath String
+}
+
+
+
+Ref: "rides"."id" < "rides"."endTime"
+```
+    
+- API 명세 (절대수정금지)
+    
+    
+    | api | type(예상) | request | response | note |
+    | --- | --- | --- | --- | --- |
+    | login | post | sign | UserResponse | 로그인 시 토큰 저장(UUID - UserDefaults) 후 role값으로 재요청 |
+    | createUser | post | sign | UserResponse | role값으로 재요청 |
+    | getUser | get | - | UserResponse |  |
+    | patchUser | patch | user | UserResponse | 이름 저장/이름 수정/비밀번호 변경 등  작업 후 성패 유무 반환 |
+    | logout | - | - | - |  |
+    | deleteUser | delete | password | - |  |
+    | getKickboard | post | UUID(kickboard) | KickboardResponse |  |
+    | getKickboardList | get | - | Array<KickboardResponse> |  |
+    | getKickboardRide | post | UUID(kickboard) | RideResponse |  |
+    | getKickboardRideList | post | UUID(user) | Array<RideResponse> |  |
+    | createKickboard | post | createKickboard | - | 해당 kickboard 생성 |
+    | rentKickboard | post | rentKickboard | - | 입력한 값으로 ride 및 kickboard 업데이트 |
+    | returnKickboard | post | returnKickboard | - | 입력한 값으로 ride 및 kickboard 업데이트 |
+    | declareKickboard | patch | UUID(kickboard) | - | 킥보드 신고 |
+    | deleteKickboard | delete | UUID(kickboard) | - | 킥보드 삭제 |
+- DTO 명세
+    
+    ## Request
+    
+    - sign
+        
+        ```swift
+        {
+        	email: String
+        	password: String
+        }
+        ```
+        
+    - user
+        
+        ```swift
+        {
+        	id: UUID
+        	name: String
+        	email: String
+        	password: String
+        	role: String 
+        	ride: [KickboardRide]
+        }
+        ```
+        
+    - createKickboard
+        
+        ```swift
+        {
+        	latitude: Double
+          longitude: Double
+          battery: Int
+          address: String
+        }
+        ```
+        
+    - rentKickboard
+        
+        ```swift
+        {
+        	id: UUID
+        	latitude: Double
+        	longitude: Double
+        	address: String
+        }
+        ```
+        
+    - returnKickboard
+        
+        ```swift
+        {
+        	id: UUID
+        	latitude: Double
+          longitude: Double
+          battery: Int
+          address: String
+          imagePath: String
+        }
+        ```
+        
+    
+    ### Response
+    
+    - UserResponse
+        
+        ```swift
+        {
+        	id: UUID
+        	name: String
+        	email: String
+        	password: String
+        	role: String          // "GUEST", "USER"
+        	current_kickboard_ride_id: UUID
+        }
+        ```
+        
+    - KickboardResponse
+        
+        ```swift
+        {
+        	id: UUID
+        	latitude: Double
+          longitude: Double
+          address: String
+          battery: Int
+        	status: String       // "ABLE", "DECLARED", "LOW_BATTERY", "IMPOSSIBILITY"
+        }
+        ```
+        
+    - RideResponse
+        
+        ```swift
+        {
+        	id: UUID
+          userId: UUID
+          kickboardId UUID
+          startTime Date
+          endTime Date
+          address: String
+          startLatitude Double
+          startLongitude Double
+          endLatitude Double
+          endLongitude Double
+          battery: Int
+          price Int
+          imagePath String
+        }
+        ```
+        </div>
+</details>
