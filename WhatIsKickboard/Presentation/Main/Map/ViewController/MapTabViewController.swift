@@ -55,7 +55,13 @@ final class MapTabViewController: BaseViewController {
         }
     }
     
-    private var isUsingKickboard: Bool = false
+    private var isUsingKickboard: Bool = false {
+        didSet {
+            viewModel.action.onNext(.viewWillLayoutSubviews)
+            self.tabBarController?.tabBar.isHidden = isUsingKickboard
+//            mapTabView.getSearchBar().isHidden = isUsingKickboard
+        }
+    }
     
     private var timer: Timer?
     private var elapsedMinutes = 0
@@ -87,6 +93,11 @@ final class MapTabViewController: BaseViewController {
     }
     
     // MARK: - Lifecycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+//        KickboardPersistenceManager.getKickboardRide(id: UUID)
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -284,7 +295,6 @@ final class MapTabViewController: BaseViewController {
                                                  repeats: true)
                     owner.mapTabView.updateUsingKickboardViewTimeLabel(elapsedMinutes: owner.elapsedMinutes)
                 } else {
-                    owner.isUsingKickboard = false
                     // MARK: - 킥보드 반납 버튼 상태
                     owner.viewModel.action.onNext(.requestReturn)
                     
@@ -467,7 +477,11 @@ private extension MapTabViewController {
         isAllMarkerHidden.toggle()
         kickboardMarkerList
             .filter { $0.userInfo["status"] as! String != KickboardStatus.impossibility.rawValue }
-            .forEach { $0.hidden = isAllMarkerHidden }
+            .forEach {
+                print($0)
+                $0.hidden = isAllMarkerHidden
+                print($0)
+            }
     }
     
     /// 키보드 내림
@@ -519,6 +533,7 @@ private extension MapTabViewController {
 
         alert.getSubmitButton().rx.tap
             .bind { [weak self, weak alert] in
+                self?.isUsingKickboard = true
                 alert?.removeFromSuperview()
                 self?.customAlertView = nil
                 self?.openCamera()
@@ -527,6 +542,7 @@ private extension MapTabViewController {
 
         alert.getCancelButton().rx.tap
             .bind { [weak self, weak alert] in
+                self?.isUsingKickboard = false
                 alert?.removeFromSuperview()
                 self?.customAlertView = nil
             }
@@ -546,10 +562,6 @@ private extension MapTabViewController {
 // MARK: - NMFMapViewCameraDelegate
 
 extension MapTabViewController: NMFMapViewCameraDelegate {
-    func mapView(_ mapView: NMFMapView, cameraDidChangeByReason reason: Int, animated: Bool) {
-        print("cameraDidChangeByReason")
-    }
-    
     func mapView(_ mapView: NMFMapView, cameraWillChangeByReason reason: Int, animated: Bool) {
         // 카메라가 현위치를 추적하는 것을 멈춤
         if reason == NMFMapChangedByGesture {
@@ -571,7 +583,7 @@ extension MapTabViewController: NMFMapViewCameraDelegate {
 extension MapTabViewController: NMFMapViewTouchDelegate {
     func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
         dismissKeyboard()
-        if !isUsingKickboard {
+        if !isUsingKickboard && !isRegister {
             mapTabView.showModalDownAnimation()
             self.tabBarController?.tabBar.isHidden = false
         }
