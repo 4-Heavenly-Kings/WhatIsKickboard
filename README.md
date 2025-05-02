@@ -710,34 +710,57 @@ WhatIsKickboard/
 <details>
 <summary> 서동환 </summary>
 <div markdown="1">
+</br>
 	
+**현위치 이동 애니메이션**
+	
+- 문제: 네이버 지도 API에서 기본으로 제공하는 사용자 현위치 이동 효과가 매끄럽지 않음
+- 해결: API에서 제공하는 애니메이션과 좌표로 지도를 이동하는 애니메이션을 활용하여 UX를 개선
 
-
+</br>
 </div>
 </details>
 
 <details>
 <summary> 백래훈 </summary>
 <div markdown="1">
+</br>
+	
+**ModalType 열거형으로 케이스 별로 화면을 구별하여 코드 재활용**
 
+- 문제: 이름 수정, 비밀번호 수정, 회원탈퇴 화면을 모두 구현할 필요성 의문
+- 해결: 어떤 화면인지 ModalType 열거형으로 케이스 별로 구별하여 화면을 재활용하였고, 이로 인해 repository, useCase도 하나의 화면에서만 구현하면 되기에 개발 시간을 단축시킬 수 있었음
 
+</br>
 </div>
 </details>
 
   
 <details>
-
  <summary> 유영웅 </summary>
 <div markdown="1">
+ </br>
+	
+ **RxSwift .onError 한 번 호출 후 스트림 종료 문제**
+ 
+- 문제: .onError() 발생 후 Observable이 종료돼서 더 이상 이벤트를 받지 못함
+- 해결: PublishSubject → PublishRelay로 변경하고, 에러 스트림 따로 분리
 
-
+</br>
 </div>
 </details>
+
 <details>
 <summary> 천성우 </summary>
 <div markdown="1">
+</br>
+	
+**반납 버튼 2번 눌러야 동작하는 문제**
 
+- 문제: 반납 버튼을 눌러도 첫 번째 클릭에선 아무 일도 일어나지 않고, 두 번째 클릭 이후에야 킥보드가 반납됨.
+- 해결: g₩etUser()와 getKickboard()를 한 번의 흐름에서 모두 검사하도록 로직 재구성
 
+</br>
 </div>
 </details>
 
