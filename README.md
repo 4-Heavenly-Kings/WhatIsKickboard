@@ -6,7 +6,7 @@
 자신의 위치를 기반으로 등록 된 킥보드를 사용하고 반납이 가능하며 운영자는 킥보드를 등록할 수 있는 서비스
 
 <br><br>
-## 🛴 과수원 iOS 🛴
+## 🛴 킥보드가 뭐? iOS 🛴
 <img src="https://github.com/user-attachments/assets/e3d53e12-5685-430e-8350-428e5f89a166" width="200"> | <img src="https://github.com/user-attachments/assets/b820a610-96fe-4cd0-b1c6-122f229c58aa" width="200"> | <img src="https://github.com/user-attachments/assets/1969b83f-d201-4253-a19a-37d75f416d09" width="200"> | <img src="https://github.com/user-attachments/assets/1e65418d-bc56-47f7-a0f9-a85788a9a71c" width="200"> |
 :---------:|:----------:|:---------:|:---------:|
 서동환 | 백래훈 | 유영웅 | 천성우 |
