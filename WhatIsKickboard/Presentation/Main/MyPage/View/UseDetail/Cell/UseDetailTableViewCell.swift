@@ -41,14 +41,6 @@ final class UseDetailTableViewCell: BaseTableViewCell {
         }
         
         usingComment.do {
-            let text = "포비와 강남구에서 15분 놀았어요!"
-            let attributedText = NSMutableAttributedString.makeBoldAttributedString(
-                fullText: text,
-                boldParts: ["강남구", "15분"],
-                regularFont: .systemFont(ofSize: 15, weight: .regular),
-                boldFont: .systemFont(ofSize: 15, weight: .bold),
-                color: .black)
-            $0.attributedText = attributedText
             $0.textAlignment = .center
         }
         
@@ -84,6 +76,63 @@ final class UseDetailTableViewCell: BaseTableViewCell {
             $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().offset(-16)
         }
+    }
+    
+    func configureCell(_ item: KickboardRide) {
+        let address = item.address.components(separatedBy: " ")
+        let minutes = Calendar.current.dateComponents([.minute], from: item.startTime, to: item.endTime!).minute ?? 0
+        
+        let text = "포비와 \(address[1])에서 \(minutes)분 놀았어요!"
+        let attributedText = NSMutableAttributedString.makeBoldAttributedString(
+            fullText: text,
+            boldParts: [address[1], String(minutes)],
+            regularFont: .systemFont(ofSize: 15, weight: .regular),
+            boldFont: .systemFont(ofSize: 15, weight: .bold),
+            color: .black)
+        
+        if let imagePath = item.imagePath,
+           let image = loadImageFromDirectory(with: imagePath) {
+             returnImage.image = image
+        }
+        
+        usingComment.attributedText = attributedText
+        rentLocationLabel.text = "대여장소: \(item.address)"
+        
+    }
+    
+    func loadImageFromDirectory(with identifier: String) -> UIImage? {
+        let fileManager = FileManager.default
+        // 파일 경로로 접근
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileURL = documentsDirectory.appendingPathComponent(identifier, conformingTo: .jpeg)
+        
+        // 이미지 파일이 존재한다면, 이미지로 변환 후 리턴
+        guard fileManager.fileExists(atPath: fileURL.path) else { return nil }
+        
+        return UIImage(contentsOfFile: fileURL.path)
+    }
+    
+    func testLoadImageFromDirectory() -> UIImage {
+        // 1. 임의 이미지 생성
+        let size = CGSize(width: 100, height: 100)
+        UIGraphicsBeginImageContext(size)
+        UIColor.red.setFill()
+        UIRectFill(CGRect(origin: .zero, size: size))
+        let testImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        // 2. 파일 저장 (테스트 내부에서만)
+        let fileManager = FileManager.default
+        let identifier = "test_image"
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileURL = documentsDirectory.appendingPathComponent(identifier, conformingTo: .jpeg)
+        if let data = testImage?.jpegData(compressionQuality: 1.0) {
+            try? data.write(to: fileURL)
+        }
+        // 3. 함수 테스트
+        let loadedImage = loadImageFromDirectory(with: identifier)
+        
+        return loadedImage!
     }
     
 }

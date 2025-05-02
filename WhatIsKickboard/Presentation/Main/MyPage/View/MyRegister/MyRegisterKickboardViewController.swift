@@ -18,13 +18,28 @@ final class MyRegisterKickboardViewController: BaseViewController {
     // MARK: - Compoenets
     let myRegisterKickboardView = MyRegisterKickboardView()
     
-    // MARK: - Properties
-    let dummyData = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    private let viewModel: MyRegisterKickboardViewModel
+    
+    init(viewModel: MyRegisterKickboardViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func loadView() {
         super.loadView()
         
         view = myRegisterKickboardView
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        bindAction()
+        bindUIEvents()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -36,9 +51,6 @@ final class MyRegisterKickboardViewController: BaseViewController {
     override func setStyles() {
         super.setStyles()
         
-        myRegisterKickboardView.getMyRegisterTableView().delegate = self
-        myRegisterKickboardView.getMyRegisterTableView().dataSource = self
-        
     }
     
     override func setLayout() {
@@ -49,25 +61,23 @@ final class MyRegisterKickboardViewController: BaseViewController {
     override func bindViewModel() {
         super.bindViewModel()
         
+        viewModel.state.kickboardList
+            .bind(to: myRegisterKickboardView.getMyRegisterTableView().rx.items(cellIdentifier: MyRegisterKickboardTableViewCell.className, cellType: MyRegisterKickboardTableViewCell.self)) { row, element, cell in
+                cell.configureCell(element)
+            }
+            .disposed(by: disposeBag)
+        
+    }
+    
+    private func bindAction() {
+        viewModel.action.onNext(.viewDidLoad)
+    }
+    
+    private func bindUIEvents() {
         myRegisterKickboardView.getNavigationBarView().getBackButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.navigationController?.popViewController(animated: true)
             }
             .disposed(by: disposeBag)
-    }
-}
-
-extension MyRegisterKickboardViewController: UITableViewDelegate {
-    
-}
-
-extension MyRegisterKickboardViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dummyData.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: MyRegisterKickboardTableViewCell.className, for: indexPath)
-        return cell
     }
 }

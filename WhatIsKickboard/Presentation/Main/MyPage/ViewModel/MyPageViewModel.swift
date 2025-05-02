@@ -9,6 +9,8 @@ import Foundation
 
 import RxSwift
 import RxRelay
+import CoreData
+import UIKit
 
 final class MyPageViewModel: ViewModelProtocol {
 
@@ -30,8 +32,13 @@ final class MyPageViewModel: ViewModelProtocol {
 
     let state = State()
     let disposeBag = DisposeBag()
+    
+    let modifyUseCase: ModifyUseCase
+    
+    var container: NSPersistentContainer!
 
-    init() {
+    init(modifyUseCase: ModifyUseCase) {
+        self.modifyUseCase = modifyUseCase
         bind()
     }
 
@@ -48,6 +55,13 @@ final class MyPageViewModel: ViewModelProtocol {
                 }
             }
             .disposed(by: disposeBag)
+        
+//        Task {
+//            for _ in 0..<10 {
+//                try await KickboardPersistenceManager.createKickboard(latitude: 37.498061, longitude: 127.028759, battery: 77, address: "서울특별시 강남구 도산대로 23길")
+//            }
+//        }
+        
     }
 }
 
@@ -56,7 +70,7 @@ private extension MyPageViewModel {
     
     /// 유저정보 불러오기
     func loadUser() {
-        UserPersistenceManager.getUser()
+        modifyUseCase.getUser()
             .subscribe(with: self, onSuccess: { owner, user in
                 owner.state.user.onNext(user)
             }, onFailure: { owner, error in

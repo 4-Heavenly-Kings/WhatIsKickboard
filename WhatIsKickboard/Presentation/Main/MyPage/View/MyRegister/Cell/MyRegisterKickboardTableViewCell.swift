@@ -31,8 +31,10 @@ final class MyRegisterKickboardTableViewCell: BaseTableViewCell {
     override func setStyles() {
         super.setStyles()
         
+        self.selectionStyle = .none
+        
         batteryImage.do {
-            $0.image = UIImage(named: "KickboardMarker_Available")
+            $0.image = UIImage(named: "KickboardMarker_Available_Shadow")
             $0.contentMode = .scaleAspectFit
         }
         
@@ -67,6 +69,7 @@ final class MyRegisterKickboardTableViewCell: BaseTableViewCell {
             $0.axis = .vertical
             $0.spacing = 5
             $0.alignment = .trailing
+            $0.distribution = .equalSpacing
         }
         
     }
@@ -93,6 +96,27 @@ final class MyRegisterKickboardTableViewCell: BaseTableViewCell {
         kickboardStatusLabel.snp.makeConstraints {
             $0.leading.equalTo(batteryImage.snp.trailing).offset(8)
             $0.centerY.equalToSuperview()
+        }
+    }
+    
+    func configureCell(_ item: Kickboard) {
+        kickboardStatusLabel.text = KickboardStatus(rawValue: item.status)?.korean
+        uuidLabel.text = item.id.uuidString.components(separatedBy: "-").first ?? ""
+        battryStatusLabel.text = "배터리 상태: \(item.battery)%"
+        registerLocationLabel.text = "등록장소: \(item.address)"
+        batteryImage.image = setKickboardStatus(KickboardStatus(rawValue: item.status) ?? .declared)
+    }
+    
+    private func setKickboardStatus(_ status: KickboardStatus) -> UIImage {
+        switch status {
+        case .able:
+            return UIImage(resource: .kickboardMarkerAvailable)
+        case .declared:
+            return UIImage(resource: .kickboardMarkerDeclared)
+        case .lowBattery:
+            return UIImage(resource: .kickboardMarkerUnavailable)
+        case .impossibility:
+            return UIImage(resource: .kickboardMarkerImpossibility)
         }
     }
 }

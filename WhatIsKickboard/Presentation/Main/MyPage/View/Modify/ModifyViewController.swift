@@ -21,10 +21,11 @@ final class ModifyViewController: BaseViewController {
     
     // MARK: - Properties
     private var modityType: ModifyType
-    private let modifyViewModel = ModifyViewModel()
+    private let modifyViewModel: ModifyViewModel
     
-    init(modityType: ModifyType) {
+    init(modityType: ModifyType, modifyViewModel: ModifyViewModel) {
         self.modityType = modityType
+        self.modifyViewModel = modifyViewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -104,6 +105,7 @@ final class ModifyViewController: BaseViewController {
             .disposed(by: disposeBag)
         
         modifyViewModel.state.errorMessage
+            .observe(on: MainScheduler.asyncInstance)
             .bind(with: self) { owner, message in
                 owner.showModifyAlert(message)
             }
