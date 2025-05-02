@@ -37,9 +37,11 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         case searchText(text: String)
         /// 카메라 아이들 상태일 때 Reverse Geocoding 검색
         case mapViewCameraIdle(lat: Double, lng: Double)
+        case viewWillLayoutSubviews
         case didRentButtonTap(id: UUID, latitude: Double, longitude: Double, address: String)
         /// 바인딩 완료
         case didBinding
+        case requestReturn
     }
     var action: AnyObserver<Action> {
         return state.actionSubject.asObserver()
@@ -58,17 +60,26 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         /// 장소 검색 결과
         fileprivate(set) var locationSearchResult = PublishRelay<[LocationModel]>()
         /// Reverse Geocoding 검색 결과
-        fileprivate(set) var reverseGeoSearchResult = PublishRelay<[ReverseGeoResultModel]>()
+        fileprivate(set) var reverseGeoSearchResult = BehaviorRelay<[ReverseGeoResultModel]>(value: [])
+        
+        let kickboardRide = PublishRelay<KickboardRide>()
+        let user = PublishRelay<User>()
+        let error = PublishRelay<Error>()
     }
     var state = State()
+    
+    private let returnRequestUseCaseInterface: ReturnRequestUseCaseInterface
+    private var storedKickboardId: UUID?
     
     // MARK: - Initializer
     
     init(fetchAPIGeocodingUseCase: FetchAPIGeocodingUseCase,
-         rentKickboardUseCase: RentKickboardUseCase) {
+         rentKickboardUseCase: RentKickboardUseCase
+         , returnRequestUseCaseInterface: ReturnRequestUseCaseInterface) {
         
         self.fetchAPIGeocodingUseCase = fetchAPIGeocodingUseCase
         self.rentKickboardUseCase = rentKickboardUseCase
+        self.returnRequestUseCaseInterface = returnRequestUseCaseInterface
         
         super.init()
         
@@ -89,8 +100,10 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
                     owner.searchCoords(lat: lat, lng: lng)
                 case let .didRentButtonTap(id, latitude, longitude, address):
                     owner.rentKickboard(id: id, latitude: latitude, longitude: longitude, address: address)
-                case .didBinding:
+                case .didBinding, .viewWillLayoutSubviews:
                     owner.updateKickboardList()
+                case .requestReturn:
+                    owner.handleReturnRequest()
                 }
             }.disposed(by: disposeBag)
     }
@@ -151,6 +164,29 @@ private extension MapTabViewModel {
         let logMsg = "현재 위치: (latitude: \(lat ?? 0.0), longitude: \(lng ?? 0.0))"
         os_log(.debug, log: log, "%@", logMsg)
         state.userLocation.accept(locationManager.location?.coordinate)
+    }
+    
+    private func handleReturnRequest() {
+        returnRequestUseCaseInterface.getCurrentUser()
+            .flatMap { [weak self] user -> Single<(KickboardRide, User)> in
+                guard let self = self else {
+                    return .error(NSError(domain: "ViewModel deallocated", code: -1))
+                }
+
+                guard let rideId = user.currentKickboardRideId else {
+                    return .error(NSError(domain: "No current ride ID", code: -2))
+                }
+
+                return self.returnRequestUseCaseInterface.getKickboardRide(id: rideId)
+                    .map { ride in (ride, user) }
+            }
+            .subscribe(onSuccess: { [weak self] ride, user in
+                self?.state.kickboardRide.accept(ride)
+                self?.state.user.accept(user)
+            }, onFailure: { [weak self] error in
+                self?.state.error.accept(error)
+            })
+            .disposed(by: disposeBag)
     }
 }
 
