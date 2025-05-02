@@ -54,17 +54,18 @@ private extension MyRegisterKickboardViewModel {
                 print("getKickboardList 호출 성공")
                 print("CoreData 킥보드 리스트: \(kickboardList)")
                 
-                let kickboad = Kickboard(id: UUID(),
-                                         latitude: 128.12,
-                                         longitude: 37.33,
-                                         battery: 30,
-                                         address: "서울시",
-                                         status: "ABLE")
-                
-                print("MockData 킥보드 리스트: \(kickboad.getMockList())")
+//                let kickboad = Kickboard(id: UUID(),
+//                                         latitude: 128.12,
+//                                         longitude: 37.33,
+//                                         battery: 30,
+//                                         address: "서울시",
+//                                         status: "ABLE")
+//                
+//                print("MockData 킥보드 리스트: \(kickboad.getMockList())")
+//                owner.state.kickboardList.accept(kickboad.getMockList())
                 
                 // 여기서 MockData가 아닌 CoreData를 넘겨줘야함
-                owner.state.kickboardList.accept(kickboad.getMockList())
+                owner.state.kickboardList.accept(kickboardList)
             } onFailure: { owner, error in
                 print("getKickboardList 호출 실패")
             }

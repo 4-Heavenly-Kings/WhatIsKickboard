@@ -9,6 +9,8 @@ import Foundation
 
 import RxSwift
 import RxRelay
+import CoreData
+import UIKit
 
 final class MyPageViewModel: ViewModelProtocol {
 
@@ -32,6 +34,8 @@ final class MyPageViewModel: ViewModelProtocol {
     let disposeBag = DisposeBag()
     
     let modifyUseCase: ModifyUseCase
+    
+    var container: NSPersistentContainer!
 
     init(modifyUseCase: ModifyUseCase) {
         self.modifyUseCase = modifyUseCase
@@ -51,6 +55,13 @@ final class MyPageViewModel: ViewModelProtocol {
                 }
             }
             .disposed(by: disposeBag)
+        
+//        Task {
+//            for _ in 0..<10 {
+//                try await KickboardPersistenceManager.createKickboard(latitude: 37.498061, longitude: 127.028759, battery: 77, address: "서울특별시 강남구 도산대로 23길")
+//            }
+//        }
+        
     }
 }
 
