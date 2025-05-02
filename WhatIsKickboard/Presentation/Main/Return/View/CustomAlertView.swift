@@ -46,7 +46,8 @@ final class CustomAlertView: BaseView {
         }
         
         switch alertType {
-        case .returnRequest, .logout, .deleteID, .emailFailed, .signIntFailed, .failureUserModify:
+        case .returnRequest, .logout, .deleteID, .emailFailed, .signIntFailed,
+                .failureUserModify, .batteryInputFailed, .failCreateKickboard, .successCreateKickboard:
             imageView.do {
                 $0.image = UIImage(named: "PobyHi")
             }
@@ -155,7 +156,9 @@ final class CustomAlertView: BaseView {
                 $0.bottom.equalTo(buttonStackView.snp.bottom)
                 $0.width.equalTo(1)
             }
-        case .confirmReturn, .emailFailed ,.signIntFailed, .failureUserModify:
+            
+        case .confirmReturn, .emailFailed ,.signIntFailed, .failureUserModify, .batteryInputFailed, .failCreateKickboard, .successCreateKickboard:
+            
             addSubviews(containerView)
             containerView.addSubviews(imageView, titleLabel, horizontalSeparator, buttonStackView)
             buttonStackView.addArrangedSubviews(submitButton)

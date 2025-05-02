@@ -23,7 +23,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     /// Core Location Manager
     private let locationManager = CLLocationManager()
     
-    private let apiUseCase = FetchAPIGeocodingUseCase()
+    private let fetchAPIGeocodingUseCase = FetchAPIGeocodingUseCase()
     
     var disposeBag = DisposeBag()
     
@@ -31,9 +31,11 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     
     enum Action {
         /// 현재 위치 버튼 탭
-        case didlocationButtonTap
+        case didLocationButtonTap
         /// 장소 검색창 텍스트
         case searchText(text: String)
+        /// 카메라 아이들 상태일 때 Reverse Geocoding 검색
+        case mapViewCameraIdle(lat: Double, lng: Double)
         /// 바인딩 완료
         case didBinding
     }
@@ -51,8 +53,10 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         fileprivate(set) var userLocation = BehaviorRelay<CLLocationCoordinate2D?>(value: nil)
         /// 킥보드 리스트
         fileprivate(set) var kickboardList = BehaviorRelay<[Kickboard]>(value: [])
-        /// 검색 결과
-        fileprivate(set) var searchResult = PublishRelay<[LocationModel]>()
+        /// 장소 검색 결과
+        fileprivate(set) var locationSearchResult = PublishRelay<[LocationModel]>()
+        /// Reverse Geocoding 검색 결과
+        fileprivate(set) var reverseGeoSearchResult = PublishRelay<[ReverseGeoResultModel]>()
     }
     var state = State()
     
@@ -70,12 +74,14 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         state.actionSubject
             .subscribe(with: self) { owner, action in
                 switch action {
-                case .didBinding:
-                    owner.updateKickboardList()
-                case .didlocationButtonTap:
+                case .didLocationButtonTap:
                     owner.updateLastLocation()
                 case let .searchText(text):
                     owner.searchLocation(searchText: text)
+                case let .mapViewCameraIdle(lat, lng):
+                    owner.searchCoords(lat: lat, lng: lng)
+                case .didBinding:
+                    owner.updateKickboardList()
                 }
             }.disposed(by: disposeBag)
     }
@@ -137,12 +143,22 @@ private extension MapTabViewModel {
 private extension MapTabViewModel {
     /// API를 통한 장소 검색
     func searchLocation(searchText: String) {
-        apiUseCase.fetchSearchResults(for: searchText)
+        fetchAPIGeocodingUseCase.fetchSearchResults(for: searchText)
             .subscribe(with: self, onSuccess: { owner, locations in
-                owner.state.searchResult.accept(locations)
+                owner.state.locationSearchResult.accept(locations)
             }, onFailure: { owner, error in
-                owner.state.searchResult.accept([])
+                owner.state.locationSearchResult.accept([])
                 os_log(.error, log: owner.log, "장소 검색 실패: %@", "\(error)")
+            }).disposed(by: disposeBag)
+    }
+    
+    func searchCoords(lat: Double, lng: Double) {
+        let coordinates = "\(lng),\(lat)"
+        fetchAPIGeocodingUseCase.fetchCoordToAddress(coords: coordinates)
+            .subscribe(with: self, onSuccess: { owner, results in
+                owner.state.reverseGeoSearchResult.accept(results)
+            }, onFailure: { owner, error in
+                owner.state.reverseGeoSearchResult.accept([])
             }).disposed(by: disposeBag)
     }
 }
