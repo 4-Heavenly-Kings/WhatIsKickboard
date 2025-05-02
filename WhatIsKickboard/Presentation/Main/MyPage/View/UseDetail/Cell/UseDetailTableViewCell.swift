@@ -90,10 +90,16 @@ final class UseDetailTableViewCell: BaseTableViewCell {
             boldFont: .systemFont(ofSize: 15, weight: .bold),
             color: .black)
         
-        if let imagePath = item.imagePath,
-           let image = loadImageFromDirectory(with: imagePath) {
-             returnImage.image = image
+        if let imagePath = item.imagePath, let image = UIImage(contentsOfFile: imagePath) {
+            returnImage.image = image
+        } else {
+            print("이미지 로딩 실패")
         }
+        
+//        if let imagePath = item.imagePath,
+//           let image = loadImageFromDirectory(with: imagePath) {
+//             returnImage.image = image
+//        }
         
         usingComment.attributedText = attributedText
         rentLocationLabel.text = "대여장소: \(item.address)"
