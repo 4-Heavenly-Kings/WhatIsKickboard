@@ -34,8 +34,8 @@ final class RegisterStackView: UIStackView {
         alignment = .center
         
         batteryTextField.do {
-            $0.placeholder = "배터리 잔량"
-            $0.font = .systemFont(ofSize: 16, weight: .regular)
+            $0.placeholder = "배터리 잔량(0 ~ 100 사이의 값을 입력해주세요)"
+            $0.font = .systemFont(ofSize: 12, weight: .regular)
             $0.layer.cornerRadius = 25
             $0.backgroundColor = UIColor(hex: "#FFFFFF")
             
@@ -67,6 +67,10 @@ final class RegisterStackView: UIStackView {
     
     func configure(location: String) {
         locationLabel.text = "위치: \(location)"
+    }
+    
+    func getBatteryTextField() -> UITextField {
+        return batteryTextField
     }
     
     required init(coder: NSCoder) {

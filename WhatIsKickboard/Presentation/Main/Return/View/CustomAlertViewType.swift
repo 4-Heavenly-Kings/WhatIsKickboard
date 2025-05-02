@@ -15,6 +15,9 @@ enum CustomAlertViewType {
     case emailFailed
     case signIntFailed
     case failureUserModify
+    case batteryInputFailed
+    case failCreateKickboard
+    case successCreateKickboard
     
     func makeTitle(name: String, minutes: Int? = nil, count: Int? = nil) -> NSAttributedString {
         let fullText: String
@@ -36,6 +39,12 @@ enum CustomAlertViewType {
             }
         case .emailFailed, .signIntFailed, .failureUserModify:
             fullText = name
+        case .batteryInputFailed:
+            fullText = "0~100 사이의 값을 입력해주세요"
+        case .failCreateKickboard:
+            fullText = "킥보드 등록을 실패했습니다"
+        case .successCreateKickboard:
+            fullText = "킥보드 등록을 성공했습니다"
         }
         
         let attributedString = NSMutableAttributedString(string: fullText)
@@ -70,7 +79,7 @@ enum CustomAlertViewType {
             } else {
                 return "이제 포비와 그만 달릴까요?"
             }
-        case .confirmReturn:
+        case .confirmReturn, .batteryInputFailed, .failCreateKickboard, .successCreateKickboard:
             return ""
         case .logout:
             return "이제 그만 로그아웃 할까요?"
@@ -86,7 +95,7 @@ enum CustomAlertViewType {
     var submitTitle: String {
         switch self {
         case .returnRequest: return "포비와 그만 놀기"
-        case .confirmReturn, .emailFailed, .signIntFailed, .failureUserModify: return "확인"
+        case .confirmReturn, .emailFailed, .signIntFailed, .failureUserModify, .batteryInputFailed, .failCreateKickboard, .successCreateKickboard: return "확인"
         case .logout: return "로그아웃"
         case .deleteID: return "포비에게 도망가기"
         }
@@ -94,7 +103,7 @@ enum CustomAlertViewType {
     
     var submitTitleColor: UIColor {
         switch self {
-        case .returnRequest, .confirmReturn, .deleteID, .emailFailed, .signIntFailed, .failureUserModify: return UIColor(hex: "#6B6E82")
+        case .returnRequest, .confirmReturn, .deleteID, .emailFailed, .signIntFailed, .failureUserModify, .batteryInputFailed, .failCreateKickboard, .successCreateKickboard: return UIColor(hex: "#6B6E82")
         case .logout: return UIColor(hex: "#FF4F17")
         }
     }
@@ -102,7 +111,7 @@ enum CustomAlertViewType {
     var cancelTitle: String {
         switch self {
         case .returnRequest: return "더 달리기"
-        case .confirmReturn, .emailFailed, .signIntFailed: return ""
+        case .confirmReturn, .emailFailed, .signIntFailed, .batteryInputFailed, .failCreateKickboard, .successCreateKickboard: return ""
         case .logout, .failureUserModify: return "취소"
         case .deleteID: return "포비와 더 달리기"
         }

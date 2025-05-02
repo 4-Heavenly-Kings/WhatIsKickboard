@@ -14,16 +14,19 @@ import Then
 
 final class ReturnViewController: BaseViewController {
     
+    private let viewModel: ReturnViewModel
+    
     private let contentView = ReturnView()
     private var customAlertView: CustomAlertView?
     
-    private let imagePath: String
-
+    private let returnUIModel: ReturnUIModel
+    
     
     // MARK: - View Life Cycle
-    
-    init(imagePath: String) {
-        self.imagePath = imagePath
+    /// 위도, 경도, 주소를 추가적으로 받아야함
+    init(viewModel: ReturnViewModel , returnUIModel: ReturnUIModel) {
+        self.viewModel = viewModel
+        self.returnUIModel = returnUIModel
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -39,7 +42,7 @@ final class ReturnViewController: BaseViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+//        self.navigationController?.setNavigationBarHidden(true, animated: animated)
         self.tabBarController?.tabBar.isHidden = true
     }
     
@@ -58,6 +61,21 @@ final class ReturnViewController: BaseViewController {
         
         contentView.customSubmitButton.rx.tap
             .bind { [weak self] in
+                guard let self else { return }
+                self.viewModel.action.onNext(.returnKickboard(
+                    latitude: self.returnUIModel.latitude,
+                    longitude: self.returnUIModel.longitude,
+                    battery: self.returnUIModel.battery,
+                    imagePath: self.returnUIModel.imagePath,
+                    address: self.returnUIModel.address
+                ))
+                self.showCustomAlert()
+            }
+            .disposed(by: disposeBag)
+        
+        viewModel.state.success
+            .observe(on: MainScheduler.instance)
+            .bind { [weak self] in
                 self?.showCustomAlert()
             }
             .disposed(by: disposeBag)
@@ -67,8 +85,8 @@ final class ReturnViewController: BaseViewController {
         view.backgroundColor = .white
         
         contentView.navigationBarView.configure(title: "반납하기", showsRightButton: false, rightButtonTitle: nil)
-        contentView.feeLabelView.configure(extraFee: "2,200")
-        contentView.returnStackView.configure(time: 22, battery: 55, fee: "2,700")
+        contentView.feeLabelView.configure(extraFee: "\(returnUIModel.price - 500 >= 0 ? returnUIModel.price - 500 : 0 )")
+        contentView.returnStackView.configure(time: returnUIModel.returnMinutes, battery: returnUIModel.battery, fee: "\(returnUIModel.price)")
         contentView.customSubmitButton.configure(buttonTitle: "반납하기")
     }
     
@@ -97,10 +115,6 @@ final class ReturnViewController: BaseViewController {
                 alert?.removeFromSuperview()
                 self?.customAlertView = nil
                 self?.navigationController?.popViewController(animated: true)
-                /// 이게 이미지 경로라 이거를 CoreData로 주면 될 것 같아요~
-                if let imagePath = self?.imagePath {
-                    print("🖼️ 이미지 경로:", imagePath)
-                }
             }
             .disposed(by: disposeBag)
 
@@ -108,10 +122,10 @@ final class ReturnViewController: BaseViewController {
     }
     
     private func setImage() {
-        if let image = UIImage(contentsOfFile: imagePath) {
+        if let image = UIImage(contentsOfFile: returnUIModel.imagePath) {
             contentView.imageView.image = image
         } else {
-            print("❌ 이미지 로딩 실패")
+            print("이미지 로딩 실패")
         }
     }
     

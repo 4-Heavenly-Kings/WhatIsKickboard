@@ -194,7 +194,12 @@ final class MapTabViewController: BaseViewController {
                 // 킥보드 등록
                 let lat = owner.cameraCoordinates.lat
                 let lng = owner.cameraCoordinates.lng
-                let registerVC = RegisterViewController(lat: lat, lng: lng, address: owner.address)
+                let item: RegisterUIModel = .init(latitude: lat, longitude: lng, address: owner.address)
+                
+                let repository = CreateKickboardRepository()
+                let useCase = CreateKickboardUseCaseInterface(repository: repository)
+                let viewModel = RegisterViewModel(createKickboardUseCase: useCase)
+                let registerVC = RegisterViewController(viewModel: viewModel, registerUIModel: item)
                 owner.navigationController?.pushViewController(registerVC, animated: true)
             }.disposed(by: disposeBag)
         
