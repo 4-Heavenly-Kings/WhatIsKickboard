@@ -289,6 +289,7 @@ final class MapTabViewController: BaseViewController {
                     owner.viewModel.action.onNext(.requestReturn)
                     
                     owner.mapTabView.getCustomButton().configure(buttonTitle: "대여하기")
+                    owner.mapTabView.showModalDownAnimation()
                 }
             }.disposed(by: disposeBag)
     }
