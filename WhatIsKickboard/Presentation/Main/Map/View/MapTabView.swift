@@ -472,7 +472,7 @@ extension MapTabView {
         let attributedText = NSMutableAttributedString.makeAttributedString(
             text: usingTimeText + suffixText,
             highlightedParts: [
-                (usingTimeText, .black, UIFont.systemFont(ofSize: 30, weight: .bold))
+                (usingTimeText, .black, UIFont.monospacedDigitSystemFont(ofSize: 30, weight: .bold))
             ]
         )
         mapUsingKickboardView.usingTimeLabel.attributedText = attributedText

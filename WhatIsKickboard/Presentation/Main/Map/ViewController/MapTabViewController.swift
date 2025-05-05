@@ -234,6 +234,7 @@ final class MapTabViewController: BaseViewController {
                 alert.addAction(UIAlertAction(title: "취소", style: .cancel))
                 alert.addAction(UIAlertAction(title: "신고", style: .destructive, handler: { _ in
                     owner.viewModel.action.onNext(.didDeclareButtonTap(id: selectedKickboard.id))
+                    self.currentMode = .map
                 }))
                 owner.present(alert, animated: true)
             }.disposed(by: disposeBag)
