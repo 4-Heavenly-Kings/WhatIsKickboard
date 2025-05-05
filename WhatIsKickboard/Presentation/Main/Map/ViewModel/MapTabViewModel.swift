@@ -22,14 +22,17 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     /// Core Location Manager
     private let locationManager = CLLocationManager()
     
-    /// 킥보드 사용 시간 측정용
-    private var timer: Timer?
-    private var elapsedSeconds = 0
-    
     private let getKickboardListUseCase: GetKickboardListUseCase
     private let declareKickboardUseCase: DeclareKickboardUseCase
     private let fetchAPIGeocodingUseCase: FetchAPIGeocodingUseCase
     private let rentKickboardUseCase: RentKickboardUseCase
+    private let returnRequestUseCaseInterface: ReturnRequestUseCaseInterface
+    
+    private var storedKickboardId: UUID?
+    
+    /// 킥보드 사용 시간 측정용
+    private var timer: Timer?
+    private var elapsedSeconds = 0
     
     var disposeBag = DisposeBag()
     
@@ -43,13 +46,13 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         /// 장소 검색창 텍스트
         case searchText(text: String)
         /// 카메라 아이들 상태일 때 Reverse Geocoding 검색
-        case mapViewCameraIdle(lat: Double, lng: Double)
+        case searchCoords(lat: Double, lng: Double)
         /// 킥보드 대여
         case didRentButtonTap(id: UUID, latitude: Double, longitude: Double, address: String)
         /// 킥보드 반납
         case requestReturn
         /// 바인딩 완료
-        case didBinding
+        case getKickboardList
     }
     var action: AnyObserver<Action> {
         return state.actionSubject.asObserver()
@@ -63,14 +66,13 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         
         /// Core Location 사용자 위치 좌표
         fileprivate(set) var userLocation = BehaviorRelay<CLLocationCoordinate2D?>(value: nil)
-        /// 사용자가 타고있던 킥보드 정보
-        fileprivate(set) var userRidingKickboard = PublishRelay<KickboardRide>()
         /// 킥보드 리스트
         fileprivate(set) var kickboardList = BehaviorRelay<[Kickboard]>(value: [])
         /// 장소 검색 결과
         fileprivate(set) var locationSearchResult = PublishRelay<[LocationModel]>()
         /// Reverse Geocoding 검색 결과
         fileprivate(set) var reverseGeoSearchResult = BehaviorRelay<[ReverseGeoResultModel]>(value: [])
+        /// 킥보드 사용 시간
         fileprivate(set) var elapsedSeconds = BehaviorRelay<Int>(value: 0)
         
         let kickboardRide = PublishRelay<KickboardRide>()
@@ -78,9 +80,6 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         let error = PublishRelay<Error>()
     }
     var state = State()
-    
-    private let returnRequestUseCaseInterface: ReturnRequestUseCaseInterface
-    private var storedKickboardId: UUID?
     
     // MARK: - Initializer
     
@@ -113,13 +112,13 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
                     owner.declareKickboard(id: id)
                 case let .searchText(text):
                     owner.searchLocation(searchText: text)
-                case let .mapViewCameraIdle(lat, lng):
+                case let .searchCoords(lat, lng):
                     owner.searchCoords(lat: lat, lng: lng)
                 case let .didRentButtonTap(id, latitude, longitude, address):
                     owner.rentKickboard(id: id, latitude: latitude, longitude: longitude, address: address)
                 case .requestReturn:
                     owner.handleReturnRequest()
-                case .didBinding:
+                case .getKickboardList:
                     owner.updateKickboardList()
                 }
             }.disposed(by: disposeBag)
@@ -184,7 +183,7 @@ private extension MapTabViewModel {
 // MARK: - Kickboard Methods
 
 private extension MapTabViewModel {
-    /// 킥보드 리스트 ViewController로 전달
+    /// 킥보드 리스트 MapTabViewController로 전달
     func updateKickboardList() {
         getKickboardListUseCase.getKickboardList()
             .subscribe(with: self) { owner, kickboardList in
@@ -192,11 +191,20 @@ private extension MapTabViewModel {
             }.disposed(by: disposeBag)
     }
     
+    /// 킥보드 신고 정보 Core Data에 전달
     func declareKickboard(id: UUID) {
-        declareKickboardUseCase.declareKickboard(id: id)
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.declareKickboardUseCase.declareKickboard(id: id)
+                self.updateKickboardList()
+            } catch {
+                os_log(.error, log: log, "킥보드 신고 실패: %@", "\(error.localizedDescription)")
+            }
+        }
     }
     
-    /// 킥보드 대여 정보 CoreData에 전달
+    /// 킥보드 대여 정보 Core Data에 전달
     func rentKickboard(id: UUID, latitude: Double, longitude: Double, address: String) {
         rentKickboardUseCase.execute(id: id, latitude: latitude, longitude: longitude, address: address)
         
@@ -247,10 +255,11 @@ private extension MapTabViewModel {
                 owner.state.locationSearchResult.accept(locations)
             }, onFailure: { owner, error in
                 owner.state.locationSearchResult.accept([])
-                os_log(.error, log: owner.log, "장소 검색 실패: %@", "\(error)")
+                os_log(.error, log: owner.log, "장소 검색 실패: %@", "\(error.localizedDescription)")
             }).disposed(by: disposeBag)
     }
     
+    /// API를 통한 좌표 ➡️ 주소 변환
     func searchCoords(lat: Double, lng: Double) {
         let coordinates = "\(lng),\(lat)"
         fetchAPIGeocodingUseCase.fetchCoordToAddress(coords: coordinates)

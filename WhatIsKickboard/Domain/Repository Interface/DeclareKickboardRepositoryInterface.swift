@@ -8,5 +8,5 @@
 import Foundation
 
 protocol DeclareKickboardRepositoryInterface {
-    func declareKickboard(id: UUID)
+    func declareKickboard(id: UUID) async throws
 }

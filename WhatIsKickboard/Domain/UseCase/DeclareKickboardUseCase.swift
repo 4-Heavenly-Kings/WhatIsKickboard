@@ -15,7 +15,7 @@ final class DeclareKickboardUseCase: DeclareKickboardUseCaseInterface {
         self.repository = repository
     }
     
-    func declareKickboard(id: UUID) {
-        repository.declareKickboard(id: id)
+    func declareKickboard(id: UUID) async throws {
+        try await repository.declareKickboard(id: id)
     }
 }

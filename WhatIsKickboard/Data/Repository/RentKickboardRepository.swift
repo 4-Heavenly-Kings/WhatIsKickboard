@@ -11,6 +11,7 @@ import OSLog
 import RxSwift
 
 final class RentKickboardRepository: RentKickboardRepositoryInterface {
+    
     private let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "RentKickboardRepository")
     
     func rentKickboard(id: UUID, latitude: Double, longitude: Double, address: String) {

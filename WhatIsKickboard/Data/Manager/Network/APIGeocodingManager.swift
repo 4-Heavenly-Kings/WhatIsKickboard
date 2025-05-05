@@ -85,8 +85,6 @@ final class APIGeocodingManager {
                 return Disposables.create()
             }
             
-            os_log(.debug, log: log, "%@", "\(url)")
-            
             var urlRequest: URLRequest = URLRequest(url: url)
             urlRequest.httpMethod = "GET"
             

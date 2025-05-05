@@ -21,7 +21,6 @@ final class TabBarController: UITabBarController {
     private let tabBackgroundView = UIView()
     /// 직전에 표시했던 ViewController의 index 저장
     private var previousIndex: Int = 0
-    private var userID = PublishSubject<UUID>()
     
     private let viewModel = TabbarViewModel()
     var disposeBag = DisposeBag()

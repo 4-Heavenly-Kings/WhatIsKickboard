@@ -64,6 +64,7 @@ final class MapTabView: BaseView {
             case .usingKickboard:
                 // 현위치 버튼 위치 조절, 킥보드 사용중 모달
                 declareButton.isHidden = true
+                updateUsingTimeLabel(elapsedSeconds: 0)
                 rentOrReturnButton.configure(buttonTitle: "반납하기")
             case .returnKickboard:
                 // 킥보드 정보 모달 DOWN
@@ -466,7 +467,7 @@ extension MapTabView {
     
     /// 이용 시간 UI 업데이트
     func updateUsingTimeLabel(elapsedSeconds: Int) {
-        let usingTimeText = elapsedSeconds >= 60 ? "\(elapsedSeconds)초" : "\(elapsedSeconds / 60)분"
+        let usingTimeText = elapsedSeconds < 60 ? "\(elapsedSeconds)초" : "\(elapsedSeconds / 60)분"
         let suffixText = " 이용 중"
         let attributedText = NSMutableAttributedString.makeAttributedString(
             text: usingTimeText + suffixText,

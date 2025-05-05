@@ -8,5 +8,5 @@
 import Foundation
 
 protocol DeclareKickboardUseCaseInterface {
-    func declareKickboard(id: UUID)
+    func declareKickboard(id: UUID) async throws
 }
