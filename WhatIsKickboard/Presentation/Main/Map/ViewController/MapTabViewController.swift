@@ -85,6 +85,9 @@ final class MapTabViewController: BaseViewController {
     
     // MARK: - Properties
     
+    /// TabBarController 관련 Delegate
+    weak var changeSelectedIndexDelegate: ChangeSelectedIndexDelegate?
+    
     private let viewModel: MapTabViewModel
     
     private var selectedKickboard: Kickboard?
@@ -100,18 +103,19 @@ final class MapTabViewController: BaseViewController {
             mapTabView.getHideKickboardButton().setImage(buttonImage, for: .normal)
         }
     }
-    
+
+    /// 사용자 위치 좌표
+    private var userCoordinates = CLLocationCoordinate2D()
     /// 지도 카메라 좌표
     private var cameraCoordinates = NMGLatLng()
     /// 검색창 주소
     private var address = ""
     
+    // 반납 관련 프로퍼티
     private var customAlertView: CustomAlertView?
     private var returnPrice: Int = 0
     private var returnBattery: Int = 0
     private var returnMinutes: Int = 0
-    /// TabBarController 관련 Delegate
-    weak var changeSelectedIndexDelegate: ChangeSelectedIndexDelegate?
     
     // MARK: - UI Components
     
@@ -147,6 +151,8 @@ final class MapTabViewController: BaseViewController {
         viewModel.state.userLocation
             .compactMap { $0 }
             .bind(with: self) { owner, coordinates in
+                owner.userCoordinates = coordinates
+                
                 let mapView = owner.mapTabView.getNaverMapView().mapView
                 if mapView.positionMode == .disabled {
                     mapView.positionMode = .normal
@@ -205,9 +211,12 @@ final class MapTabViewController: BaseViewController {
         viewModel.state.reverseGeoSearchResult
             .asDriver(onErrorJustReturn: [])
             .drive(with: self) { owner, location in
-                guard let nearest = location.first else { return }
-                owner.address = owner.makeAddress(location: nearest)
-                owner.mapTabView.getSearchBar().text = owner.address
+                if let nearest = location.first {
+                    owner.address = owner.makeAddress(location: nearest)
+                    owner.mapTabView.getSearchBar().text = owner.address
+                } else {
+                    owner.mapTabView.getSearchBar().text = ""
+                }
             }.disposed(by: disposeBag)
         
         // 킥보드 사용 시간 업데이트
@@ -247,9 +256,7 @@ final class MapTabViewController: BaseViewController {
                 owner.viewModel.action.onNext(.searchText(text: text))
             }.disposed(by: disposeBag)
         
-        // 바인딩 완료 알림
-        viewModel.action.onNext(.getKickboardList)
-        
+        // 킥보드 반납 모달 표시
         Observable
             .combineLatest(viewModel.state.kickboardRide, viewModel.state.user)
             .observe(on: MainScheduler.instance)
@@ -265,6 +272,9 @@ final class MapTabViewController: BaseViewController {
                 print("오류 발생: \(error.localizedDescription)")
             }
             .disposed(by: disposeBag)
+        
+        // 바인딩 완료 알림
+        viewModel.action.onNext(.getKickboardList)
         
         
         // View ➡️ ViewController
@@ -541,9 +551,6 @@ private extension MapTabViewController {
         self.returnPrice = (returnMinutes * 100) + 500
         self.returnBattery = kickboard.battery
         
-        
-        print(returnPrice)
-        
         let alert = CustomAlertView(frame: .zero, alertType: .returnRequest)
         view.addSubview(alert)
         alert.snp.makeConstraints { $0.edges.equalToSuperview() }
@@ -669,11 +676,12 @@ extension MapTabViewController: UIImagePickerControllerDelegate, UINavigationCon
                         price: self.returnPrice,
                         battery: self.returnBattery,
                         returnMinutes: self.returnMinutes,
-                        latitude: self.cameraCoordinates.lat,
-                        longitude: self.cameraCoordinates.lng,
+                        latitude: self.userCoordinates.latitude,
+                        longitude: self.userCoordinates.longitude,
                         address: self.address
                     )
                     let returnVC = ReturnViewController(viewModel: viewModel, returnUIModel: returnUIModel)
+                    returnVC.refreshKickboardListDelegate = self
                     self.navigationController?.pushViewController(returnVC, animated: true)
                 }
             }
@@ -703,7 +711,6 @@ extension MapTabViewController: UIImagePickerControllerDelegate, UINavigationCon
 
 extension MapTabViewController: RefreshKickboardListDelegate {
     func refreshKickboardList() {
-        changeMarkerHideState(to: false)
         viewModel.action.onNext(.getKickboardList)
     }
 }
