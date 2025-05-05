@@ -61,7 +61,6 @@ final class MapTabViewController: BaseViewController {
         didSet {
             switch currentMode {
             case .map:
-                mapPositionMode = .direction
                 mapTabView.currentMode = .map
                 changeMarkerHideState(to: false)
                 self.tabBarController?.tabBar.isHidden = false
@@ -155,6 +154,7 @@ final class MapTabViewController: BaseViewController {
                 owner.userCoordinates = coordinates
                 
                 let mapView = owner.mapTabView.getNaverMapView().mapView
+                // 앱 실행 시 카메라 추적 모드
                 if mapView.positionMode == .disabled {
                     mapView.positionMode = .normal
                     owner.mapPositionMode = .direction
@@ -718,7 +718,9 @@ extension MapTabViewController: UIImagePickerControllerDelegate, UINavigationCon
 
 extension MapTabViewController: UpdateKickboardListDelegate {
     func updateKickboardList() {
-        currentMode = .map
+        if currentMode == .returnKickboard {
+            currentMode = .map
+        }
         viewModel.action.onNext(.getKickboardList)
     }
 }
