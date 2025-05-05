@@ -245,7 +245,7 @@ extension TabBarController: UITabBarControllerDelegate {
             if let nav = viewControllers?[0] as? UINavigationController,
                let mapVC = nav.viewControllers.first as? MapTabViewController {
                 selectedIndex = 0
-                mapVC.isRegister = true
+                mapVC.currentMode = .registerKickboard
             }
         } else {
             previousIndex = index

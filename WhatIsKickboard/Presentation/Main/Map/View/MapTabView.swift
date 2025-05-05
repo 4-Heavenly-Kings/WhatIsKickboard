@@ -14,6 +14,55 @@ import Then
 /// 지도 탭 View
 final class MapTabView: BaseView {
     
+    // MARK: - Properties
+    
+    var currentMode: MapTabViewMode = .map {
+        didSet {
+            switch currentMode {
+            case .map:
+                // 검색창, 마커숨김 버튼, 탭바
+                searchBar.isHidden = false
+                searchBar.text = ""
+                searchBar.snp.remakeConstraints {
+                    $0.top.equalTo(self.safeAreaLayoutGuide).inset(10)
+                    $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
+                }
+                hideKickboardButton.isHidden = false
+                statusBarBackgroundView.isHidden = true
+                navigationBarView.isHidden = true
+                centerMarkerImageView.isHidden = true
+                showModalDownAnimation()
+            case .registerKickboard:
+                // 검색창, 마커숨김 버튼, 네비바
+                searchBar.isHidden = false
+                searchBar.text = ""
+                searchBar.snp.remakeConstraints {
+                    $0.top.equalTo(navigationBarView.snp.bottom).offset(10)
+                    $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
+                }
+                hideKickboardButton.isHidden = false
+                statusBarBackgroundView.isHidden = false
+                navigationBarView.isHidden = false
+                centerMarkerImageView.isHidden = false
+            case .touchKickboard:
+                // 검색창, 현위치 버튼 위치 조절, 킥보드 정보 모달 UP
+                searchBar.isHidden = false
+                searchBar.text = ""
+                hideKickboardButton.isHidden = true
+                rentOrReturnButton.configure(buttonTitle: "대여하기")
+            case .usingKickboard:
+                // 현위치 버튼 위치 조절, 킥보드 사용중 모달
+                rentOrReturnButton.configure(buttonTitle: "반납하기")
+            case .returnKickboard:
+                break
+            case .returnComplete:
+                // 킥보드 정보 모달 DOWN
+                showModalDownAnimation()
+                currentMode = .map
+            }
+        }
+    }
+    
     // MARK: - UI Components
     
     /// 네이버 지도 NMFNaverMapView
@@ -57,7 +106,7 @@ final class MapTabView: BaseView {
     
     private let mapUsingKickboardView = MapUsingKickboardView()
     
-    private let customButton = CustomSubmitButton()
+    private let rentOrReturnButton = CustomSubmitButton()
     
     // MARK: - Style Helper
     
@@ -152,7 +201,7 @@ final class MapTabView: BaseView {
             $0.layer.borderColor = UIColor(hex: "#E7E7E7").cgColor
         }
         
-        customButton.configure(buttonTitle: "대여하기")
+        rentOrReturnButton.configure(buttonTitle: "대여하기")
         
         setModalLikeTransform()
     }
@@ -166,7 +215,7 @@ final class MapTabView: BaseView {
                          centerMarkerImageView, modalLikeContainerView)
         buttonStackView.addArrangedSubviews(hideKickboardButton, locationButton)
         tableViewContainer.addSubview(resultTableView)
-        modalLikeContainerView.addSubviews(mapUsingKickboardView, customButton)
+        modalLikeContainerView.addSubviews(mapUsingKickboardView, rentOrReturnButton)
         
         naverMapView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -231,10 +280,10 @@ final class MapTabView: BaseView {
         
         mapUsingKickboardView.snp.makeConstraints {
             $0.top.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(customButton.snp.top).offset(-16)
+            $0.bottom.equalTo(rentOrReturnButton.snp.top).offset(-16)
         }
         
-        customButton.snp.makeConstraints {
+        rentOrReturnButton.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(25)
             $0.bottom.equalTo(self.safeAreaLayoutGuide)
             $0.height.equalTo(50)
@@ -243,10 +292,10 @@ final class MapTabView: BaseView {
     
     // MARK: - Lifecycle
     
+    // cornerRadius, 그림자 설정
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        // 코너값, 그림자 설정
         buttonStackView.layoutIfNeeded()
         buttonStackView.subviews.forEach {
             $0.layer.cornerRadius = $0.frame.width / 2
@@ -308,20 +357,24 @@ final class MapTabView: BaseView {
         return resultTableView
     }
     
+    /// centerMarkerImageView 반환
     func getCenterMarkerImageView() -> UIImageView {
         return centerMarkerImageView
     }
     
+    /// modalLikeContainerView 반환
     func getModalLikeContainerView() -> UIView {
         return modalLikeContainerView
     }
     
+    /// mapUsingKickboardView 반환
     func getMapUsingKickboardView() -> MapUsingKickboardView {
         return mapUsingKickboardView
     }
     
-    func getCustomButton() -> CustomSubmitButton {
-        return customButton
+    /// rentOrReturnButton 반환
+    func getRentOrReturnButton() -> CustomSubmitButton {
+        return rentOrReturnButton
     }
     
     /// resultTableView(tableViewContainer) 높이 및 그림자 효과 업데이트
@@ -347,10 +400,12 @@ final class MapTabView: BaseView {
         resultTableView.isHidden = state
     }
     
+    /// 킥보드 대여/반납 모달 애니메이션 세팅
     func setModalLikeTransform() {
         modalLikeContainerView.transform = CGAffineTransform(translationX: 0, y: 400)
     }
     
+    /// 킥보드 대여/반납 모달 올림 애니메이션
     func showModalUpAnimation() {
         UIView.animate(withDuration: 0.3) { [weak self] in
             guard let self else { return }
@@ -358,6 +413,7 @@ final class MapTabView: BaseView {
         }
     }
     
+    /// 킥보드 대여/반납 모달 내림 애니메이션
     func showModalDownAnimation() {
         UIView.animate(withDuration: 0.3) { [weak self] in
             guard let self else { return }
@@ -365,12 +421,14 @@ final class MapTabView: BaseView {
         }
     }
     
-    func updateUsingKickboardViewTimeLabel(elapsedMinutes: Int) {
-        let text = "\(elapsedMinutes)분 이용 중"
+    /// 이용 시간 UI 업데이트
+    func updateUsingTimeLabel(elapsedSeconds: Int) {
+        let usingTimeText = elapsedSeconds >= 60 ? "\(elapsedSeconds)초" : "\(elapsedSeconds / 60)분"
+        let suffixText = " 이용 중"
         let attributedText = NSMutableAttributedString.makeAttributedString(
-            text: text,
+            text: usingTimeText + suffixText,
             highlightedParts: [
-                ("\(elapsedMinutes)분", .black, UIFont.systemFont(ofSize: 30, weight: .bold))
+                (usingTimeText, .black, UIFont.systemFont(ofSize: 30, weight: .bold))
             ]
         )
         mapUsingKickboardView.usingTimeLabel.attributedText = attributedText

@@ -18,10 +18,13 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     // MARK: - Properties
     
     private let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MapViewModel")
-    /// 킥보드 목업 데이터
-//    private let mockKickboard = Kickboard(id: UUID(), latitude: 37.2064, longitude: 127.0681, battery: 80, address: "서울특별시 종로구 세종대로 175", status: "ABLE")
+
     /// Core Location Manager
     private let locationManager = CLLocationManager()
+    
+    /// 킥보드 사용 시간 측정용
+    private var timer: Timer?
+    private var elapsedSeconds = 0
     
     private let fetchAPIGeocodingUseCase: FetchAPIGeocodingUseCase
     private let rentKickboardUseCase: RentKickboardUseCase
@@ -37,10 +40,11 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         case searchText(text: String)
         /// 카메라 아이들 상태일 때 Reverse Geocoding 검색
         case mapViewCameraIdle(lat: Double, lng: Double)
-        case viewWillLayoutSubviews
+        /// 킥보드 대여
         case didRentButtonTap(id: UUID, latitude: Double, longitude: Double, address: String)
         /// 바인딩 완료
         case didBinding
+        /// 킥보드 반납
         case requestReturn
     }
     var action: AnyObserver<Action> {
@@ -61,6 +65,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         fileprivate(set) var locationSearchResult = PublishRelay<[LocationModel]>()
         /// Reverse Geocoding 검색 결과
         fileprivate(set) var reverseGeoSearchResult = BehaviorRelay<[ReverseGeoResultModel]>(value: [])
+        fileprivate(set) var elapsedSeconds = BehaviorRelay<Int>(value: 0)
         
         let kickboardRide = PublishRelay<KickboardRide>()
         let user = PublishRelay<User>()
@@ -100,12 +105,21 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
                     owner.searchCoords(lat: lat, lng: lng)
                 case let .didRentButtonTap(id, latitude, longitude, address):
                     owner.rentKickboard(id: id, latitude: latitude, longitude: longitude, address: address)
-                case .didBinding, .viewWillLayoutSubviews:
+                case .didBinding:
                     owner.updateKickboardList()
                 case .requestReturn:
                     owner.handleReturnRequest()
                 }
             }.disposed(by: disposeBag)
+    }
+}
+
+// MARK: - @objc Methods
+
+@objc private extension MapTabViewModel {
+    func updateTimer() {
+        elapsedSeconds += 1
+        state.elapsedSeconds.accept(elapsedSeconds)
     }
 }
 
@@ -145,18 +159,6 @@ private extension MapTabViewModel {
         }
     }
     
-    /// 킥보드 리스트 ViewController로 전달
-    func updateKickboardList() {
-        KickboardPersistenceManager.getKickboardList()
-            .subscribe(with: self) { owner, kickboardList in
-                owner.state.kickboardList.accept(kickboardList)
-            }.disposed(by: disposeBag)
-    }
-    
-    func rentKickboard(id: UUID, latitude: Double, longitude: Double, address: String) {
-        rentKickboardUseCase.execute(id: id, latitude: latitude, longitude: longitude, address: address)
-    }
-    
     /// 최근 업데이트된 좌표 ViewController로 전달
     func updateLastLocation() {
         let lat = locationManager.location?.coordinate.latitude
@@ -165,8 +167,34 @@ private extension MapTabViewModel {
         os_log(.debug, log: log, "%@", logMsg)
         state.userLocation.accept(locationManager.location?.coordinate)
     }
+}
+
+// MARK: - Kickboard Methods
+
+private extension MapTabViewModel {
+    /// 킥보드 리스트 ViewController로 전달
+    func updateKickboardList() {
+        KickboardPersistenceManager.getKickboardList()
+            .subscribe(with: self) { owner, kickboardList in
+                owner.state.kickboardList.accept(kickboardList)
+            }.disposed(by: disposeBag)
+    }
     
-    private func handleReturnRequest() {
+    /// 킥보드 대여 정보 CoreData에 전달
+    func rentKickboard(id: UUID, latitude: Double, longitude: Double, address: String) {
+        rentKickboardUseCase.execute(id: id, latitude: latitude, longitude: longitude, address: address)
+        
+        timer = Timer.scheduledTimer(timeInterval: 1.0,
+                                     target: self,
+                                     selector: #selector(updateTimer),
+                                     userInfo: nil,
+                                     repeats: true)
+        
+        updateKickboardList()
+    }
+    
+    /// 킥보드 반납
+    func handleReturnRequest() {
         returnRequestUseCaseInterface.getCurrentUser()
             .flatMap { [weak self] user -> Single<(KickboardRide, User)> in
                 guard let self = self else {
@@ -187,6 +215,9 @@ private extension MapTabViewModel {
                 self?.state.error.accept(error)
             })
             .disposed(by: disposeBag)
+        
+        elapsedSeconds = 0
+        timer?.invalidate()
     }
 }
 

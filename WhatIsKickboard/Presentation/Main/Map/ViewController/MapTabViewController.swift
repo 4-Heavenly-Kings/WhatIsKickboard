@@ -15,8 +15,69 @@ import SnapKit
 import Then
 import UniformTypeIdentifiers
 
+enum MapTabViewMode {
+    case map
+    case registerKickboard
+    case touchKickboard
+    case usingKickboard
+    case returnKickboard
+    case returnComplete
+}
+
+enum BatteryImage {
+    case toTen
+    case toThirty
+    case toSeventy
+    case toNinety
+    case toHundred
+    
+    var image: UIImage? {
+        switch self {
+        case .toTen:
+            return UIImage(systemName: "battery.0percent")?.withRenderingMode(.alwaysOriginal).withTintColor(.systemRed)
+        case .toThirty:
+            return UIImage(systemName: "battery.25percent")
+        case .toSeventy:
+            return UIImage(systemName: "battery.50percent")
+        case .toNinety:
+            return UIImage(systemName: "battery.75percent")
+        case .toHundred:
+            return UIImage(systemName: "battery.100percent")
+        }
+    }
+}
+
 /// 지도 탭 ViewController
 final class MapTabViewController: BaseViewController {
+    enum TabBarMode {
+        case map
+        case registerKickboard
+        case touchKickboard
+        case usingKickboard
+        case returnKickboard
+    }
+    
+    var currentMode: MapTabViewMode = .map {
+        didSet {
+            switch currentMode {
+            case .map:
+                mapTabView.currentMode = .map
+                self.tabBarController?.tabBar.isHidden = false
+            case .registerKickboard:
+                mapTabView.currentMode = .registerKickboard
+                self.tabBarController?.tabBar.isHidden = true
+            case .touchKickboard:
+                mapTabView.currentMode = .touchKickboard
+                self.tabBarController?.tabBar.isHidden = true
+            case .usingKickboard:
+                mapTabView.currentMode = .usingKickboard
+            case .returnKickboard:
+                mapTabView.currentMode = .returnKickboard
+            case .returnComplete:
+                mapTabView.currentMode = .returnComplete
+            }
+        }
+    }
     
     // MARK: - Properties
     
@@ -26,7 +87,7 @@ final class MapTabViewController: BaseViewController {
     /// 지도 애니메이션 상태 관리용
     private var mapPositionMode: NMFMyPositionMode = .disabled
     /// 킥보드 마커 리스트
-    private var kickboardMarkerList = [NMFMarker]()
+    private var kickboardMarkerList = [UUID: NMFMarker]()
     /// 킥보드 마커 숨김 상태
     private var isAllMarkerHidden: Bool = false {
         didSet {
@@ -35,36 +96,16 @@ final class MapTabViewController: BaseViewController {
             mapTabView.getHideKickboardButton().setImage(buttonImage, for: .normal)
         }
     }
-    /// 킥보드 등록 모드
-    var isRegister: Bool = false {
-        didSet {
-            self.tabBarController?.tabBar.isHidden = isRegister
-            mapTabView.getStatusBarBackgroundView().isHidden = !isRegister
-            mapTabView.getNavigationBarView().isHidden = !isRegister
-            mapTabView.getCenterMarkerImageView().isHidden = !isRegister
-            mapTabView.getSearchBar().text = ""
-            mapTabView.getSearchBar().snp.remakeConstraints {
-                if isRegister {
-                    $0.top.equalTo(mapTabView.getNavigationBarView().snp.bottom).offset(10)
-                    $0.leading.trailing.equalTo(mapTabView.safeAreaLayoutGuide).inset(15)
-                } else {
-                    $0.top.equalTo(mapTabView.safeAreaLayoutGuide).inset(10)
-                    $0.leading.trailing.equalTo(mapTabView.safeAreaLayoutGuide).inset(15)
-                }
-            }
-        }
-    }
     
     private var isUsingKickboard: Bool = false {
         didSet {
-            viewModel.action.onNext(.viewWillLayoutSubviews)
+            changeMarkerHideState(to: true)
+//            viewModel.action.onNext(.viewWillLayoutSubviews)
             self.tabBarController?.tabBar.isHidden = isUsingKickboard
-//            mapTabView.getSearchBar().isHidden = isUsingKickboard
+            mapTabView.getSearchBar().isHidden = isUsingKickboard
         }
     }
-    
-    private var timer: Timer?
-    private var elapsedMinutes = 0
+
     
     /// 지도 카메라 좌표
     private var cameraCoordinates = NMGLatLng()
@@ -106,7 +147,7 @@ final class MapTabViewController: BaseViewController {
     
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-        viewModel.action.onNext(.viewWillLayoutSubviews)
+//        viewModel.action.onNext(.viewWillLayoutSubviews)
     }
     
     // MARK: - Bind Helper
@@ -139,19 +180,21 @@ final class MapTabViewController: BaseViewController {
             .bind(with: self) { owner, markerList in
                 // 마커 맵에서 삭제
                 owner.kickboardMarkerList.forEach {
-                    $0.mapView = nil
+                    $0.value.mapView = nil
                 }
                 
                 // 변경된 마커 업데이트
                 owner.kickboardMarkerList.removeAll()
+                
+                
                 markerList.forEach {
-                    owner.kickboardMarkerList.append($0)
+                    owner.kickboardMarkerList[$0.userInfo["id"] as! UUID] = $0
                 }
                 
                 // 지도에 표시
                 owner.kickboardMarkerList.forEach {
-                    if $0.mapView == nil {
-                        $0.mapView = owner.mapTabView.getNaverMapView().mapView
+                    if $0.value.mapView == nil {
+                        $0.value.mapView = owner.mapTabView.getNaverMapView().mapView
                     }
                 }
             }.disposed(by: disposeBag)
@@ -178,6 +221,12 @@ final class MapTabViewController: BaseViewController {
                 guard let nearest = location.first else { return }
                 owner.address = owner.makeAddress(location: nearest)
                 owner.mapTabView.getSearchBar().text = owner.address
+            }.disposed(by: disposeBag)
+        
+        viewModel.state.elapsedSeconds
+            .asDriver()
+            .drive(with: self) { owner, elapsedSeconds in
+                owner.mapTabView.updateUsingTimeLabel(elapsedSeconds: elapsedSeconds)
             }.disposed(by: disposeBag)
         
         
@@ -208,7 +257,7 @@ final class MapTabViewController: BaseViewController {
             }
             .disposed(by: disposeBag)
         
-        // 3. 에러 핸들링
+        // 에러 핸들링
         viewModel.state.error
             .observe(on: MainScheduler.instance)
             .bind { error in
@@ -218,7 +267,6 @@ final class MapTabViewController: BaseViewController {
         
         
         // View ➡️ ViewController
-        
         // 검색 결과 탭
         mapTabView.getSearchResultTableView().rx
             .modelSelected(LocationModel.self)
@@ -234,7 +282,7 @@ final class MapTabViewController: BaseViewController {
         mapTabView.getNavigationBarView().getBackButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.changeSelectedIndexDelegate?.changeSelectedIndexToPrevious()
-                owner.isRegister = false
+                owner.currentMode = .map
             }.disposed(by: disposeBag)
         
         // 킥보드 위치 등록 화면) 등록 버튼 탭
@@ -256,7 +304,7 @@ final class MapTabViewController: BaseViewController {
         // 킥보드 마커 숨김 버튼 탭
         mapTabView.getHideKickboardButton().rx.tap
             .bind(with: self) { owner, _ in
-                owner.toggleMarkerHideState()
+                owner.changeMarkerHideState(to: !owner.isAllMarkerHidden)
             }.disposed(by: disposeBag)
         
         // 검색창 활성화, 검색 결과 표시
@@ -272,9 +320,9 @@ final class MapTabViewController: BaseViewController {
             }.disposed(by: disposeBag)
         
         
-        mapTabView.getCustomButton().rx.tap
+        mapTabView.getRentOrReturnButton().rx.tap
             .bind(with: self) { owner, _ in
-                if owner.mapTabView.getCustomButton().titleLabel?.text == "대여하기" {
+                if owner.mapTabView.getRentOrReturnButton().titleLabel?.text == "대여하기" {
                     // 킥보드 대여
                     guard let selectedKickboard = owner.selectedKickboard else { return }
                     
@@ -285,21 +333,14 @@ final class MapTabViewController: BaseViewController {
                     
                     owner.isUsingKickboard = true
                     
-                    owner.mapTabView.getCustomButton().configure(buttonTitle: "반납하기")
-                    owner.elapsedMinutes = 0
-                    owner.timer?.invalidate()
-                    owner.timer = Timer.scheduledTimer(timeInterval: 60.0,
-                                                 target: owner,
-                                                 selector: #selector(owner.updateTimer),
-                                                 userInfo: nil,
-                                                 repeats: true)
-                    owner.mapTabView.updateUsingKickboardViewTimeLabel(elapsedMinutes: owner.elapsedMinutes)
+//                    owner.viewModel.action.onNext(.viewWillLayoutSubviews)
+                    owner.changeMarkerHideState(to: true)
                 } else {
                     // MARK: - 킥보드 반납 버튼 상태
                     owner.viewModel.action.onNext(.requestReturn)
                     
-                    owner.mapTabView.getCustomButton().configure(buttonTitle: "대여하기")
-                    owner.mapTabView.showModalDownAnimation()
+                    owner.changeMarkerHideState(to: false)
+                    
                 }
             }.disposed(by: disposeBag)
     }
@@ -331,13 +372,6 @@ final class MapTabViewController: BaseViewController {
     
     override func setRegister() {
         mapTabView.getSearchResultTableView().register(SearchResultCell.self, forCellReuseIdentifier: SearchResultCell.className)
-    }
-}
-
-@objc private extension MapTabViewController {
-    func updateTimer() {
-        elapsedMinutes += 1
-        mapTabView.updateUsingKickboardViewTimeLabel(elapsedMinutes: elapsedMinutes)
     }
 }
 
@@ -393,76 +427,7 @@ private extension MapTabViewController {
             // 마커 눌렀을 때 핸들러
             marker.touchHandler = { [weak self] (overlay: NMFOverlay) -> Bool in
                 guard let self else { return true }
-                
-                self.tabBarController?.tabBar.isHidden = true
-                self.mapTabView.getModalLikeContainerView().isHidden = false
-                DispatchQueue.main.async {
-                    self.mapTabView.showModalUpAnimation()
-                }
-                
-                let id = overlay.userInfo["id"] as! UUID
-                let latitude = overlay.userInfo["latitude"] as! Double
-                let longtitude = overlay.userInfo["longtitude"] as! Double
-                let battery = overlay.userInfo["battery"] as! Int
-                let status = overlay.userInfo["status"] as! String
-                
-                selectedKickboard = Kickboard(id: id,
-                                              latitude: latitude,
-                                              longitude: longtitude,
-                                              battery: battery,
-                                              address: address,
-                                              status: status)
-                
-                let usingKickboardView = self.mapTabView.getMapUsingKickboardView()
-                let customButton = self.mapTabView.getCustomButton()
-                
-                switch battery {
-                case 0...10:
-                    usingKickboardView.batteryImageView.image = UIImage(systemName: "battery.0percent")?.withRenderingMode(.alwaysOriginal).withTintColor(.systemRed)
-                case 11...30:
-                    usingKickboardView.batteryImageView.image = UIImage(systemName: "battery.25percent")
-                case 31...65:
-                    usingKickboardView.batteryImageView.image = UIImage(systemName: "battery.50percent")
-                case 66...90:
-                    usingKickboardView.batteryImageView.image = UIImage(systemName: "battery.75percent")
-                default:
-                    usingKickboardView.batteryImageView.image = UIImage(systemName: "battery.100percent")
-                }
-                usingKickboardView.batteryLabel.text = "배터리 \(battery)%"
-                
-                usingKickboardView.do {
-                    $0.usingTimeLabel.do {
-                        let text: String
-                        switch status {
-                        case KickboardStatus.able.rawValue:
-                            text = "사용가능"
-                            customButton.backgroundColor = .core
-                            customButton.isEnabled = true
-                        case KickboardStatus.declared.rawValue:
-                            text = "신고 접수 중"
-                            customButton.backgroundColor = .placeholderText
-                            customButton.isEnabled = false
-                        case KickboardStatus.lowBattery.rawValue:
-                            text = "배터리 부족"
-                            customButton.backgroundColor = .placeholderText
-                            customButton.isEnabled = false
-                        default:  // IMPOSSIBILITY
-                            text = "배터리 부족"
-                            customButton.backgroundColor = .placeholderText
-                            customButton.isEnabled = false
-                        }
-                        
-                        let attributedText = NSMutableAttributedString.makeAttributedString(
-                            text: text,
-                            highlightedParts: [
-                                (text, .black, UIFont.systemFont(ofSize: 30, weight: .bold)),
-                            ]
-                        )
-                        $0.attributedText = attributedText
-                        $0.textAlignment = .center
-                        $0.textColor = .black
-                    }
-                }
+                self.makeMarkerTouchHandler(overlay: overlay)
                 return true
             }
             
@@ -473,14 +438,12 @@ private extension MapTabViewController {
     }
     
     /// 마커 숨김 상태 변경
-    func toggleMarkerHideState() {
-        isAllMarkerHidden.toggle()
+    func changeMarkerHideState(to state: Bool) {
+        isAllMarkerHidden = state
         kickboardMarkerList
-            .filter { $0.userInfo["status"] as! String != KickboardStatus.impossibility.rawValue }
+            .filter { $0.value.userInfo["status"] as! String != KickboardStatus.impossibility.rawValue }
             .forEach {
-                print($0)
-                $0.hidden = isAllMarkerHidden
-                print($0)
+                $0.value.hidden = isAllMarkerHidden
             }
     }
     
@@ -489,6 +452,7 @@ private extension MapTabViewController {
         mapTabView.getSearchBar().resignFirstResponder()
     }
     
+    /// 주소 조합
     func makeAddress(location: ReverseGeoResultModel) -> String {
         let region = location.region
         let land = location.land
@@ -511,7 +475,79 @@ private extension MapTabViewController {
         return address
     }
     
-    private func showCustomAlert(user: User, kickboard: KickboardRide) {
+    func makeMarkerTouchHandler(overlay: NMFOverlay) {
+        tabBarController?.tabBar.isHidden = true
+        mapTabView.getModalLikeContainerView().isHidden = false
+        DispatchQueue.main.async {
+            self.mapTabView.showModalUpAnimation()
+        }
+        
+        let id = overlay.userInfo["id"] as! UUID
+        let latitude = overlay.userInfo["latitude"] as! Double
+        let longtitude = overlay.userInfo["longtitude"] as! Double
+        let battery = overlay.userInfo["battery"] as! Int
+        let status = overlay.userInfo["status"] as! String
+        
+        selectedKickboard = Kickboard(id: id,
+                                      latitude: latitude,
+                                      longitude: longtitude,
+                                      battery: battery,
+                                      address: address,
+                                      status: status)
+        
+        let usingKickboardView = self.mapTabView.getMapUsingKickboardView()
+        let rentOrReturnButton = self.mapTabView.getRentOrReturnButton()
+        
+        switch battery {
+        case 0...10:
+            usingKickboardView.batteryImageView.image = BatteryImage.toTen.image
+        case 11...30:
+            usingKickboardView.batteryImageView.image = BatteryImage.toThirty.image
+        case 31...70:
+            usingKickboardView.batteryImageView.image = BatteryImage.toSeventy.image
+        case 71...90:
+            usingKickboardView.batteryImageView.image = BatteryImage.toNinety.image
+        default:
+            usingKickboardView.batteryImageView.image = BatteryImage.toTen.image
+        }
+        usingKickboardView.batteryLabel.text = "배터리 \(battery)%"
+        
+        usingKickboardView.do {
+            $0.usingTimeLabel.do {
+                let text: String
+                switch status {
+                case KickboardStatus.able.rawValue:
+                    text = "사용가능"
+                    rentOrReturnButton.backgroundColor = .core
+                    rentOrReturnButton.isEnabled = true
+                case KickboardStatus.declared.rawValue:
+                    text = "신고 접수 중"
+//                    rentOrReturnButton.backgroundColor = .placeholderText
+                    rentOrReturnButton.isEnabled = false
+                case KickboardStatus.lowBattery.rawValue:
+                    text = "배터리 부족"
+//                    rentOrReturnButton.backgroundColor = .placeholderText
+                    rentOrReturnButton.isEnabled = false
+                default:  // IMPOSSIBILITY
+                    text = "배터리 부족"
+//                    rentOrReturnButton.backgroundColor = .placeholderText
+                    rentOrReturnButton.isEnabled = false
+                }
+                
+                let attributedText = NSMutableAttributedString.makeAttributedString(
+                    text: text,
+                    highlightedParts: [
+                        (text, .black, UIFont.systemFont(ofSize: 30, weight: .bold)),
+                    ]
+                )
+                $0.attributedText = attributedText
+                $0.textAlignment = .center
+                $0.textColor = .black
+            }
+        }
+    }
+    
+    func showCustomAlert(user: User, kickboard: KickboardRide) {
         let name = user.name ?? "이름 없음"
         self.returnMinutes = calculateElapsedMinutes(kickboard: kickboard, userId: user.id)
         self.returnPrice = (returnMinutes * 100) + 500
@@ -572,7 +608,8 @@ extension MapTabViewController: NMFMapViewCameraDelegate {
     func mapViewCameraIdle(_ mapView: NMFMapView) {
         let coordinates = mapView.cameraPosition.target
         cameraCoordinates = coordinates
-        if isRegister {
+        
+        if currentMode == .registerKickboard {
             viewModel.action.onNext(.mapViewCameraIdle(lat: coordinates.lat, lng: coordinates.lng))
         }
     }
@@ -583,14 +620,13 @@ extension MapTabViewController: NMFMapViewCameraDelegate {
 extension MapTabViewController: NMFMapViewTouchDelegate {
     func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
         dismissKeyboard()
-        if !isUsingKickboard && !isRegister {
-            mapTabView.showModalDownAnimation()
-            self.tabBarController?.tabBar.isHidden = false
+        if currentMode != .registerKickboard && currentMode != .usingKickboard {
+            currentMode = .map
         }
     }
 }
 
-// TODO: 지도 뷰 켜졌을 때 탑승중인 킥보드 있는지 확인
+// MARK: - UIImagePickerControllerDelegate, UINavigationControllerDelegate
 
 extension MapTabViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     private func openCamera() {
@@ -655,3 +691,5 @@ extension MapTabViewController: UIImagePickerControllerDelegate, UINavigationCon
         }
     }
 }
+
+// TODO: 지도 뷰 켜졌을 때 탑승중인 킥보드 있는지 확인
