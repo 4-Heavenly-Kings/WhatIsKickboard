@@ -7,6 +7,6 @@
 
 import Foundation
 
-protocol RefreshKickboardListDelegate: AnyObject {
-    func refreshKickboardList()
+protocol UpdateKickboardListDelegate: AnyObject {
+    func updateKickboardList()
 }

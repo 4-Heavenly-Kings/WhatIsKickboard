@@ -48,6 +48,7 @@ enum BatteryImage {
 
 /// 지도 탭 ViewController
 final class MapTabViewController: BaseViewController {
+    
     enum TabBarMode {
         case map
         case registerKickboard
@@ -62,6 +63,7 @@ final class MapTabViewController: BaseViewController {
             case .map:
                 mapPositionMode = .direction
                 mapTabView.currentMode = .map
+                changeMarkerHideState(to: false)
                 self.tabBarController?.tabBar.isHidden = false
             case .registerKickboard:
                 mapPositionMode = .normal
@@ -78,7 +80,6 @@ final class MapTabViewController: BaseViewController {
                 changeMarkerHideState(to: true)
             case .returnKickboard:
                 mapTabView.currentMode = .returnKickboard
-                changeMarkerHideState(to: false)
             }
         }
     }
@@ -213,10 +214,10 @@ final class MapTabViewController: BaseViewController {
             .drive(with: self) { owner, location in
                 if let nearest = location.first {
                     owner.address = owner.makeAddress(location: nearest)
-                    owner.mapTabView.getSearchBar().text = owner.address
                 } else {
-                    owner.mapTabView.getSearchBar().text = ""
+                    owner.address = ""
                 }
+                owner.mapTabView.getSearchBar().text = owner.address
             }.disposed(by: disposeBag)
         
         // 킥보드 사용 시간 업데이트
@@ -306,17 +307,23 @@ final class MapTabViewController: BaseViewController {
         mapTabView.getNavigationBarView().getRightButton().rx.tap
             .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, _ in
-                // 킥보드 등록
-                let lat = owner.cameraCoordinates.lat
-                let lng = owner.cameraCoordinates.lng
-                let item: RegisterUIModel = .init(latitude: lat, longitude: lng, address: owner.address)
-                
-                let repository = CreateKickboardRepository()
-                let useCaseInterface = CreateKickboardUseCase(repository: repository)
-                let viewModel = RegisterViewModel(createKickboardUseCaseInterface: useCaseInterface)
-                let registerVC = RegisterViewController(viewModel: viewModel, registerUIModel: item)
-                registerVC.refreshKickboardListDelegate = self
-                owner.navigationController?.pushViewController(registerVC, animated: true)
+                if owner.address != "" {
+                    // 킥보드 등록
+                    let lat = owner.cameraCoordinates.lat
+                    let lng = owner.cameraCoordinates.lng
+                    let item: RegisterUIModel = .init(latitude: lat, longitude: lng, address: owner.address)
+                    
+                    let repository = CreateKickboardRepository()
+                    let useCaseInterface = CreateKickboardUseCase(repository: repository)
+                    let viewModel = RegisterViewModel(createKickboardUseCaseInterface: useCaseInterface)
+                    let registerVC = RegisterViewController(viewModel: viewModel, registerUIModel: item)
+                    registerVC.updateKickboardListDelegate = self
+                    owner.navigationController?.pushViewController(registerVC, animated: true)
+                } else {
+                    let alert = UIAlertController(title: "입력된 장소 없음", message: "장소를 입력해주세요.", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "확인", style: .default))
+                    owner.present(alert, animated: true)
+                }
             }.disposed(by: disposeBag)
         
         // 검색창 활성화, 검색 결과 표시
@@ -398,7 +405,7 @@ private extension MapTabViewController {
             marker.userInfo = [
                 "id": $0.id,
                 "latitude": $0.latitude,
-                "longtitude": $0.longitude,
+                "longitude": $0.longitude,
                 "battery": $0.battery,
                 "status": $0.status
             ]
@@ -436,7 +443,7 @@ private extension MapTabViewController {
             
             let id = overlay.userInfo["id"] as! UUID
             let latitude = overlay.userInfo["latitude"] as! Double
-            let longtitude = overlay.userInfo["longtitude"] as! Double
+            let longitude = overlay.userInfo["longitude"] as! Double
             let battery = overlay.userInfo["battery"] as! Int
             let status = overlay.userInfo["status"] as! String
             
@@ -444,11 +451,11 @@ private extension MapTabViewController {
                 mapTabView.getDeclareButton().isHidden = true
             }
             
-            moveMapCamera(lat: latitude, lng: longtitude)
+            moveMapCamera(lat: latitude, lng: longitude)
             
             selectedKickboard = Kickboard(id: id,
                                           latitude: latitude,
-                                          longitude: longtitude,
+                                          longitude: longitude,
                                           battery: battery,
                                           address: address,
                                           status: status)
@@ -709,8 +716,9 @@ extension MapTabViewController: UIImagePickerControllerDelegate, UINavigationCon
     }
 }
 
-extension MapTabViewController: RefreshKickboardListDelegate {
-    func refreshKickboardList() {
+extension MapTabViewController: UpdateKickboardListDelegate {
+    func updateKickboardList() {
+        currentMode = .map
         viewModel.action.onNext(.getKickboardList)
     }
 }

@@ -213,8 +213,6 @@ private extension MapTabViewModel {
                                      selector: #selector(updateTimer),
                                      userInfo: nil,
                                      repeats: true)
-        
-        updateKickboardList()
     }
     
     /// 킥보드 반납
