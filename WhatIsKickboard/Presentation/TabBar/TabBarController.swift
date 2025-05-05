@@ -21,6 +21,7 @@ final class TabBarController: UITabBarController {
     private let tabBackgroundView = UIView()
     /// 직전에 표시했던 ViewController의 index 저장
     private var previousIndex: Int = 0
+    private var userID = PublishSubject<UUID>()
     
     private let viewModel = TabbarViewModel()
     var disposeBag = DisposeBag()
@@ -128,22 +129,23 @@ private extension TabBarController {
     /// 지도, 등록, 마이페이지 탭바 아이템 설정
     /// (여기서 '등록'은 dummy로 선언)
     func setTabBarItems() {
-//        let repository = ReturnRequestRepository()
-//        let useCaseInterface = ReturnRequestUseCase(repository: repository)
-//        let viewModel = TestViewModel(returnRequestUseCaseInterface: useCaseInterface)
-//        let vc = testViewController(viewModel: viewModel)
-//        
-//        
-        
-        
+        let getKickboardListRepository = GetKickboardListRepository()
+        let declareKickboardRepository = DeclareKickboardRepository()
         let apiGeocodingRepository = APIGeocodingRepository()
         let rentKickboardrepository = RentKickboardRepository()
         let returnRequestRepository = ReturnRequestRepository()
     
+        let getKickboardListUseCase = GetKickboardListUseCase(repository: getKickboardListRepository)
+        let declareKickboardUseCase = DeclareKickboardUseCase(repository: declareKickboardRepository)
         let fetchAPIGeocodingUseCase = FetchAPIGeocodingUseCase(repository: apiGeocodingRepository)
         let rentKickboardUseCase = RentKickboardUseCase(repository: rentKickboardrepository)
         let returnRequestUseCase = ReturnRequestUseCase(repository: returnRequestRepository)
-        let viewModel = MapTabViewModel(fetchAPIGeocodingUseCase: fetchAPIGeocodingUseCase, rentKickboardUseCase: rentKickboardUseCase, returnRequestUseCaseInterface: returnRequestUseCase)
+        
+        let viewModel = MapTabViewModel(getKickboardListUseCase: getKickboardListUseCase,
+                                        declareKickboardUseCase: declareKickboardUseCase,
+                                        fetchAPIGeocodingUseCase: fetchAPIGeocodingUseCase,
+                                        rentKickboardUseCase: rentKickboardUseCase,
+                                        returnRequestUseCaseInterface: returnRequestUseCase)
         let mapTabViewController = MapTabViewController(viewModel: viewModel)
         mapTabViewController.changeSelectedIndexDelegate = self
         

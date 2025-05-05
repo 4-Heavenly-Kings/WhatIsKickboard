@@ -17,7 +17,7 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     
     // MARK: - Properties
     
-    private let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MapViewModel")
+    private let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MapTabViewModel")
 
     /// Core Location Manager
     private let locationManager = CLLocationManager()
@@ -26,6 +26,8 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     private var timer: Timer?
     private var elapsedSeconds = 0
     
+    private let getKickboardListUseCase: GetKickboardListUseCase
+    private let declareKickboardUseCase: DeclareKickboardUseCase
     private let fetchAPIGeocodingUseCase: FetchAPIGeocodingUseCase
     private let rentKickboardUseCase: RentKickboardUseCase
     
@@ -36,16 +38,18 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     enum Action {
         /// 현재 위치 버튼 탭
         case didLocationButtonTap
+        /// 킥보드 신고 버튼 탭
+        case didDeclareButtonTap(id: UUID)
         /// 장소 검색창 텍스트
         case searchText(text: String)
         /// 카메라 아이들 상태일 때 Reverse Geocoding 검색
         case mapViewCameraIdle(lat: Double, lng: Double)
         /// 킥보드 대여
         case didRentButtonTap(id: UUID, latitude: Double, longitude: Double, address: String)
-        /// 바인딩 완료
-        case didBinding
         /// 킥보드 반납
         case requestReturn
+        /// 바인딩 완료
+        case didBinding
     }
     var action: AnyObserver<Action> {
         return state.actionSubject.asObserver()
@@ -59,6 +63,8 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
         
         /// Core Location 사용자 위치 좌표
         fileprivate(set) var userLocation = BehaviorRelay<CLLocationCoordinate2D?>(value: nil)
+        /// 사용자가 타고있던 킥보드 정보
+        fileprivate(set) var userRidingKickboard = PublishRelay<KickboardRide>()
         /// 킥보드 리스트
         fileprivate(set) var kickboardList = BehaviorRelay<[Kickboard]>(value: [])
         /// 장소 검색 결과
@@ -78,10 +84,14 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
     
     // MARK: - Initializer
     
-    init(fetchAPIGeocodingUseCase: FetchAPIGeocodingUseCase,
-         rentKickboardUseCase: RentKickboardUseCase
-         , returnRequestUseCaseInterface: ReturnRequestUseCaseInterface) {
-        
+    init(getKickboardListUseCase: GetKickboardListUseCase,
+         declareKickboardUseCase: DeclareKickboardUseCase,
+         fetchAPIGeocodingUseCase: FetchAPIGeocodingUseCase,
+         rentKickboardUseCase: RentKickboardUseCase,
+         returnRequestUseCaseInterface: ReturnRequestUseCaseInterface
+    ) {
+        self.getKickboardListUseCase = getKickboardListUseCase
+        self.declareKickboardUseCase = declareKickboardUseCase
         self.fetchAPIGeocodingUseCase = fetchAPIGeocodingUseCase
         self.rentKickboardUseCase = rentKickboardUseCase
         self.returnRequestUseCaseInterface = returnRequestUseCaseInterface
@@ -99,16 +109,18 @@ final class MapTabViewModel: NSObject, ViewModelProtocol {
                 switch action {
                 case .didLocationButtonTap:
                     owner.updateLastLocation()
+                case let .didDeclareButtonTap(id: id):
+                    owner.declareKickboard(id: id)
                 case let .searchText(text):
                     owner.searchLocation(searchText: text)
                 case let .mapViewCameraIdle(lat, lng):
                     owner.searchCoords(lat: lat, lng: lng)
                 case let .didRentButtonTap(id, latitude, longitude, address):
                     owner.rentKickboard(id: id, latitude: latitude, longitude: longitude, address: address)
-                case .didBinding:
-                    owner.updateKickboardList()
                 case .requestReturn:
                     owner.handleReturnRequest()
+                case .didBinding:
+                    owner.updateKickboardList()
                 }
             }.disposed(by: disposeBag)
     }
@@ -174,10 +186,14 @@ private extension MapTabViewModel {
 private extension MapTabViewModel {
     /// 킥보드 리스트 ViewController로 전달
     func updateKickboardList() {
-        KickboardPersistenceManager.getKickboardList()
+        getKickboardListUseCase.getKickboardList()
             .subscribe(with: self) { owner, kickboardList in
                 owner.state.kickboardList.accept(kickboardList)
             }.disposed(by: disposeBag)
+    }
+    
+    func declareKickboard(id: UUID) {
+        declareKickboardUseCase.declareKickboard(id: id)
     }
     
     /// 킥보드 대여 정보 CoreData에 전달
