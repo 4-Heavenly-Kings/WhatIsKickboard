@@ -49,47 +49,14 @@ enum BatteryImage {
 /// 지도 탭 ViewController
 final class MapTabViewController: BaseViewController {
     
-    enum TabBarMode {
-        case map
-        case registerKickboard
-        case touchKickboard
-        case usingKickboard
-        case returnKickboard
-    }
-    
-    var currentMode: MapTabViewMode = .map {
-        didSet {
-            switch currentMode {
-            case .map:
-                mapTabView.currentMode = .map
-                changeMarkerHideState(to: false)
-                self.tabBarController?.tabBar.isHidden = false
-            case .registerKickboard:
-                mapPositionMode = .normal
-                mapTabView.currentMode = .registerKickboard
-                viewModel.action.onNext(.searchCoords(lat: cameraCoordinates.lat, lng: cameraCoordinates.lng))
-                self.tabBarController?.tabBar.isHidden = true
-            case .touchKickboard:
-                mapPositionMode = .normal
-                mapTabView.currentMode = .touchKickboard
-                self.tabBarController?.tabBar.isHidden = true
-            case .usingKickboard:
-                mapPositionMode = .direction
-                mapTabView.currentMode = .usingKickboard
-                changeMarkerHideState(to: true)
-            case .returnKickboard:
-                mapTabView.currentMode = .returnKickboard
-            }
-        }
-    }
-    
     // MARK: - Properties
     
-    /// TabBarController 관련 Delegate
-    weak var changeSelectedIndexDelegate: ChangeSelectedIndexDelegate?
+    /// MapTabViewController 현재 모드
+    let currentModeRelay = BehaviorRelay<MapTabViewMode>(value: .map)
     
     private let viewModel: MapTabViewModel
     
+    /// 선택한 킥보드 정보
     private var selectedKickboard: Kickboard?
     /// 지도 애니메이션 상태 관리용
     private var mapPositionMode: NMFMyPositionMode = .disabled
@@ -110,6 +77,9 @@ final class MapTabViewController: BaseViewController {
     private var cameraCoordinates = NMGLatLng()
     /// 검색창 주소
     private var address = ""
+    
+    /// TabBarController 관련 Delegate
+    weak var changeSelectedIndexDelegate: ChangeSelectedIndexDelegate?
     
     // 반납 관련 프로퍼티
     private var customAlertView: CustomAlertView?
@@ -135,7 +105,7 @@ final class MapTabViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentMode = .map
+        currentModeRelay.accept(.map)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -146,6 +116,35 @@ final class MapTabViewController: BaseViewController {
     // MARK: - Bind Helper
     
     override func bindViewModel() {
+        // MapTabViewController 현재 모드 설정
+        currentModeRelay
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self, onNext: { owner, mode in
+                switch mode {
+                case .map:
+                    owner.mapTabView.currentModeRelay.accept(.map)
+                    owner.changeMarkerHideState(to: false)
+                    owner.tabBarController?.tabBar.isHidden = false
+                case .registerKickboard:
+                    owner.mapPositionMode = .normal
+                    owner.mapTabView.currentModeRelay.accept(.registerKickboard)
+                    owner.viewModel.action.onNext(.searchCoords(lat: owner.cameraCoordinates.lat, lng: owner.cameraCoordinates.lng))
+                    owner.tabBarController?.tabBar.isHidden = true
+                case .touchKickboard:
+                    owner.mapPositionMode = .normal
+                    owner.mapTabView.currentModeRelay.accept(.touchKickboard)
+                    owner.tabBarController?.tabBar.isHidden = true
+                case .usingKickboard:
+                    owner.mapPositionMode = .direction
+                    owner.mapTabView.currentModeRelay.accept(.usingKickboard)
+                    owner.changeMarkerHideState(to: true)
+                case .returnKickboard:
+                    owner.mapTabView.currentModeRelay.accept(.returnKickboard)
+                }
+            }).disposed(by: disposeBag)
+        
+        
         // ViewModel ➡️ State
         // 사용자 위치로 카메라 이동
         viewModel.state.userLocation
@@ -244,7 +243,7 @@ final class MapTabViewController: BaseViewController {
                 alert.addAction(UIAlertAction(title: "취소", style: .cancel))
                 alert.addAction(UIAlertAction(title: "신고", style: .destructive, handler: { _ in
                     owner.viewModel.action.onNext(.didDeclareButtonTap(id: selectedKickboard.id))
-                    self.currentMode = .map
+                    owner.currentModeRelay.accept(.map)
                 }))
                 owner.present(alert, animated: true)
             }.disposed(by: disposeBag)
@@ -300,7 +299,7 @@ final class MapTabViewController: BaseViewController {
         mapTabView.getNavigationBarView().getBackButton().rx.tap
             .bind(with: self) { owner, _ in
                 owner.changeSelectedIndexDelegate?.changeSelectedIndexToPrevious()
-                owner.currentMode = .map
+                owner.currentModeRelay.accept(.map)
             }.disposed(by: disposeBag)
         
         // 킥보드 위치 등록 화면) 등록 버튼 탭
@@ -341,7 +340,7 @@ final class MapTabViewController: BaseViewController {
         // 대여하기 or 반납하기 버튼 탭
         mapTabView.getRentOrReturnButton().rx.tap
             .bind(with: self) { owner, _ in
-                if owner.currentMode == .touchKickboard {
+                if owner.currentModeRelay.value == .touchKickboard {
                     // 킥보드 대여
                     guard let selectedKickboard = owner.selectedKickboard else { return }
                     
@@ -350,7 +349,7 @@ final class MapTabViewController: BaseViewController {
                                                                     longitude: selectedKickboard.longitude,
                                                                     address: selectedKickboard.address))
                     
-                    owner.currentMode = .usingKickboard
+                    owner.currentModeRelay.accept(.usingKickboard)
                 } else {
                     // 킥보드 반납
                     owner.viewModel.action.onNext(.requestReturn)
@@ -438,8 +437,8 @@ private extension MapTabViewController {
     
     /// 마커 눌렀을 때 핸들러 생성
     func makeMarkerTouchHandler(overlay: NMFOverlay) {
-        if currentMode == .map || currentMode == .touchKickboard {
-            currentMode = .touchKickboard
+        if currentModeRelay.value == .map || currentModeRelay.value == .touchKickboard {
+            currentModeRelay.accept(.touchKickboard)
             
             let id = overlay.userInfo["id"] as! UUID
             let latitude = overlay.userInfo["latitude"] as! Double
@@ -449,6 +448,8 @@ private extension MapTabViewController {
             
             if status == KickboardStatus.declared.rawValue {
                 mapTabView.getDeclareButton().isHidden = true
+            } else {
+                mapTabView.getDeclareButton().isHidden = false
             }
             
             moveMapCamera(lat: latitude, lng: longitude)
@@ -571,7 +572,7 @@ private extension MapTabViewController {
         
         alert.getSubmitButton().rx.tap
             .bind { [weak self, weak alert] in
-                self?.currentMode = .returnKickboard
+                self?.currentModeRelay.accept(.returnKickboard)
                 alert?.removeFromSuperview()
                 self?.customAlertView = nil
                 self?.openCamera()
@@ -636,7 +637,7 @@ extension MapTabViewController: NMFMapViewCameraDelegate {
         let coordinates = mapView.cameraPosition.target
         cameraCoordinates = coordinates
         
-        if currentMode == .registerKickboard {
+        if currentModeRelay.value == .registerKickboard {
             viewModel.action.onNext(.searchCoords(lat: coordinates.lat, lng: coordinates.lng))
         }
     }
@@ -647,8 +648,8 @@ extension MapTabViewController: NMFMapViewCameraDelegate {
 extension MapTabViewController: NMFMapViewTouchDelegate {
     func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
         dismissKeyboard()
-        if currentMode != .registerKickboard && currentMode != .usingKickboard {
-            currentMode = .map
+        if currentModeRelay.value != .registerKickboard && currentModeRelay.value != .usingKickboard {
+            currentModeRelay.accept(.map)
         }
     }
 }
@@ -718,8 +719,8 @@ extension MapTabViewController: UIImagePickerControllerDelegate, UINavigationCon
 
 extension MapTabViewController: UpdateKickboardListDelegate {
     func updateKickboardList() {
-        if currentMode == .returnKickboard {
-            currentMode = .map
+        if currentModeRelay.value == .returnKickboard {
+            currentModeRelay.accept(.map)
         }
         viewModel.action.onNext(.getKickboardList)
     }

@@ -8,6 +8,8 @@
 import UIKit
 
 import NMapsMap
+import RxSwift
+import RxRelay
 import SnapKit
 import Then
 
@@ -16,63 +18,10 @@ final class MapTabView: BaseView {
     
     // MARK: - Properties
     
-    var currentMode: MapTabViewMode = .map {
-        didSet {
-            switch currentMode {
-            case .map:
-                // 검색창, 마커숨김 버튼, 탭바
-                searchBar.isHidden = false
-                searchBar.text = ""
-                searchBar.snp.remakeConstraints {
-                    $0.top.equalTo(self.safeAreaLayoutGuide).inset(10)
-                    $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
-                }
-                hideKickboardButton.isHidden = false
-                declareButton.isHidden = true
-                buttonStackView.snp.remakeConstraints {
-                    $0.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
-                    $0.bottom.equalTo(self.safeAreaLayoutGuide).inset(40)
-                    $0.width.equalTo(50)
-                }
-                statusBarBackgroundView.isHidden = true
-                navigationBarView.isHidden = true
-                centerMarkerImageView.isHidden = true
-                showModalDownAnimation()
-            case .registerKickboard:
-                // 검색창, 마커숨김 버튼, 네비바
-                searchBar.text = ""
-                searchBar.snp.remakeConstraints {
-                    $0.top.equalTo(navigationBarView.snp.bottom).offset(10)
-                    $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
-                }
-                statusBarBackgroundView.isHidden = false
-                navigationBarView.isHidden = false
-                centerMarkerImageView.isHidden = false
-            case .touchKickboard:
-                // 검색창, 현위치 버튼 위치 조절, 킥보드 정보 모달 UP
-                searchBar.isHidden = false
-                searchBar.text = ""
-                declareButton.isHidden = false
-                hideKickboardButton.isHidden = true
-                buttonStackView.snp.remakeConstraints {
-                    $0.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
-                    $0.bottom.equalTo(modalLikeContainerView.snp.top)
-                    $0.width.equalTo(50)
-                }
-                showModalUpAnimation()
-                rentOrReturnButton.configure(buttonTitle: "대여하기")
-            case .usingKickboard:
-                // 현위치 버튼 위치 조절, 킥보드 사용중 모달
-                declareButton.isHidden = true
-                updateUsingTimeLabel(elapsedSeconds: 0)
-                rentOrReturnButton.configure(buttonTitle: "반납하기")
-            case .returnKickboard:
-                // 킥보드 정보 모달 DOWN
-                showModalDownAnimation()
-                currentMode = .map
-            }
-        }
-    }
+    /// MapTabView 현재 모드
+    let currentModeRelay = BehaviorRelay<MapTabViewMode>(value: .map)
+    
+    private let disposeBag = DisposeBag()
     
     // MARK: - UI Components
     
@@ -120,6 +69,71 @@ final class MapTabView: BaseView {
     private let mapUsingKickboardView = MapUsingKickboardView()
     /// 대여하기/반납하기 CustomSubmitButton
     private let rentOrReturnButton = CustomSubmitButton()
+    
+    // MARK: - Initializer
+    
+    init() {
+        super.init(frame: .zero)
+        
+        // MapTabView 현재 모드 설정
+        currentModeRelay
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self, onNext: { owner, mode in
+                switch mode {
+                case .map:
+                    owner.searchBar.isHidden = false
+                    owner.searchBar.text = ""
+                    owner.searchBar.snp.remakeConstraints {
+                        $0.top.equalTo(self.safeAreaLayoutGuide).inset(10)
+                        $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
+                    }
+                    owner.hideKickboardButton.isHidden = false
+                    owner.declareButton.isHidden = true
+                    owner.buttonStackView.snp.remakeConstraints {
+                        $0.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
+                        $0.bottom.equalTo(self.safeAreaLayoutGuide).inset(40)
+                        $0.width.equalTo(50)
+                    }
+                    owner.statusBarBackgroundView.isHidden = true
+                    owner.navigationBarView.isHidden = true
+                    owner.centerMarkerImageView.isHidden = true
+                    owner.showModalDownAnimation()
+                case .registerKickboard:
+                    owner.searchBar.text = ""
+                    owner.searchBar.snp.remakeConstraints {
+                        $0.top.equalTo(owner.navigationBarView.snp.bottom).offset(10)
+                        $0.leading.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
+                    }
+                    owner.statusBarBackgroundView.isHidden = false
+                    owner.navigationBarView.isHidden = false
+                    owner.centerMarkerImageView.isHidden = false
+                case .touchKickboard:
+                    owner.searchBar.isHidden = false
+                    owner.searchBar.text = ""
+                    owner.declareButton.isHidden = false
+                    owner.hideKickboardButton.isHidden = true
+                    owner.buttonStackView.snp.remakeConstraints {
+                        $0.trailing.equalTo(self.safeAreaLayoutGuide).inset(15)
+                        $0.bottom.equalTo(owner.modalLikeContainerView.snp.top)
+                        $0.width.equalTo(50)
+                    }
+                    owner.showModalUpAnimation()
+                    owner.rentOrReturnButton.configure(buttonTitle: "대여하기")
+                case .usingKickboard:
+                    owner.declareButton.isHidden = true
+                    owner.updateUsingTimeLabel(elapsedSeconds: 0)
+                    owner.rentOrReturnButton.configure(buttonTitle: "반납하기")
+                case .returnKickboard:
+                    owner.showModalDownAnimation()
+                    owner.currentModeRelay.accept(.map)
+                }
+            }).disposed(by: disposeBag)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Style Helper
     
