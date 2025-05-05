@@ -123,19 +123,23 @@ final class MapTabViewController: BaseViewController {
             .subscribe(with: self, onNext: { owner, mode in
                 switch mode {
                 case .map:
+                    // 킥보드 마커, 탭바
                     owner.mapTabView.currentModeRelay.accept(.map)
                     owner.changeMarkerHideState(to: false)
                     owner.tabBarController?.tabBar.isHidden = false
                 case .registerKickboard:
+                    // 카메라 멈춤, 카메라 좌표로 주소 검색
                     owner.mapPositionMode = .normal
                     owner.mapTabView.currentModeRelay.accept(.registerKickboard)
                     owner.viewModel.action.onNext(.searchCoords(lat: owner.cameraCoordinates.lat, lng: owner.cameraCoordinates.lng))
                     owner.tabBarController?.tabBar.isHidden = true
                 case .touchKickboard:
+                    // 카메라 멈춤
                     owner.mapPositionMode = .normal
                     owner.mapTabView.currentModeRelay.accept(.touchKickboard)
                     owner.tabBarController?.tabBar.isHidden = true
                 case .usingKickboard:
+                    // 카메라 사용자 따라가기
                     owner.mapPositionMode = .direction
                     owner.mapTabView.currentModeRelay.accept(.usingKickboard)
                     owner.changeMarkerHideState(to: true)

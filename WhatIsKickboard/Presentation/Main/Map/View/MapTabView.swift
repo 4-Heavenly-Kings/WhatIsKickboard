@@ -82,6 +82,7 @@ final class MapTabView: BaseView {
             .subscribe(with: self, onNext: { owner, mode in
                 switch mode {
                 case .map:
+                    // 검색창, 마커 숨김 버튼
                     owner.searchBar.isHidden = false
                     owner.searchBar.text = ""
                     owner.searchBar.snp.remakeConstraints {
@@ -100,6 +101,7 @@ final class MapTabView: BaseView {
                     owner.centerMarkerImageView.isHidden = true
                     owner.showModalDownAnimation()
                 case .registerKickboard:
+                    // 검색창, 마커 숨김 버튼, 네비바
                     owner.searchBar.text = ""
                     owner.searchBar.snp.remakeConstraints {
                         $0.top.equalTo(owner.navigationBarView.snp.bottom).offset(10)
@@ -109,6 +111,7 @@ final class MapTabView: BaseView {
                     owner.navigationBarView.isHidden = false
                     owner.centerMarkerImageView.isHidden = false
                 case .touchKickboard:
+                    // 검색창, 현위치 버튼 위치 조절, 킥보드 정보 모달 UP
                     owner.searchBar.isHidden = false
                     owner.searchBar.text = ""
                     owner.declareButton.isHidden = false
@@ -121,10 +124,12 @@ final class MapTabView: BaseView {
                     owner.showModalUpAnimation()
                     owner.rentOrReturnButton.configure(buttonTitle: "대여하기")
                 case .usingKickboard:
+                    // 현위치 버튼 위치 조절, 킥보드 사용중 모달
                     owner.declareButton.isHidden = true
                     owner.updateUsingTimeLabel(elapsedSeconds: 0)
                     owner.rentOrReturnButton.configure(buttonTitle: "반납하기")
                 case .returnKickboard:
+                    // 킥보드 정보 모달 DOWN
                     owner.showModalDownAnimation()
                     owner.currentModeRelay.accept(.map)
                 }
