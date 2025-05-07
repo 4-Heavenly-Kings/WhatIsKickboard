@@ -21,6 +21,7 @@ final class ReturnViewController: BaseViewController {
     
     private let returnUIModel: ReturnUIModel
     
+    weak var refreshKickboardListDelegate: UpdateKickboardListDelegate?
     
     // MARK: - View Life Cycle
     /// 위도, 경도, 주소를 추가적으로 받아야함
@@ -113,6 +114,7 @@ final class ReturnViewController: BaseViewController {
         alert.getSubmitButton().rx.tap
             .bind { [weak self, weak alert] in
                 alert?.removeFromSuperview()
+                self?.refreshKickboardListDelegate?.updateKickboardList()
                 self?.customAlertView = nil
                 self?.navigationController?.popViewController(animated: true)
             }

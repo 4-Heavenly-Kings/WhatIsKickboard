@@ -6,10 +6,8 @@
 //
 
 import Foundation
-import OSLog
 
 import RxSwift
-
 
 final class APIGeocodingRepository: APIGeocodingRepositoryInterface {
     

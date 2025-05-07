@@ -20,6 +20,8 @@ final class RegisterViewController: BaseViewController {
     private var customAlertView: CustomAlertView?
 
     private let registerUIModel: RegisterUIModel
+    
+    weak var updateKickboardListDelegate: UpdateKickboardListDelegate?
      
     // MARK: - View Life Cycle
 
@@ -72,6 +74,7 @@ final class RegisterViewController: BaseViewController {
                 self?.showAlert(type: .successCreateKickboard) {
                     self?.navigationController?.popViewController(animated: true)
                 }
+                self?.updateKickboardListDelegate?.updateKickboardList()
             }
             .disposed(by: disposeBag)
 
